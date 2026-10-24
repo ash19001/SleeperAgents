@@ -153,7 +153,7 @@ Start the Zetaris download first (step 3), because it takes 20 to 30 minutes; do
 - [x] 4. Create an NVIDIA API key at [build.nvidia.com/settings/api-keys](https://build.nvidia.com/settings/api-keys) (starts with `nvapi-`). Keep it for `.env.local`.
 - [x] 5. Install Meterless Nightshift from [meterless.ai](https://meterless.ai/): Windows 10/11 or Mac M1 to M4. On Linux or a Mac M5+, skip it and use NVIDIA direct (note this in `PROGRESS.md`).
 - [x] 6. Install Node 20+, Python 3.9+ and Docker Desktop (give Docker 8 GB of memory and 4 CPUs; on Windows use WSL2). Optional: Cursor.
-- [ ] 7. Decide the household's location for weather (any UK town; you only need its latitude and longitude).
+- [x] 7. Decide the household's location for weather (any UK town; you only need its latitude and longitude).
 
 **Done when:** you have a repo, an NVIDIA key, Nightshift installed (or a note saying why not), and Zetaris downloading or provisioning.
 

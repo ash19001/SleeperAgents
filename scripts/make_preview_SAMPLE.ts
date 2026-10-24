@@ -6,7 +6,7 @@
 // Run: node scripts/make_preview_SAMPLE.ts
 
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 type Utility = "electricity" | "gas" | "water";
 
@@ -539,8 +539,12 @@ function waterSummer() {
 
 // ---- Write the file ----------------------------------------------------------
 
+// Made by scripts/lookup_area.ts from the postcode district.
+const household = JSON.parse(readFileSync(new URL("../data/sample/household_SAMPLE.json", import.meta.url), "utf8"));
+
 const preview = {
   note: "SAMPLE data. Made-up household; preview answers are hand-written to show the page, not produced by the agent.",
+  household,
   bills: BILLS.map(({ units_true, energy_gbp, standing_gbp, driver, ...rest }) => rest),
   answers: {
     "GAS-2026-01": gasJanuary(),

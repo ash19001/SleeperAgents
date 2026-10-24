@@ -2,6 +2,23 @@
 // SAMPLE data. Made-up household; preview answers are hand-written to show the page, not produced by the agent.
 window.PREVIEW_SAMPLE = {
  "note": "SAMPLE data. Made-up household; preview answers are hand-written to show the page, not produced by the agent.",
+ "household": {
+  "note": "SAMPLE household: the bills are made up, the area details come from the lookups below.",
+  "postcode_district": "M1",
+  "town": "Manchester",
+  "latitude": 53.4775,
+  "longitude": -2.2361,
+  "price_region": {
+   "code": "G",
+   "name": "North West England"
+  },
+  "water_company": "United Utilities",
+  "sources": {
+   "price_region": "https://api.octopus.energy/v1/industry/grid-supply-points/?postcode=M1",
+   "location": "https://api.postcodes.io/outcodes/M1"
+  },
+  "looked_up": "2026-10-24"
+ },
  "bills": [
   {
    "utility": "electricity",
