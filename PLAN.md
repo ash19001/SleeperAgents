@@ -148,11 +148,11 @@ The six parts sum exactly to the change; a unit test must prove this on every sa
 Start the Zetaris download first (step 3), because it takes 20 to 30 minutes; do the rest while it runs.
 
 - [ ] 1. Sign in at [hackathon.genai.works](https://hackathon.genai.works/event/open-agent-hackathon-2026) and read rules sections 05 "What you can use" and 06 "Submission requirements". Note anything that changes Phase 9.
-- [ ] 2. Create a public GitHub repo named `why-my-bill`, clone it, and put this file in it as `PLAN.md`.
-- [ ] 3. Create a Zetaris Cloud account at [cloud.enterprise.zetaris.com/register](https://cloud.enterprise.zetaris.com/register) and start the "Run locally" download (or the AWS route; see Phase 1).
-- [ ] 4. Create an NVIDIA API key at [build.nvidia.com/settings/api-keys](https://build.nvidia.com/settings/api-keys) (starts with `nvapi-`). Keep it for `.env.local`.
-- [ ] 5. Install Meterless Nightshift from [meterless.ai](https://meterless.ai/): Windows 10/11 or Mac M1 to M4. On Linux or a Mac M5+, skip it and use NVIDIA direct (note this in `PROGRESS.md`).
-- [ ] 6. Install Node 20+, Python 3.9+ and Docker Desktop (give Docker 8 GB of memory and 4 CPUs; on Windows use WSL2). Optional: Cursor.
+- [x] 2. Create a public GitHub repo named `why-my-bill`, clone it, and put this file in it as `PLAN.md`.
+- [x] 3. Create a Zetaris Cloud account at [cloud.enterprise.zetaris.com/register](https://cloud.enterprise.zetaris.com/register) and start the "Run locally" download (or the AWS route; see Phase 1).
+- [x] 4. Create an NVIDIA API key at [build.nvidia.com/settings/api-keys](https://build.nvidia.com/settings/api-keys) (starts with `nvapi-`). Keep it for `.env.local`.
+- [x] 5. Install Meterless Nightshift from [meterless.ai](https://meterless.ai/): Windows 10/11 or Mac M1 to M4. On Linux or a Mac M5+, skip it and use NVIDIA direct (note this in `PROGRESS.md`).
+- [x] 6. Install Node 20+, Python 3.9+ and Docker Desktop (give Docker 8 GB of memory and 4 CPUs; on Windows use WSL2). Optional: Cursor.
 - [ ] 7. Decide the household's location for weather (any UK town; you only need its latitude and longitude).
 
 **Done when:** you have a repo, an NVIDIA key, Nightshift installed (or a note saying why not), and Zetaris downloading or provisioning.
@@ -161,10 +161,10 @@ Start the Zetaris download first (step 3), because it takes 20 to 30 minutes; do
 
 Run Zetaris locally if Docker can have 8 GB of memory; otherwise use a managed AWS cluster on a new AWS account (up to $200 free credits; a small cluster used about $80 in a week of Zetaris's testing). If local is not answering `SELECT 1` by 20:00 tonight, switch to AWS.
 
-- [ ] 1. **(you)** Install: local via [Install locally](https://zetaris.github.io/getting-started/docs/install/updated_zetaris_installation_guide.html), or AWS via the [AWS Free Tier checklist](https://zetaris.github.io/getting-started/docs/install/aws-free-tier-checklist.html) then [Managed AWS cluster](https://zetaris.github.io/getting-started/docs/install/managed-aws-cluster-guide.html). Local endpoints: UI `http://localhost:3000`, REST `http://localhost:8888/api/v1.0`.
-- [ ] 2. **(you)** In the Zetaris UI, create an API key under **Management → API Tokens** (shown once) and copy the numeric **ID** from **Management → Organisation**. Put both in `.env.local` yourself. Put the same values in the getting-started clone's own `.env.local` too; its scripts read their own copy.
-- [ ] 3. **(Claude Code)** Clone [zetaris/getting-started](https://github.com/zetaris/getting-started) next to the repo (not inside it) and read its `AGENTS.md`, `docs/connections/client-setup.md` and `scripts/HOWTO.md`.
-- [ ] 4. **(Claude Code)** Run its read-only preflight (`python3 scripts/preflight.py`), then `SELECT 1` and `SHOW LIGHTNING DATABASES` through `scripts/query_zetaris.py`.
+- [x] 1. **(you)** Install: local via [Install locally](https://zetaris.github.io/getting-started/docs/install/updated_zetaris_installation_guide.html), or AWS via the [AWS Free Tier checklist](https://zetaris.github.io/getting-started/docs/install/aws-free-tier-checklist.html) then [Managed AWS cluster](https://zetaris.github.io/getting-started/docs/install/managed-aws-cluster-guide.html). Local endpoints: UI `http://localhost:3000`, REST `http://localhost:8888/api/v1.0`.
+- [x] 2. **(you)** In the Zetaris UI, create an API key under **Management → API Tokens** (shown once) and copy the numeric **ID** from **Management → Organisation**. Put both in `.env.local` yourself. Put the same values in the getting-started clone's own `.env.local` too; its scripts read their own copy.
+- [x] 3. **(Claude Code)** Clone [zetaris/getting-started](https://github.com/zetaris/getting-started) next to the repo (not inside it) and read its `AGENTS.md`, `docs/connections/client-setup.md` and `scripts/HOWTO.md`.
+- [x] 4. **(Claude Code)** Run its read-only preflight (`python3 scripts/preflight.py`), then `SELECT 1` and `SHOW LIGHTNING DATABASES` through `scripts/query_zetaris.py`.
 - [ ] 5. **(Claude Code)** Read the [File cookbook](https://zetaris.github.io/getting-started/open_data/parquet_csv/HOWTO.html), the [REST cookbook](https://zetaris.github.io/getting-started/open_data/rest_apis/HOWTO.html) and the [SQL gotchas](https://zetaris.github.io/getting-started/docs/guides/zetaris-lightning-sql-companion.html) so Phase 4 uses the right registration syntax. Summarise the steps for registering a CSV file and a REST API in `PROGRESS.md`.
 
 **Done when:** `SELECT 1` returns 1 through the helper script, and `PROGRESS.md` holds the registration steps for files and REST APIs.
@@ -173,13 +173,13 @@ Run Zetaris locally if Docker can have 8 GB of memory; otherwise use a managed A
 
 Nightshift is the AI provider: an OpenAI-compatible API on your machine that routes each call to a model. Behind it, NVIDIA Nemotron does the reasoning. A direct NVIDIA call is the labelled fallback.
 
-- [ ] 1. **(you)** Start Nightshift. In its **Providers** tab, add NVIDIA with your `nvapi-` key. If your GPU allows, also install a local Nemotron model.
-- [ ] 2. **(you)** Find the runtime token (the `proxy-token` file in Nightshift's state folder, or the key in its connect link `http://<host>:<port>/connect#k=<key>`) and put it in `.env.local` as `NIGHTSHIFT_TOKEN`. The placeholder `rt-local` is rejected.
-- [ ] 3. **(Claude Code)** Write `scripts/smoke_llm.ts`:
+- [x] 1. **(you)** Start Nightshift. In its **Providers** tab, add NVIDIA with your `nvapi-` key. If your GPU allows, also install a local Nemotron model.
+- [x] 2. **(you)** Find the runtime token (the `proxy-token` file in Nightshift's state folder, or the key in its connect link `http://<host>:<port>/connect#k=<key>`) and put it in `.env.local` as `NIGHTSHIFT_TOKEN`. The placeholder `rt-local` is rejected.
+- [x] 3. **(Claude Code)** Write `scripts/smoke_llm.ts`:
   - `GET {NIGHTSHIFT_BASE_URL}/models` with `Authorization: Bearer <token>`. 200 with `meterless/*` ids = online; 401 or 403 = wrong token; no answer = offline.
   - `POST /chat/completions` with model `meterless/fast`, headers `meterless-app: why-my-bill` and `meterless-scope: user`, timeout 180 s. Print the text and the `model` field.
   - The same call against `https://integrate.api.nvidia.com/v1` with `NVIDIA_API_KEY` and model `nvidia/nemotron-3.5-lightning-30b-a3b`.
-- [ ] 4. **(Claude Code)** Record in `PROGRESS.md` which `meterless/*` modes `/models` lists and which Nemotron model each one routed to.
+- [x] 4. **(Claude Code)** Record in `PROGRESS.md` which `meterless/*` modes `/models` lists and which Nemotron model each one routed to.
 
 **Done when:** both calls in the smoke script return text, and the Nightshift reply names a Nemotron model.
 

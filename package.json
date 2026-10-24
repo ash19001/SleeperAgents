@@ -1,0 +1,9 @@
+{
+  "name": "why-my-bill",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "smoke:llm": "node scripts/smoke_llm.ts"
+  }
+}
