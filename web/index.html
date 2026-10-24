@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Why My Bill</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Ask why a household energy or water bill changed and see the £ split, the causes and the evidence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@87,700;87,800&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root {
+  /* Layout: a two-pane bill desk. Bills, question and notes on the left; the answer sheet on the right. One column below 1040px. */
+  --bg: #eef3f1;
+  --surface: #ffffff;
+  --surface-2: #f4f7f6;
+  --ink: #0f1715;
+  --ink-2: #43504c;
+  --muted: #687571;
+  --line: #d8e1de;
+  --grid: #e6ecea;
+  --axis: #b9c5c1;
+  --accent: #0b6a63;
+  --accent-hover: #08564f;
+  --accent-ink: #ffffff;
+  --accent-wash: #d9eeea;
+  --bar: #93c8c1;
+  --bar-hover: #6fb4ab;
+  --bar-sel: #0b6a63;
+  --up: #e34948;
+  --down: #2a78d6;
+  --up-ink: #a92a28;
+  --down-ink: #1b5ba8;
+  --up-wash: #fbe4e3;
+  --down-wash: #e1ecfa;
+  --sample-bg: #f8ecc4;
+  --sample-ink: #4a3800;
+  --code-bg: #f1f5f4;
+  --backdrop: rgb(8 12 11 / 0.45);
+  --shadow: 0 1px 2px rgb(15 23 21 / 0.05), 0 8px 24px rgb(15 23 21 / 0.07);
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 12px;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1110;
+    --surface: #141a19;
+    --surface-2: #1b2221;
+    --ink: #e8eeec;
+    --ink-2: #b3bfbb;
+    --muted: #8a9793;
+    --line: #2a3432;
+    --grid: #202927;
+    --axis: #3d4a47;
+    --accent: #46c0b2;
+    --accent-hover: #6ad3c6;
+    --accent-ink: #04211e;
+    --accent-wash: #173733;
+    --bar: #2f6e66;
+    --bar-hover: #3f8a80;
+    --bar-sel: #5fd3c5;
+    --up: #e66767;
+    --down: #3987e5;
+    --up-ink: #f29a9a;
+    --down-ink: #8cbaf0;
+    --up-wash: #3a2020;
+    --down-wash: #172a42;
+    --sample-bg: #2f2710;
+    --sample-ink: #f3dc9c;
+    --code-bg: #0f1514;
+    --backdrop: rgb(0 0 0 / 0.6);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1110;
+  --surface: #141a19;
+  --surface-2: #1b2221;
+  --ink: #e8eeec;
+  --ink-2: #b3bfbb;
+  --muted: #8a9793;
+  --line: #2a3432;
+  --grid: #202927;
+  --axis: #3d4a47;
+  --accent: #46c0b2;
+  --accent-hover: #6ad3c6;
+  --accent-ink: #04211e;
+  --accent-wash: #173733;
+  --bar: #2f6e66;
+  --bar-hover: #3f8a80;
+  --bar-sel: #5fd3c5;
+  --up: #e66767;
+  --down: #3987e5;
+  --up-ink: #f29a9a;
+  --down-ink: #8cbaf0;
+  --up-wash: #3a2020;
+  --down-wash: #172a42;
+  --sample-bg: #2f2710;
+  --sample-ink: #f3dc9c;
+  --code-bg: #0f1514;
+  --backdrop: rgb(0 0 0 / 0.6);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+[hidden] { display: none !important; }
+img, svg { max-width: 100%; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wrap { max-width: 1240px; margin-inline: auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+
+/* Top bar and SAMPLE band */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark { width: 36px; height: 36px; flex: none; color: var(--accent); }
+.brand-name { font-family: var(--font-display); font-stretch: 87%; font-weight: 800; font-size: 1.55rem; line-height: 1.05; letter-spacing: -0.01em; }
+.brand-tag { color: var(--ink-2); font-size: 0.92rem; }
+.mode {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-2);
+}
+.mode::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.mode[data-mode="live"]::before { background: var(--accent); }
+.mode[data-mode="replay"]::before { background: var(--down); }
+.mode[data-mode="preview"]::before { background: var(--sample-ink); }
+.sample { background: var(--sample-bg); color: var(--sample-ink); }
+.sample-inner { display: flex; align-items: baseline; gap: 10px; padding-block: 8px; font-size: 0.92rem; }
+.sample-tag {
+  flex: none; font-family: var(--font-mono); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.14em;
+  border: 1px solid currentColor; border-radius: 4px; padding: 0 6px;
+}
+
+/* Page layout */
+.page { display: grid; gap: 20px; padding-block: 20px 32px; }
+.side { display: grid; gap: 20px; min-width: 0; align-content: start; }
+@media (min-width: 1040px) {
+  .page { grid-template-columns: minmax(0, 430px) minmax(0, 1fr); gap: 24px; align-items: start; }
+}
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.section-title { font-family: var(--font-display); font-stretch: 87%; font-weight: 700; font-size: 1.2rem; line-height: 1.2; }
+.label { font-weight: 600; font-size: 0.95rem; }
+
+/* Bills */
+.bills-card { padding: 16px 16px 18px; display: grid; gap: 14px; }
+.bills-head { display: grid; gap: 2px; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); }
+.tab {
+  appearance: none; background: none; border: 0; cursor: pointer;
+  padding: 8px 12px 10px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  color: var(--ink-2); font-weight: 600;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.chart { position: relative; display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); grid-template-rows: 176px auto; margin-top: 18px; }
+.chart-y { position: relative; grid-area: 1 / 1; }
+.chart-y span {
+  position: absolute; right: 8px; transform: translateY(50%);
+  font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.chart-plot { position: relative; grid-area: 1 / 2; border-bottom: 1px solid var(--axis); }
+.gridline { position: absolute; left: 0; right: 0; border-top: 1px solid var(--grid); }
+.cols { position: absolute; inset: 0; display: flex; }
+.col { position: relative; flex: 1 1 0; min-width: 0; }
+.bar-btn {
+  appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
+  position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center;
+}
+.bar { width: min(24px, 70%); background: var(--bar); border-radius: 4px 4px 0 0; transition: background-color 0.15s; }
+.bar-btn:hover .bar, .bar-btn:focus-visible .bar { background: var(--bar-hover); }
+.bar-btn[aria-pressed="true"] .bar { background: var(--bar-sel); }
+.bar-val {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 0.75rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.chart-x { grid-area: 2 / 2; display: flex; padding-top: 6px; }
+.xl { flex: 1 1 0; min-width: 0; display: grid; justify-items: center; gap: 1px; font-size: 0.72rem; line-height: 1.2; color: var(--muted); text-align: center; }
+.xl.on { color: var(--ink); font-weight: 700; }
+.xl-mark { font-size: 0.66rem; letter-spacing: 0.02em; }
+.xl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  display: grid; gap: 1px; min-width: 9rem;
+  background: var(--ink); color: var(--surface); border-radius: 8px; padding: 8px 10px;
+  font-size: 0.8rem; line-height: 1.35; box-shadow: var(--shadow);
+}
+.tip strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.tip-label { opacity: 0.8; }
+
+/* Ask */
+.ask { display: grid; gap: 8px; }
+.ask-row { display: flex; gap: 8px; }
+input[type="text"], textarea {
+  width: 100%; min-width: 0; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2);
+}
+input[type="text"]:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-wash); }
+textarea { resize: vertical; min-height: 64px; }
+.btn {
+  appearance: none; cursor: pointer; white-space: nowrap;
+  border: 1px solid transparent; border-radius: 8px; padding: 9px 16px;
+  background: var(--accent); color: var(--accent-ink); font-weight: 700;
+}
+.btn:hover { background: var(--accent-hover); }
+.btn-quiet { background: transparent; color: var(--ink); border-color: var(--line); font-weight: 600; }
+.btn-quiet:hover { background: var(--surface-2); }
+.btn-small { padding: 5px 10px; font-size: 0.875rem; }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; }
+.example {
+  appearance: none; cursor: pointer; text-align: left;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 4px 11px; font-size: 0.86rem;
+}
+.example:hover { border-color: var(--accent); color: var(--ink); }
+
+/* Household notes */
+.notes-card { padding: 16px; display: grid; gap: 12px; }
+.note-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.note { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); }
+.note-date { grid-column: 2; }
+.note-form { display: grid; gap: 8px; }
+.note-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--ink-2); }
+
+/* Answer sheet */
+.sheet { padding: 22px 18px; display: grid; gap: 24px; box-shadow: var(--shadow); transition: opacity 0.2s; }
+.sheet[aria-busy="true"] { opacity: 0.5; }
+@media (min-width: 640px) { .sheet { padding: 28px 32px 30px; } }
+.sheet-head { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.q { font-family: var(--font-display); font-stretch: 87%; font-weight: 700; font-size: clamp(1.3rem, 1.05rem + 1vw, 1.7rem); line-height: 1.2; }
+.hero { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-top: 10px; }
+.hero-num { font-family: var(--font-display); font-stretch: 87%; font-weight: 800; font-size: clamp(2.6rem, 2rem + 3vw, 3.6rem); line-height: 1; letter-spacing: -0.02em; }
+.dir { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; }
+.dir.up { background: var(--up-wash); color: var(--up-ink); }
+.dir.down { background: var(--down-wash); color: var(--down-ink); }
+.dir.flat { background: var(--surface-2); color: var(--ink-2); }
+.hero-from { color: var(--ink-2); }
+.explain { font-size: 1.08rem; line-height: 1.65; max-width: 66ch; }
+.fact { font-weight: 700; }
+.chip {
+  appearance: none; cursor: pointer; display: inline-block;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2);
+  font-family: var(--font-mono); font-size: 0.7rem; line-height: 1; padding: 3px 5px; border-radius: 5px;
+  margin-inline: 1px; vertical-align: 0.15em;
+}
+.chip:hover { border-color: var(--accent); color: var(--ink); }
+.chip.m { background: var(--accent-wash); border-color: transparent; color: var(--ink); }
+.chip.static { cursor: default; vertical-align: baseline; }
+.block { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 20px; }
+.block-title { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.block-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+
+/* Where the £ went */
+.split-key { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--ink-2); }
+.split-key span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 14px; height: 8px; border-radius: 2px; }
+.swatch.up { background: var(--up); }
+.swatch.down { background: var(--down); }
+.split { display: grid; }
+.split-row {
+  display: grid; align-items: center; gap: 4px 12px; padding-block: 7px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "label value" "track track";
+}
+@media (min-width: 640px) {
+  .split-row { grid-template-columns: 15rem minmax(0, 1fr) 6.5rem; grid-template-areas: "label track value"; }
+}
+.split-label { grid-area: label; min-width: 0; }
+.split-track { grid-area: track; position: relative; height: 14px; }
+.split-track::before { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; border-left: 1px solid var(--axis); }
+.split-bar { position: absolute; top: 1px; height: 12px; }
+.split-bar.up { left: calc(50% + 1px); background: var(--up); border-radius: 0 4px 4px 0; }
+.split-bar.down { right: 50%; background: var(--down); border-radius: 4px 0 0 4px; }
+.split-value { grid-area: value; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.split-row.zero { color: var(--muted); }
+.split-row.zero .split-value { font-weight: 400; }
+.split-row.total { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 10px; font-weight: 700; }
+.split-row.total .split-track::before { display: none; }
+.check-line { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; color: var(--ink-2); }
+.check-line svg { color: var(--accent); flex: none; }
+
+/* Causes, ruled out, next steps */
+.causes { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.cause { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+.cause-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.cause-name { font-weight: 700; }
+.cause-effect { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cause-detail { grid-column: 1 / -1; color: var(--ink-2); max-width: 66ch; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.up { background: var(--up); }
+.dot.down { background: var(--down); }
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px 2px 6px; border-radius: 999px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.pill.supported { background: var(--accent-wash); color: var(--ink); }
+.pill.ruled_out { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.pill.inconclusive { background: var(--surface-2); color: var(--ink-2); border: 1px dashed var(--axis); }
+.ruled .cause { gap: 2px 12px; }
+.ruled .cause-name { font-weight: 600; color: var(--ink-2); }
+.ruled .cause-detail { color: var(--muted); font-size: 0.95rem; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.steps li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; }
+.steps svg { margin-top: 4px; color: var(--accent); }
+.feedback { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; border-top: 1px solid var(--line); padding-top: 18px; }
+.feedback .btn-quiet[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-wash); }
+.feedback .btn-quiet { display: inline-flex; align-items: center; gap: 6px; }
+
+/* How this answer was made */
+.trace { border-top: 1px solid var(--line); padding-top: 16px; }
+.trace summary { cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; list-style: none; }
+.trace summary::-webkit-details-marker { display: none; }
+.trace summary .block-title::before { content: "+ "; }
+.trace[open] summary .block-title::before { content: "− "; }
+.trace-steps { margin: 14px 0 0; padding-left: 1.4rem; display: grid; gap: 10px; }
+.trace-steps li { padding-left: 4px; }
+.trace-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; }
+.trace-step { font-weight: 600; }
+.trace-ms { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.trace-how { color: var(--ink-2); font-size: 0.92rem; }
+.trace-model { font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); overflow-wrap: anywhere; }
+.trace-note { margin-top: 12px; }
+
+/* Message states */
+.message { display: grid; gap: 12px; }
+.message h2 { font-family: var(--font-display); font-stretch: 87%; font-weight: 700; font-size: 1.35rem; }
+
+/* Evidence drawer */
+dialog.drawer {
+  border: 0; padding: 0; margin: 0 0 0 auto;
+  width: min(580px, 100%); max-width: 100%; height: 100%; max-height: 100%;
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+}
+dialog.drawer::backdrop { background: var(--backdrop); }
+.drawer-inner {
+  height: 100%; overflow-y: auto; display: grid; align-content: start; gap: 16px;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) 22px;
+}
+@media (max-width: 699px) {
+  dialog.drawer { width: 100%; height: auto; max-height: 88vh; margin: auto 0 0 0; border-radius: 16px 16px 0 0; }
+  .drawer-inner { max-height: 88vh; padding: 16px var(--gutter-r) max(24px, env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+}
+.drawer-top { display: flex; justify-content: flex-end; }
+.drawer-body { display: grid; gap: 14px; min-width: 0; }
+.drawer-title { font-family: var(--font-display); font-stretch: 87%; font-weight: 700; font-size: 1.4rem; line-height: 1.2; }
+.drawer-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.callout { background: var(--sample-bg); color: var(--sample-ink); border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; }
+pre.sql {
+  margin: 0; overflow-x: auto; white-space: pre;
+  background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
+  font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6;
+}
+dl.meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 0.92rem; }
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.hash { font-family: var(--font-mono); font-size: 0.76rem; }
+blockquote.note-quote { margin: 0; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 1.05rem; }
+
+.foot { padding-block: 0 28px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
+        <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2.5"></circle>
+        <path d="M9 22a9.5 9.5 0 0 1 18 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M18 22l5.5-7.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+        <circle cx="18" cy="22" r="2.4" fill="currentColor"></circle>
+      </svg>
+      <div>
+        <h1 class="brand-name">Why My Bill</h1>
+        <p class="brand-tag">Ask why a bill changed. See the £ split, the causes and the evidence.</p>
+      </div>
+    </div>
+    <span id="mode" class="mode" data-mode="preview">Preview</span>
+  </div>
+</header>
+
+<div class="sample" role="note">
+  <div class="wrap sample-inner">
+    <span class="sample-tag">SAMPLE</span>
+    <span id="sample-text">A made-up household.</span>
+  </div>
+</div>
+
+<main class="wrap page">
+  <div class="side">
+    <section class="card bills-card" aria-labelledby="bills-title">
+      <div class="bills-head">
+        <h2 id="bills-title" class="section-title">Your bills</h2>
+        <p id="bills-sub" class="muted small"></p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Utility">
+        <button class="tab" role="tab" type="button" id="tab-electricity" data-utility="electricity" aria-controls="bills-panel">Electricity</button>
+        <button class="tab" role="tab" type="button" id="tab-gas" data-utility="gas" aria-controls="bills-panel">Gas</button>
+        <button class="tab" role="tab" type="button" id="tab-water" data-utility="water" aria-controls="bills-panel">Water</button>
+      </div>
+      <div id="bills-panel" role="tabpanel" aria-labelledby="tab-gas">
+        <div id="chart" class="chart"></div>
+        <div id="chart-legend" class="chart-legend small muted"></div>
+      </div>
+      <p class="muted small">Tap a bar to ask why that bill changed.</p>
+      <form id="ask-form" class="ask" autocomplete="off">
+        <label for="question" class="label">Or ask in your own words</label>
+        <div class="ask-row">
+          <input id="question" name="question" type="text" placeholder="Why did my gas bill go up in January?">
+          <button class="btn" type="submit">Ask</button>
+        </div>
+        <div id="examples" class="examples" aria-label="Example questions"></div>
+      </form>
+    </section>
+
+    <section class="card notes-card" aria-labelledby="notes-title">
+      <h2 id="notes-title" class="section-title">Household notes</h2>
+      <p class="muted small">Things your bills can't show, like a new appliance or someone working from home. Answers use them to explain changes in use.</p>
+      <ul id="note-list" class="note-list"></ul>
+      <form id="note-form" class="note-form">
+        <label for="note-text" class="label">Add a note</label>
+        <textarea id="note-text" name="note" rows="2" placeholder="We installed a heat pump on 15 March 2026"></textarea>
+        <div class="note-actions">
+          <button class="btn" type="submit">Save note</button>
+          <button id="suggest-note" class="btn btn-quiet" type="button">Use the heat pump example</button>
+        </div>
+        <div id="note-status" class="status-line small" role="status"></div>
+      </form>
+    </section>
+  </div>
+
+  <section id="answer" class="card sheet" aria-labelledby="answer-title" aria-busy="false"></section>
+</main>
+
+<footer class="wrap foot small muted">
+  SAMPLE household data. The agent reads data through Zetaris, reasons with NVIDIA Nemotron via Meterless Nightshift, and keeps household notes in Meterless H-MEM.
+</footer>
+
+<p id="sr-status" class="visually-hidden" role="status"></p>
+
+<dialog id="drawer" class="drawer" aria-labelledby="drawer-title">
+  <div class="drawer-inner">
+    <div class="drawer-top"><button id="drawer-close" class="btn btn-quiet btn-small" type="button">Close</button></div>
+    <div id="drawer-body" class="drawer-body"></div>
+  </div>
+</dialog>
+
+<script src="preview_SAMPLE.js"></script>
+<script>
+// Data source. When the Node server (src/server.ts) is running, the page uses it:
+//   GET  /api/status   -> { mode: "live" | "replay" }
+//   GET  /api/bills    -> { bills: [...] }
+//   GET  /api/notes    -> { notes: [{ id, text, created }] }
+//   POST /api/ask      { question } -> an answer (PLAN.md answer contract) or { clarify }
+//   POST /api/note     { text } -> { note }
+//   POST /api/feedback { question, bill_b, rating } -> { stored }
+// With no server (a static host, or this preview), it uses the SAMPLE preview data.
+(() => {
+  "use strict";
+
+  const P = window.PREVIEW_SAMPLE || null;
+  const EXAMPLES = P ? P.examples : [
+    "Why did my gas bill go up in January?",
+    "Why was my electricity bill lower in June?",
+    "Why did my water bill go up in June and July?",
+  ];
+  const SUGGESTED_NOTE = P ? P.suggested_note : "We installed a heat pump on 15 March 2026";
+
+  const UTILITIES = {
+    electricity: { name: "Electricity", cadence: "monthly" },
+    gas: { name: "Gas", cadence: "monthly" },
+    water: { name: "Water", cadence: "every two months" },
+  };
+  const CAUSE_NAMES = {
+    C1: "Unit price changed",
+    C2: "Standing charge changed",
+    C3: "Bill covered more or fewer days",
+    C4: "Estimated reading corrected",
+    C5: "Credit or one-off charge",
+    C6: "Weather",
+    C7: "Use changed beyond the weather",
+    C8: "Possible leak",
+    C9: "Switched fuel",
+  };
+  const PART_NAMES = {
+    period: "Days on the bill",
+    weather: "Weather",
+    usage_other: "Use beyond the weather",
+    unit_price: "Unit price",
+    standing: "Standing charge",
+    estimate: "Estimated reading",
+    oneoff: "Credits and one-off charges",
+  };
+  const VERDICTS = { supported: "Supported", ruled_out: "Ruled out", inconclusive: "Not enough data" };
+  const ROUTES = {
+    nightshift: "via Meterless Nightshift",
+    "nvidia-direct": "via NVIDIA direct (fallback)",
+    zetaris: "Zetaris, read-only SQL",
+    "h-mem": "Meterless H-MEM",
+    code: "Code, no model",
+  };
+  const MODEL_NAMES = {
+    "nvidia/nemotron-3.5-lightning-30b-a3b": "Nemotron 3.5 Lightning 30B",
+    "nvidia/nemotron-3-ultra-550b-a55b": "Nemotron 3 Ultra 550B",
+  };
+  const ICONS = {
+    check: '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    cross: '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    query: '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="12.6" r="1" fill="currentColor"/></svg>',
+    arrow: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    thumbUp: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M2 7h2.5v7H2zM6 14V7.2l3-4.7c1 0 1.7.8 1.5 1.8L10 6.5h3.3c.9 0 1.5.8 1.3 1.7l-1.1 4.6c-.2.7-.8 1.2-1.5 1.2z" fill="currentColor"/></svg>',
+    thumbDown: '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" style="transform: rotate(180deg)"><path d="M2 7h2.5v7H2zM6 14V7.2l3-4.7c1 0 1.7.8 1.5 1.8L10 6.5h3.3c.9 0 1.5.8 1.3 1.7l-1.1 4.6c-.2.7-.8 1.2-1.5 1.2z" fill="currentColor"/></svg>',
+  };
+  const MONTH_RE = /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/;
+  const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const state = {
+    mode: "preview",
+    utility: "gas",
+    bills: [],
+    notes: [],
+    view: "empty",
+    answer: null,
+    message: "",
+    selected: null,
+    lastQuestion: "",
+    busy: false,
+  };
+
+  // ---- Small helpers -------------------------------------------------------
+
+  const $ = (sel) => document.querySelector(sel);
+
+  function el(tag, attrs, ...children) {
+    const node = document.createElement(tag);
+    for (const [key, value] of Object.entries(attrs || {})) {
+      if (value === false || value == null) continue;
+      if (key === "class") node.className = value;
+      else if (key.startsWith("on")) node.addEventListener(key.slice(2), value);
+      else node.setAttribute(key, value === true ? "" : value);
+    }
+    for (const child of children.flat()) {
+      if (child == null || child === false) continue;
+      node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+    }
+    return node;
+  }
+
+  function icon(name) {
+    const t = document.createElement("template");
+    t.innerHTML = ICONS[name];
+    return t.content.firstChild;
+  }
+
+  function money(x, signed) {
+    const pennies = Math.round(x * 100);
+    if (pennies === 0) return "£0.00";
+    const abs = (Math.abs(pennies) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${pennies < 0 ? "−" : signed ? "+" : ""}£${abs}`;
+  }
+
+  const fmtDate = (iso) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+    .toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).replace("Sept", "Sep");
+  const fmtDateTime = (iso) => new Date(iso)
+    .toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
+  const fmtMs = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${ms} ms`);
+  const fmtUnits = (n, unit) => `${n.toLocaleString("en-GB")} ${unit}`;
+  const shortLabel = (bill) => (bill.utility === "water" ? bill.label.replace(/ \d{4}/g, "") : bill.label.slice(0, 3));
+  const billsFor = (utility) => state.bills.filter((b) => b.utility === utility);
+  const billById = (id) => state.bills.find((b) => b.bill_id === id);
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  function announce(text) {
+    $("#sr-status").textContent = text;
+  }
+
+  // ---- Data source ---------------------------------------------------------
+
+  async function getJson(url) {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`${url} answered ${res.status}`);
+    return res.json();
+  }
+
+  async function postJson(url, body) {
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`${url} answered ${res.status}`);
+    return res.json();
+  }
+
+  const api = {
+    async status() {
+      try {
+        const s = await getJson("/api/status");
+        if (s && (s.mode === "live" || s.mode === "replay")) return s.mode;
+      } catch {
+        // No server: fall through to preview.
+      }
+      return "preview";
+    },
+    async bills() {
+      return state.mode === "preview" ? P.bills : (await getJson("/api/bills")).bills;
+    },
+    async notes() {
+      return state.mode === "preview" ? [] : (await getJson("/api/notes")).notes;
+    },
+    async ask(question) {
+      if (state.mode !== "preview") return postJson("/api/ask", { question });
+      await sleep(350);
+      return previewAsk(question);
+    },
+    async addNote(text) {
+      if (state.mode !== "preview") return (await postJson("/api/note", { text })).note;
+      return { id: `M${state.notes.length + 1}`, text, created: new Date().toISOString().slice(0, 10) };
+    },
+    async feedback(answer, rating) {
+      if (state.mode === "preview") return { stored: false };
+      return postJson("/api/feedback", { question: answer.question, bill_b: answer.bill_b, rating });
+    },
+  };
+
+  // Preview only: match the question to a bill with simple keywords. The agent
+  // uses Nemotron for this step.
+  function previewAsk(question) {
+    const q = question.toLowerCase();
+    const utility = /electric|power/.test(q) ? "electricity" : /\bgas\b/.test(q) ? "gas" : /water/.test(q) ? "water" : null;
+    const match = q.match(MONTH_RE);
+    if (!utility || !match) {
+      return { clarify: "Which bill do you mean? Name the utility and the month, for example “Why did my gas bill go up in January?”" };
+    }
+    const month = MONTH_KEYS.indexOf(match[1].slice(0, 3)) + 1;
+    const bills = P.bills.filter((b) => b.utility === utility);
+    const index = bills.findIndex((b) => b.months.includes(month));
+    if (index < 0) {
+      return { clarify: `There's no ${utility} bill for that month in this sample. The bills run from October 2025 to September 2026.` };
+    }
+    if (index === 0) {
+      return { clarify: `The ${bills[0].label} ${utility} bill is the first one in this sample, so there's no earlier bill to compare it with.` };
+    }
+    let entry = P.answers[bills[index].bill_id];
+    if (!entry) return { no_preview: true, bill_id: bills[index].bill_id, utility };
+    if (entry.variants) {
+      const note = state.notes.find((n) => /heat pump/i.test(n.text));
+      entry = note ? withNote(entry.variants.heat_pump_note, note) : entry.variants.no_note;
+    }
+    const answer = structuredClone(entry);
+    answer.question = question;
+    return answer;
+  }
+
+  // The preview answer cites the heat pump note as M1; point it at the note the viewer saved.
+  function withNote(answer, note) {
+    const json = JSON.stringify(answer).replaceAll('"M1"', JSON.stringify(note.id)).replaceAll("[M1]", `[${note.id}]`);
+    const out = JSON.parse(json);
+    out.memory = [{ id: note.id, text: note.text, created: note.created }];
+    return out;
+  }
+
+  // ---- Asking --------------------------------------------------------------
+
+  async function ask(question, { scroll = true } = {}) {
+    question = question.trim();
+    if (!question || state.busy) return;
+    state.lastQuestion = question;
+    $("#question").value = question;
+    state.busy = true;
+    renderAnswer();
+    try {
+      const res = await api.ask(question);
+      if (res.clarify) {
+        Object.assign(state, { view: "clarify", message: res.clarify, answer: null, selected: null });
+      } else if (res.no_preview) {
+        Object.assign(state, { view: "no_preview", answer: null, selected: res.bill_id, utility: res.utility });
+      } else {
+        Object.assign(state, { view: "answer", answer: res, selected: res.bill_b, utility: res.utility });
+      }
+    } catch (err) {
+      Object.assign(state, { view: "error", message: err.message, answer: null });
+    }
+    state.busy = false;
+    renderTabs();
+    renderChart();
+    renderAnswer();
+    announce(state.view === "answer" ? "Answer ready." : state.message || "Done.");
+    if (scroll && window.matchMedia("(max-width: 1039px)").matches) {
+      $("#answer").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    }
+  }
+
+  // ---- Bills chart ---------------------------------------------------------
+
+  function renderTabs() {
+    for (const tab of document.querySelectorAll(".tab")) {
+      const on = tab.dataset.utility === state.utility;
+      tab.setAttribute("aria-selected", String(on));
+      tab.tabIndex = on ? 0 : -1;
+    }
+    $("#bills-panel").setAttribute("aria-labelledby", `tab-${state.utility}`);
+    const bills = billsFor(state.utility);
+    $("#bills-sub").textContent = bills.length
+      ? `${bills.length} bills, ${UTILITIES[state.utility].cadence}, ${fmtDate(bills[0].period_start)} to ${fmtDate(bills[bills.length - 1].period_end)}`
+      : "No bills loaded.";
+  }
+
+  function niceStep(max) {
+    for (const step of [10, 20, 25, 50, 100, 200, 250, 500]) if (max / step <= 4) return step;
+    return 1000;
+  }
+
+  function renderChart() {
+    const chart = $("#chart");
+    const bills = billsFor(state.utility);
+    chart.replaceChildren();
+    if (!bills.length) return;
+    const step = niceStep(Math.max(...bills.map((b) => b.total_gbp)));
+    const top = Math.ceil(Math.max(...bills.map((b) => b.total_gbp)) / step) * step;
+    const pct = (v) => `${(v / top) * 100}%`;
+
+    const yAxis = el("div", { class: "chart-y", "aria-hidden": "true" });
+    const plot = el("div", { class: "chart-plot" });
+    for (let v = 0; v <= top; v += step) {
+      yAxis.append(Object.assign(el("span", {}, `£${v}`), { style: `bottom:${pct(v)}` }));
+      if (v > 0) plot.append(Object.assign(el("div", { class: "gridline" }), { style: `bottom:${pct(v)}` }));
+    }
+
+    const cols = el("div", { class: "cols" });
+    const xAxis = el("div", { class: "chart-x", "aria-hidden": "true" });
+    const name = UTILITIES[state.utility].name;
+    let anyEstimated = false;
+    let anyPreview = false;
+    for (const bill of bills) {
+      const selected = bill.bill_id === state.selected;
+      const estimated = bill.read_type === "estimated";
+      const hasPreview = state.mode === "preview" && Boolean(P.answers[bill.bill_id]);
+      anyEstimated ||= estimated;
+      anyPreview ||= hasPreview;
+      const bar = el("span", { class: "bar" });
+      bar.style.height = pct(bill.total_gbp);
+      const btn = el("button", {
+        class: "bar-btn",
+        type: "button",
+        "aria-pressed": String(selected),
+        "aria-label": `${name} bill, ${bill.label}, ${money(bill.total_gbp)}${estimated ? ", estimated reading" : ""}. Ask why it changed.`,
+        onclick: () => ask(`Why did my ${name.toLowerCase()} bill change in ${bill.label}?`),
+        onpointerenter: () => showTip(btn, bill),
+        onpointerleave: hideTip,
+        onfocus: () => showTip(btn, bill),
+        onblur: hideTip,
+      }, bar);
+      if (selected) {
+        const val = el("span", { class: "bar-val" }, money(bill.total_gbp));
+        val.style.bottom = `calc(${pct(bill.total_gbp)} + 4px)`;
+        btn.append(val);
+      }
+      cols.append(el("div", { class: "col" }, btn));
+      xAxis.append(el("span", { class: `xl${selected ? " on" : ""}` },
+        shortLabel(bill),
+        estimated ? el("span", { class: "xl-mark" }, "Est.") : null,
+        hasPreview ? el("span", { class: "xl-dot" }) : null));
+    }
+    plot.append(cols);
+    chart.append(yAxis, plot, xAxis, el("div", { id: "tip", class: "tip", hidden: true }));
+
+    const legend = $("#chart-legend");
+    legend.replaceChildren(
+      anyEstimated ? el("span", {}, "Est. = estimated meter reading") : null,
+      anyPreview ? el("span", {}, el("span", { class: "xl-dot" }), "Has a preview answer") : null,
+    );
+    legend.hidden = !anyEstimated && !anyPreview;
+  }
+
+  function showTip(btn, bill) {
+    const tip = $("#tip");
+    if (!tip) return;
+    tip.replaceChildren(
+      el("span", { class: "tip-label" }, bill.label),
+      el("strong", {}, money(bill.total_gbp)),
+      el("span", {}, `${bill.days} days, ${fmtUnits(bill.units_billed, bill.unit)}`),
+      bill.read_type === "estimated" ? el("span", {}, "Estimated reading") : null,
+      bill.adjustments_gbp ? el("span", {}, `Includes a ${money(Math.abs(bill.adjustments_gbp))} ${bill.adjustments_gbp < 0 ? "credit" : "charge"}`) : null,
+    );
+    tip.hidden = false;
+    const box = $("#chart").getBoundingClientRect();
+    const col = btn.getBoundingClientRect();
+    const bar = btn.querySelector(".bar").getBoundingClientRect();
+    const left = Math.max(0, Math.min(col.left + col.width / 2 - box.left - tip.offsetWidth / 2, box.width - tip.offsetWidth));
+    const top = Math.max(-8, bar.top - box.top - tip.offsetHeight - 10);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+
+  function hideTip() {
+    const tip = $("#tip");
+    if (tip) tip.hidden = true;
+  }
+
+  // ---- Answer sheet --------------------------------------------------------
+
+  function chip(ref, answer) {
+    const isNote = ref.startsWith("M");
+    const ev = isNote ? null : answer.evidence.find((e) => e.id === ref);
+    const label = isNote ? `Household note ${ref}` : `Evidence ${ref}${ev ? `: ${ev.title}` : ""}`;
+    return el("button", { class: `chip${isNote ? " m" : ""}`, type: "button", "aria-label": label, title: label, onclick: () => openDrawer(ref, answer) }, ref);
+  }
+
+  // Fill {F#} placeholders from the facts table and turn [E#] / [M#] into chips.
+  function richText(text, answer) {
+    const frag = document.createDocumentFragment();
+    for (const part of text.split(/(\{F\d+\}|\[[EM]\d+\])/)) {
+      if (!part) continue;
+      const fact = part.match(/^\{(F\d+)\}$/);
+      const ref = part.match(/^\[([EM]\d+)\]$/);
+      if (fact) {
+        const f = answer.facts.find((x) => x.id === fact[1]);
+        frag.append(el("strong", { class: "fact", title: f ? `${f.id}, from ${f.evidence.join(", ")}` : "" }, f ? f.value : part));
+      } else if (ref) {
+        frag.append(chip(ref[1], answer));
+      } else {
+        frag.append(part);
+      }
+    }
+    return frag;
+  }
+
+  function directionTag(change) {
+    const pennies = Math.round(change * 100);
+    if (pennies > 0) return el("span", { class: "dir up" }, "▲ Up");
+    if (pennies < 0) return el("span", { class: "dir down" }, "▼ Down");
+    return el("span", { class: "dir flat" }, "No change");
+  }
+
+  function splitBlock(a) {
+    const max = Math.max(...a.components.map((c) => Math.abs(c.gbp)), 0.01);
+    const rows = a.components.map((c) => {
+      const zero = Math.round(c.gbp * 100) === 0;
+      const track = el("span", { class: "split-track", "aria-hidden": "true" });
+      if (!zero) {
+        const bar = el("span", { class: `split-bar ${c.gbp > 0 ? "up" : "down"}` });
+        bar.style.width = `calc(${(Math.abs(c.gbp) / max) * 50}% - 1px)`;
+        track.append(bar);
+      }
+      return el("div", { class: `split-row${zero ? " zero" : ""}` },
+        el("span", { class: "split-label" }, PART_NAMES[c.id] || c.id, " ", zero ? null : (c.evidence || []).map((id) => chip(id, a))),
+        track,
+        el("span", { class: "split-value" }, money(c.gbp, true)));
+    });
+    const sum = a.components.reduce((t, c) => t + Math.round(c.gbp * 100), 0);
+    const off = sum - Math.round(a.change_gbp * 100);
+    return el("section", { class: "block", "aria-labelledby": "h-split" },
+      el("div", { class: "block-head" },
+        el("h3", { id: "h-split", class: "block-title" }, "Where the £ went"),
+        el("div", { class: "split-key" },
+          el("span", {}, el("span", { class: "swatch up" }), "Adds to the bill"),
+          el("span", {}, el("span", { class: "swatch down" }), "Takes off the bill"))),
+      el("div", { class: "split" }, rows,
+        el("div", { class: "split-row total" },
+          el("span", { class: "split-label" }, "Total change"),
+          el("span", { class: "split-track" }),
+          el("span", { class: "split-value" }, money(a.change_gbp, true)))),
+      el("p", { class: "check-line" }, icon(off === 0 ? "check" : "cross"),
+        off === 0 ? "The parts add up to the change, to the penny." : `The parts are ${money(Math.abs(off) / 100)} away from the change.`));
+  }
+
+  function causeItem(c, a) {
+    const iconName = c.verdict === "supported" ? "check" : c.verdict === "ruled_out" ? "cross" : "query";
+    const showEffect = c.verdict === "supported" && Math.round(c.effect_gbp * 100) !== 0;
+    return el("li", { class: "cause" },
+      el("div", { class: "cause-head" },
+        el("span", { class: `pill ${c.verdict}` }, icon(iconName), VERDICTS[c.verdict] || c.verdict),
+        el("span", { class: "cause-name" }, CAUSE_NAMES[c.id] || c.id)),
+      showEffect
+        ? el("span", { class: "cause-effect" }, el("span", { class: `dot ${c.effect_gbp > 0 ? "up" : "down"}`, "aria-hidden": "true" }), money(c.effect_gbp, true))
+        : el("span"),
+      el("p", { class: "cause-detail" }, c.detail, " ", [...(c.evidence || []), ...(c.memory || [])].map((id) => chip(id, a))));
+  }
+
+  function causesBlock(a) {
+    const supported = a.causes.filter((c) => c.verdict === "supported");
+    const unclear = a.causes.filter((c) => c.verdict === "inconclusive");
+    return el("section", { class: "block", "aria-labelledby": "h-why" },
+      el("h3", { id: "h-why", class: "block-title" }, "Why it changed"),
+      supported.length
+        ? el("ul", { class: "causes" }, [...supported, ...unclear].map((c) => causeItem(c, a)))
+        : el("p", { class: "muted" }, "None of the causes tested explains this change."));
+  }
+
+  function ruledOutBlock(a) {
+    const ruled = a.causes.filter((c) => c.verdict === "ruled_out");
+    if (!ruled.length) return null;
+    return el("section", { class: "block ruled", "aria-labelledby": "h-ruled" },
+      el("h3", { id: "h-ruled", class: "block-title" }, `Ruled out (${ruled.length})`),
+      el("ul", { class: "causes" }, ruled.map((c) => causeItem(c, a))));
+  }
+
+  function stepsBlock(a) {
+    if (!a.next_steps || !a.next_steps.length) return null;
+    return el("section", { class: "block", "aria-labelledby": "h-next" },
+      el("h3", { id: "h-next", class: "block-title" }, "What to do next"),
+      el("ul", { class: "steps" }, a.next_steps.map((s) =>
+        el("li", {}, icon("arrow"), el("p", {}, s.action, " ", (s.evidence || []).map((id) => chip(id, a)))))));
+  }
+
+  function feedbackBlock(a) {
+    const status = el("span", { class: "small muted", role: "status" });
+    const buttons = [];
+    const send = async (rating, btn) => {
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      try {
+        const res = await api.feedback(a, rating);
+        status.textContent = res.stored ? "Thanks. Your feedback is saved with this answer." : "Thanks. Feedback isn't saved in preview mode.";
+      } catch (err) {
+        status.textContent = `Couldn't save feedback: ${err.message}`;
+      }
+    };
+    const up = el("button", { class: "btn btn-quiet btn-small", type: "button", "aria-pressed": "false", onclick: () => send("helpful", up) }, icon("thumbUp"), "Yes");
+    const down = el("button", { class: "btn btn-quiet btn-small", type: "button", "aria-pressed": "false", onclick: () => send("not_helpful", down) }, icon("thumbDown"), "No");
+    buttons.push(up, down);
+    return el("div", { class: "feedback" }, el("span", {}, "Was this answer useful?"), up, down, status);
+  }
+
+  function traceBlock(a) {
+    if (!a.trace || !a.trace.length) return null;
+    const total = a.trace.reduce((t, s) => t + (s.ms || 0), 0);
+    return el("details", { class: "trace" },
+      el("summary", {},
+        el("span", { class: "block-title" }, "How this answer was made"),
+        el("span", { class: "small muted" }, `${a.trace.length} steps, ${fmtMs(total)}`)),
+      el("ol", { class: "trace-steps" }, a.trace.map((s) => el("li", {},
+        el("div", { class: "trace-row" },
+          el("span", { class: "trace-step" }, s.label || s.step),
+          el("span", { class: "trace-ms" }, fmtMs(s.ms))),
+        el("div", { class: "trace-how" }, s.model ? `${MODEL_NAMES[s.model] || s.model} ${ROUTES[s.route] || s.route}` : ROUTES[s.route] || s.route),
+        s.model ? el("div", { class: "trace-model" }, s.model) : null))),
+      state.mode === "preview"
+        ? el("p", { class: "trace-note small muted" }, "Preview: these times are typical figures from test calls, not from this answer.")
+        : null);
+  }
+
+  function answerView(a) {
+    const A = billById(a.bill_a);
+    const B = billById(a.bill_b);
+    const from = a.total_a ?? (A && A.total_gbp);
+    const to = a.total_b ?? (B && B.total_gbp);
+    const explain = el("p", { class: "explain" });
+    explain.append(richText(a.answer_markdown, a));
+    return [
+      el("header", { class: "sheet-head" },
+        el("p", { class: "eyebrow" }, `${UTILITIES[a.utility].name} · ${A ? A.label : a.bill_a} → ${B ? B.label : a.bill_b}`),
+        el("h2", { id: "answer-title", class: "q" }, `“${a.question}”`),
+        el("div", { class: "hero" },
+          el("span", { class: "hero-num" }, money(a.change_gbp, true)),
+          directionTag(a.change_gbp),
+          from != null && to != null ? el("span", { class: "hero-from" }, `from ${money(from)} to ${money(to)}`) : null)),
+      explain,
+      splitBlock(a),
+      causesBlock(a),
+      ruledOutBlock(a),
+      stepsBlock(a),
+      feedbackBlock(a),
+      traceBlock(a),
+    ];
+  }
+
+  function messageView(title, text, withExamples) {
+    return [el("div", { class: "message" },
+      el("h2", { id: "answer-title" }, title),
+      el("p", { class: "muted" }, text),
+      withExamples ? exampleButtons() : null)];
+  }
+
+  function renderAnswer() {
+    const root = $("#answer");
+    root.setAttribute("aria-busy", String(state.busy));
+    if (state.busy && state.view === "empty") {
+      root.replaceChildren(...messageView("Working on it", "Reading the question, testing the causes and checking the numbers.", false));
+      return;
+    }
+    if (state.busy) return;
+    const views = {
+      answer: () => answerView(state.answer),
+      clarify: () => messageView("Which bill do you mean?", state.message, true),
+      no_preview: () => messageView("No preview answer for this bill yet",
+        "In preview mode, answers exist only for the bills marked with a dot. Once the agent is connected, every bill gets one.", true),
+      error: () => messageView("Couldn't get an answer", `${state.message}. Check that the server is running, then try again.`, false),
+      empty: () => messageView("Ask about a bill", "Tap a bar or type a question to see why that bill changed.", true),
+    };
+    root.replaceChildren(...(views[state.view] || views.empty)().filter(Boolean));
+  }
+
+  function exampleButtons() {
+    return el("div", { class: "examples" }, EXAMPLES.map((q) =>
+      el("button", { class: "example", type: "button", onclick: () => ask(q) }, q)));
+  }
+
+  // ---- Evidence drawer -----------------------------------------------------
+
+  function openDrawer(ref, answer) {
+    const body = $("#drawer-body");
+    if (ref.startsWith("E")) {
+      const ev = answer.evidence.find((e) => e.id === ref);
+      if (!ev) return;
+      const usedFor = [
+        ...answer.components.filter((c) => (c.evidence || []).includes(ref) && Math.round(c.gbp * 100) !== 0).map((c) => PART_NAMES[c.id]),
+        ...answer.causes.filter((c) => (c.evidence || []).includes(ref)).map((c) => CAUSE_NAMES[c.id]),
+      ];
+      const code = el("code", {}, ev.sql);
+      const pre = el("pre", { class: "sql" }, code);
+      const copied = el("span", { class: "small muted", role: "status" });
+      const copy = el("button", { class: "btn btn-quiet btn-small", type: "button" }, "Copy SQL");
+      copy.addEventListener("click", () => {
+        navigator.clipboard.writeText(ev.sql).then(
+          () => { copied.textContent = "Copied"; },
+          () => { window.getSelection().selectAllChildren(code); copied.textContent = "Selected. Press Ctrl+C or ⌘C to copy."; });
+      });
+      body.replaceChildren(
+        el("p", { class: "eyebrow" }, `Evidence ${ev.id}`),
+        el("h2", { id: "drawer-title", class: "drawer-title" }, ev.title || "Query"),
+        state.mode === "preview" ? el("p", { class: "callout" }, "Preview: this query hasn't run yet. It shows what the agent will send to Zetaris.") : null,
+        el("div", { class: "drawer-row" }, el("h3", { class: "block-title" }, "Query sent to Zetaris"), el("span", {}, copied, " ", copy)),
+        pre,
+        el("dl", { class: "meta" },
+          el("dt", {}, "Rows returned"), el("dd", {}, String(ev.rows)),
+          el("dt", {}, "Run at"), el("dd", {}, fmtDateTime(ev.at)),
+          el("dt", {}, "Fingerprint"), el("dd", {},
+            el("span", { class: "hash" }, ev.sha256), el("br"),
+            el("span", { class: "small muted" }, state.mode === "preview"
+              ? "SHA-256 of the query text, for this preview."
+              : "SHA-256 of the rows returned, so anyone can check the data hasn't changed.")),
+          usedFor.length ? [el("dt", {}, "Used for"), el("dd", {}, usedFor.join(", "))] : null));
+    } else {
+      const note = (answer.memory || []).find((m) => m.id === ref) || state.notes.find((n) => n.id === ref);
+      if (!note) return;
+      const usedFor = answer.causes.filter((c) => (c.memory || []).includes(ref)).map((c) => CAUSE_NAMES[c.id]);
+      body.replaceChildren(
+        el("p", { class: "eyebrow" }, `Household note ${note.id}`),
+        el("h2", { id: "drawer-title", class: "drawer-title" }, "What you told us"),
+        el("blockquote", { class: "note-quote" }, note.text),
+        el("dl", { class: "meta" },
+          el("dt", {}, "Added"), el("dd", {}, fmtDate(note.created)),
+          el("dt", {}, "Stored in"), el("dd", {}, "Meterless H-MEM, the household memory"),
+          usedFor.length ? [el("dt", {}, "Used for"), el("dd", {}, usedFor.join(", "))] : null));
+    }
+    hideTip();
+    $("#drawer").showModal();
+  }
+
+  // ---- Household notes -----------------------------------------------------
+
+  function renderNotes() {
+    const list = $("#note-list");
+    list.replaceChildren(...(state.notes.length
+      ? state.notes.map((n) => el("li", { class: "note" },
+        el("span", { class: "chip m static" }, n.id),
+        el("span", {}, n.text),
+        el("span", { class: "note-date small muted" }, `Added ${fmtDate(n.created)}`)))
+      : [el("li", { class: "muted small" }, "No notes yet.")]));
+  }
+
+  async function saveNote(event) {
+    event.preventDefault();
+    const box = $("#note-text");
+    const status = $("#note-status");
+    const text = box.value.trim();
+    if (!text) {
+      status.replaceChildren("Write a note first.");
+      return;
+    }
+    try {
+      const note = await api.addNote(text);
+      state.notes.push(note);
+      box.value = "";
+      renderNotes();
+      status.replaceChildren(`Saved as ${note.id}.`,
+        state.lastQuestion
+          ? el("button", { class: "btn btn-quiet btn-small", type: "button", onclick: () => ask(state.lastQuestion) }, "Ask the last question again")
+          : null);
+    } catch (err) {
+      status.replaceChildren(`Couldn't save the note: ${err.message}`);
+    }
+  }
+
+  // ---- Wiring --------------------------------------------------------------
+
+  function selectUtility(utility, focus) {
+    state.utility = utility;
+    renderTabs();
+    renderChart();
+    if (focus) document.getElementById(`tab-${utility}`).focus();
+  }
+
+  function wire() {
+    const order = Object.keys(UTILITIES);
+    for (const tab of document.querySelectorAll(".tab")) {
+      tab.addEventListener("click", () => selectUtility(tab.dataset.utility, false));
+      tab.addEventListener("keydown", (e) => {
+        const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!dir) return;
+        e.preventDefault();
+        selectUtility(order[(order.indexOf(state.utility) + dir + order.length) % order.length], true);
+      });
+    }
+    $("#ask-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      ask($("#question").value);
+    });
+    $("#note-form").addEventListener("submit", saveNote);
+    $("#suggest-note").addEventListener("click", () => {
+      $("#note-text").value = SUGGESTED_NOTE;
+      $("#note-text").focus();
+    });
+    const drawer = $("#drawer");
+    $("#drawer-close").addEventListener("click", () => drawer.close());
+    drawer.addEventListener("click", (e) => {
+      if (e.target === drawer) drawer.close();
+    });
+    window.addEventListener("resize", hideTip);
+    const examples = $("#examples");
+    examples.replaceChildren(...exampleButtons().childNodes);
+  }
+
+  function renderMode() {
+    const pill = $("#mode");
+    pill.dataset.mode = state.mode;
+    pill.textContent = { preview: "Preview", replay: "Replay", live: "Live" }[state.mode];
+    $("#sample-text").textContent = {
+      preview: "A made-up household. The answers on this page are hand-written previews of what the agent will produce. They don't come from the agent yet.",
+      replay: "A made-up household. Answers were recorded from earlier runs of the agent, so the page works with the agent switched off.",
+      live: "A made-up household. Each answer comes from the agent when you ask.",
+    }[state.mode];
+  }
+
+  async function init() {
+    wire();
+    state.mode = await api.status();
+    if (state.mode === "preview" && !P) {
+      Object.assign(state, { view: "error", message: "No server answered and the preview data (preview_SAMPLE.js) didn't load" });
+    }
+    renderMode();
+    try {
+      if (state.view !== "error") {
+        state.bills = await api.bills();
+        state.notes = await api.notes();
+      }
+    } catch (err) {
+      Object.assign(state, { view: "error", message: `Couldn't load the bills: ${err.message}` });
+    }
+    renderTabs();
+    renderChart();
+    renderNotes();
+    if (state.mode !== "live" && state.view !== "error") await ask(EXAMPLES[0], { scroll: false });
+    else renderAnswer();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

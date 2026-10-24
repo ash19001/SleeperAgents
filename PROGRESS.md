@@ -23,3 +23,6 @@ Nightshift's token file is `runtime-token` in `~/Library/Application Support/ai.
 | `nvidia/llama-3.3-nemotron-super-49b-v1.5` | 410, endpoint retired |
 
 So `.env.example` names the Nemotron models explicitly instead of `meterless/fast|deep`. Every Nightshift reply carries a `meterless.compute_receipt.v1` receipt (`receipt_id`, `routed_model`, `winning_route`, phases), which the trace can show.
+
+**Phase 7 (early, backend on hold).** `web/index.html` built: bills chart per utility, question box, answer sheet (£ split, causes, ruled out, next steps, feedback, trace), evidence drawer, household notes. No server yet, so it runs in preview mode on `web/preview_SAMPLE.js`.
+Preview answers are hand-written SAMPLEs from `scripts/make_preview_SAMPLE.ts` (bill-model splits, all sum to the penny). Page needs from the answer contract: `total_a`, `total_b`, `evidence[].title`, `memory[]`, `next_steps[].cause`, `trace[].label`; and the API routes listed at the top of its script.
