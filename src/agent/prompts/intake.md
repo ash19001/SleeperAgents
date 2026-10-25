@@ -17,7 +17,7 @@ Rules:
   - "my bill" or "the bill" with no utility named is unclear: ask which, with the options electricity, gas and water.
   - A utility named anywhere in the question counts, including an added note such as "(I mean my gas bill)".
 - period: the month the question is about, as YYYY-MM. Use the bill months listed below to pick the year. If the question names the year, use that year even when there's no bill for that month (the app says the bill is missing). A two-month water bill counts for either month. Seasons: winter means January, spring April, summer July, autumn October. If no month or season is named, or it says "latest", "last bill" or "this month", use null.
-- direction: "up" if it went up, rose, jumped or was higher; "down" if it fell, dropped or was lower; otherwise "change".
+- direction: "up" if it went up, rose, jumped, was higher or expensive; "down" if it fell, dropped, was lower or cheap; otherwise "change".
 - If the question isn't about a utility bill at all, reply {"requests": [], "unclear": null}.
 
 Examples (with bills from 2025-10 to 2026-09):

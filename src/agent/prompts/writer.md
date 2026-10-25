@@ -8,7 +8,7 @@ Rules:
 - If a part is listed as not explained, say plainly that it can't be explained yet and why, with its fact.
 - Use every fact marked "must use".
 - You may add one short sentence on what was checked and ruled out, without numbers.
-- Start with how much the bill changed and its two totals.
+- Start with how much the bill changed and its two totals. If you're told the household thinks it went the other way, say so first, plainly and kindly.
 - Plain, friendly British English, addressed to "you". Three to six sentences in one paragraph. No headings, lists or jargon: don't say "degree days", "R²", "fit", "threshold", "part", or cause ids like C3.
 
 Reply with only this JSON: {"answer_markdown": "..."}

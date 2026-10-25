@@ -39,7 +39,7 @@ export async function answerQuestion(question: string, opts: PipelineOptions): P
   if (!done.length) return result;
   const trace = new Trace(result.trace, opts.onStep);
   const notes = opts.memory?.notes() ?? [];
-  const answers = await Promise.all(done.map((q) => composeAnswer(question, found.get(q.contract.contractId)!, { trace, chatFn: opts.chatFn, notes })));
+  const answers = await Promise.all(done.map((q) => composeAnswer(question, found.get(q.contract.contractId)!, { trace, chatFn: opts.chatFn, notes, expected: q.direction })));
   for (const a of answers) opts.memory?.saveFindings(a);
   const failed = result.requests.filter((q) => !found.has(q.contract.contractId)).map((q) => `${NAME[q.utility]} couldn't be investigated (${q.orchestrator.reason ?? q.orchestrator.status}).`);
 

@@ -45,10 +45,11 @@ export interface Investigation {
   measured: Map<CauseId, MeasuredCause>;
   recalled: Set<string>; // note ids recall_notes has returned; only these can be cited
   cache: Map<string, Promise<unknown>>;
+  reads: number; // queries actually sent to the data source (cache misses), for the trace
 }
 
-export function openInvestigation(fields: Omit<Investigation, "evidence" | "measured" | "recalled" | "cache">): Investigation {
-  return { ...fields, evidence: new EvidenceLog(), measured: new Map(), recalled: new Set(), cache: new Map() };
+export function openInvestigation(fields: Omit<Investigation, "evidence" | "measured" | "recalled" | "cache" | "reads">): Investigation {
+  return { ...fields, evidence: new EvidenceLog(), measured: new Map(), recalled: new Set(), cache: new Map(), reads: 0 };
 }
 
 const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
@@ -61,24 +62,28 @@ function once<T>(inv: Investigation, key: string, make: () => Promise<T>): Promi
 // All bills for a utility, logged once as evidence.
 export const allBills = (inv: Investigation, utility: Utility = inv.utility) =>
   once(inv, `bills:${utility}`, async () => {
+    inv.reads++;
     const read = await inv.data.bills({ utility });
     return { rows: read.rows, evidenceId: inv.evidence.add({ ...read.evidence, title: `${utility === "gas" ? "Gas" : utility === "water" ? "Water" : "Electricity"} bills` }) };
   });
 
 export const weatherDays = (inv: Investigation) =>
   once(inv, "weather", async () => {
+    inv.reads++;
     const read = await inv.data.weather("2024-10-01", inv.b.period_end);
     return { rows: read.rows as WeatherDay[], evidenceId: inv.evidence.add({ ...read.evidence, title: "Daily weather" }) };
   });
 
 export const meterReads = (inv: Investigation, utility: Utility = inv.utility) =>
   once(inv, `reads:${utility}`, async () => {
+    inv.reads++;
     const read = await inv.data.reads(utility, dayBefore(inv.a.period_start), inv.b.period_end);
     return { rows: read.rows, evidenceId: inv.evidence.add({ ...read.evidence, title: `${utility === "gas" ? "Gas" : utility === "water" ? "Water" : "Electricity"} meter readings` }) };
   });
 
 export const tariffRates = (inv: Investigation) =>
   once(inv, "tariffs", async () => {
+    inv.reads++;
     const read = await inv.data.tariffs(inv.utility, inv.a.period_start, inv.b.period_end);
     return { rows: read.rows, evidenceId: inv.evidence.add(read.evidence) };
   });

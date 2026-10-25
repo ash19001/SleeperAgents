@@ -12,7 +12,7 @@ import type { Scout, ScoutEvent } from "../scout/index.ts";
 import { sense } from "../scout/sense.ts";
 import type { ExecutionContract, UserRef } from "../scout/types.ts";
 import type { AskResult, Bill, ClarifyOption, TraceStep, TriageRequest, Utility } from "../lib/types.ts";
-import { periodFromText, resolvePair } from "./bills.ts";
+import { periodFromText, resolvePair, yearsIn } from "./bills.ts";
 import { runIntake, type Intake } from "./intake.ts";
 import { runOrchestrator, type OrchestratorResult } from "./orchestrators/index.ts";
 import { getScout, listen } from "./scout.ts";
@@ -53,8 +53,8 @@ function eventStep(e: ScoutEvent): TraceStep {
 }
 
 function direction(text: string): "up" | "down" | "change" {
-  if (/\b(up|rose|risen|higher|jump(ed)?|increase[ds]?|more expensive|so high)\b/i.test(text)) return "up";
-  if (/\b(down|fell|fallen|lower|drop(ped)?|decrease[ds]?|cheaper)\b/i.test(text)) return "down";
+  if (/\b(up|rose|risen|higher|jump(ed)?|increase[ds]?|(more )?expensive|so high)\b/i.test(text)) return "up";
+  if (/\b(down|fell|fallen|lower|drop(ped)?|decrease[ds]?|cheap(er)?)\b/i.test(text)) return "down";
   return "change";
 }
 
@@ -125,10 +125,23 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
     // 3 to 5. Per utility: bill pair, signed contract, orchestrator.
     const notes: string[] = [];
     let missing: { utility: Utility; period: string } | undefined;
+    const suggestions: ClarifyOption[] = [];
+    const namedYears = yearsIn(question);
     const outcomes = await Promise.all(
       requests.map(async (r): Promise<TriageRequest | AskResult | null> => {
-        const pair = resolvePair(opts.bills, r.utility, r.period);
+        const pair = resolvePair(opts.bills, r.utility, r.period, namedYears);
         if (!pair.ok) {
+          if (pair.reason === "other-year") {
+            const asked = pair.period ? monthName(pair.period) : pair.years.join(" or ");
+            const offer = pair.suggestion ? ` Did you mean ${pair.suggestion.label}?` : "";
+            notes.push(`There's no ${r.utility} bill for ${asked}: your ${r.utility} bills run from ${pair.first.label} to ${pair.latest.label}.${offer}`);
+            if (pair.suggestion) {
+              const year = pair.suggestion.label.match(/\d{4}/g)!.at(-1)!;
+              const again = question.replace(/\b(?:19|20)\d{2}\b/g, year);
+              if (!suggestions.some((s) => s.question === again)) suggestions.push({ label: pair.suggestion.label, utility: r.utility, question: again });
+            }
+            return null;
+          }
           if (pair.reason === "missing") {
             missing ??= { utility: pair.utility, period: pair.period };
             notes.push(`There's no ${r.utility} bill for ${monthName(pair.period)} yet: the latest is ${pair.latest.label}. Add it and I'll explain it.`);
@@ -187,7 +200,7 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
     const stopper = outcomes.find((o): o is AskResult => o !== null && "kind" in o);
     if (stopper) return stopper.kind === "clarify" || stopper.kind === "blocked" ? { ...stopper, trace: trace.steps } : stopper;
     const done = outcomes.filter((o): o is TriageRequest => o !== null);
-    if (!done.length) return { kind: "clarify", message: notes.join(" ") || "I couldn't find that bill.", options: [], missing, trace: trace.steps };
+    if (!done.length) return { kind: "clarify", message: notes.join(" ") || "I couldn't find that bill.", options: suggestions, missing, trace: trace.steps };
     return { kind: "triage", question, source, requests: done, redactions: hidden, notes, trace: trace.steps };
   } finally {
     stop();

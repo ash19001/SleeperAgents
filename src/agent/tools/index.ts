@@ -100,24 +100,37 @@ export const getSplit: Tool = {
   },
 };
 
-// test_cause is built per specialist, limited to the causes it owns.
+// Notes can explain a change in use, so they attach to these causes only.
+const NOTE_CAUSES = new Set<CauseId>(["C7", "C8", "C9"]);
+
+// test_cause is built per specialist, limited to the causes it owns. It takes
+// several causes in one call (one model turn instead of one each); a single
+// `cause` still works.
 export function testCauseTool(causes: CauseId[]): Tool {
+  const owned = z.enum(causes as [CauseId, ...CauseId[]]);
   return {
     name: "test_cause",
     description:
-      `Measure one possible cause against its threshold, in code. Returns whether it passes, the measured value, the threshold, its £ effect and the evidence. ` +
-      `Causes you can test: ${causes.join(", ")}. If a household note explains a change, pass its id (M#) in notes.`,
+      `Measure causes against their thresholds, in code. Pass every cause you want measured at once in "causes" (yours: ${causes.join(", ")}). ` +
+      `For each it returns whether it passes, the measured value, the threshold, its £ effect and the evidence. If a household note explains a change in use, pass its id (M#) in notes.`,
     needs: () => ["bills.read"],
-    input: z.object({
-      cause: z.enum(causes as [CauseId, ...CauseId[]]),
-      notes: z.array(z.string().regex(/^M\d+$/)).optional().describe("Household note ids (M#) that explain the change, if any"),
-    }),
+    input: z
+      .object({
+        causes: z.array(owned).min(1).optional().describe(`The causes to measure, e.g. ${JSON.stringify(causes)}`),
+        cause: owned.optional().describe("One cause; prefer causes"),
+        notes: z.array(z.string().regex(/^M\d+$/)).optional().describe("Household note ids (M#) that explain a change in use, if any"),
+      })
+      .refine((x) => (x.causes?.length ?? 0) > 0 || x.cause, { message: "Pass the causes to measure in causes." }),
     run: async (input, inv) => {
-      const { cause, notes = [] } = input as { cause: CauseId; notes?: string[] };
+      const { causes: list = [], cause, notes = [] } = input as { causes?: CauseId[]; cause?: CauseId; notes?: string[] };
       const unknown = notes.filter((id) => !inv.recalled.has(id));
       if (unknown.length) return { error: `${unknown.join(", ")} ${unknown.length === 1 ? "isn't a note" : "aren't notes"} you recalled with recall_notes. Pass only ids it returned.` };
-      const m = await testCause(inv, cause, notes);
-      return { cause, passes: m.passes, value: m.value, threshold: m.threshold, effect_gbp: m.effect_gbp, detail: m.detail, evidence: m.evidence };
+      const results = [];
+      for (const c of new Set([...list, ...(cause ? [cause] : [])])) {
+        const m = await testCause(inv, c, NOTE_CAUSES.has(c) ? notes : []);
+        results.push({ cause: c, passes: m.passes, value: m.value, threshold: m.threshold, effect_gbp: m.effect_gbp, detail: m.detail, evidence: m.evidence });
+      }
+      return { results };
     },
   };
 }

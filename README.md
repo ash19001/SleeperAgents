@@ -79,7 +79,7 @@ If Zetaris isn't set up, the agents read the same files locally and every eviden
 
 | Command | What it shows |
 | --- | --- |
-| `npm test` | 152 tests: bill model (every pair to the penny), Scout, the agent loop, specialists, orchestrator and critique loop, case file, H-MEM, facts, checker, confidence, adding bills, pipeline |
+| `npm test` | 160 tests: bill model (every pair to the penny), Scout, the agent loop, specialists, orchestrator and critique loop, case file, H-MEM, facts, checker, confidence, adding bills, pipeline |
 | `npm run eval:answers` | The whole pipeline against the answer key: 58 of 58 checks in both full runs ([eval/results.md](eval/results.md)) |
 | `npm run eval:triage` | 25 triage questions: 25 of 25 (25 Oct) |
 | `npm run zetaris:check` | Zetaris's views against the source files, and the same verdicts on all 11 scenarios |
@@ -92,7 +92,7 @@ Sample inputs: `eval/scenarios.json` (11 bill pairs with their answer key), `eva
 | Criterion | Where to look |
 | --- | --- |
 | Impact | A real question every household has; answers end in a concrete next step; [data/README.md](data/README.md) for the scenarios |
-| Technical | Code-measured causes and an exact £ split (`src/billmodel/`); 152 tests; 58 of 58 on the answer key; fallbacks for Zetaris, Nightshift and model failures |
+| Technical | Code-measured causes and an exact £ split (`src/billmodel/`); 160 tests; 58 of 58 on the answer key; fallbacks for Zetaris, Nightshift and model failures |
 | Innovation | Models never write a number (placeholders plus a code checker); signed per-utility contracts scope what each agent may read; code critiques the specialists and sends work back |
 | Demo | Replay mode (no keys); the live panel shows the agents at work; [docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md) |
 | Product and UX | Phone-first page; every number has an evidence chip; confidence and limitations in plain English; add a missing bill |

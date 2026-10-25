@@ -6,6 +6,7 @@ import type { Intake } from "./intake.ts";
 import { runOrchestrator } from "./orchestrators/index.ts";
 import { createScout } from "./scout.ts";
 import { Trace } from "./trace.ts";
+import { resolvePair, yearsIn } from "./bills.ts";
 import { triage } from "./triage.ts";
 
 const SECRET = "test-secret-not-for-use";
@@ -15,6 +16,35 @@ let n = 0;
 // A fresh user each time keeps the guard's rate limit out of the way.
 const user = () => ({ id: `test-${n++}`, role: "household" });
 const fixed = (intake: Intake | null) => vi.fn(async (_question: string, _bills: Bill[], _trace?: Trace) => intake);
+
+describe("a year the bills don't cover", () => {
+  it("is named, not swapped for another year", () => {
+    expect(yearsIn("why was my bill so cheap January 2021 (I mean my electricity bill)")).toEqual(["2021"]);
+    expect(resolvePair(bills, "electricity", "2021-01", ["2021"])).toMatchObject({ ok: false, reason: "other-year", years: ["2021"], first: { label: "Oct 2025" }, latest: { label: "Sep 2026" }, suggestion: { label: "Jan 2026" } });
+    // Even if the intake agent picked a year the bills have.
+    expect(resolvePair(bills, "electricity", "2026-01", ["2021"])).toMatchObject({ ok: false, reason: "other-year" });
+    expect(resolvePair(bills, "electricity", "2026-01", ["2026"])).toMatchObject({ ok: true, bill_b: { label: "Jan 2026" } });
+    // No year named: "April" means the April on record, as before.
+    expect(resolvePair(bills, "electricity", "2025-04", [])).toMatchObject({ ok: true, bill_b: { label: "Apr 2026" } });
+  });
+
+  it("gets a reply saying so, with the year the bills have as a button", async () => {
+    const question = "why was my bill so cheap January 2021 (I mean my electricity bill)";
+    const orchestrate = vi.fn();
+    const r = await triage(question, { bills, scout, intake: fixed({ requests: [{ utility: "electricity", period: "2021-01", direction: "down" }], unclear: null }), user: user(), orchestrate });
+    expect(r).toMatchObject({
+      kind: "clarify",
+      message: "There's no electricity bill for January 2021: your electricity bills run from Oct 2025 to Sep 2026. Did you mean Jan 2026?",
+      options: [{ label: "Jan 2026", utility: "electricity", question: "why was my bill so cheap January 2026 (I mean my electricity bill)" }],
+    });
+    expect(orchestrate).not.toHaveBeenCalled();
+  });
+
+  it("offers one button when both fuels lack that year", async () => {
+    const r = await triage("Why were my energy bills so high in January 2021?", { bills, scout, intake: fixed({ requests: [{ utility: "electricity", period: "2021-01", direction: "up" }, { utility: "gas", period: "2021-01", direction: "up" }], unclear: null }), user: user() });
+    expect(r.kind === "clarify" && r.options).toEqual([{ label: "Jan 2026", utility: "electricity", question: "Why were my energy bills so high in January 2026?" }]);
+  });
+});
 
 describe("triage", () => {
   it("splits 'energy' into gas and electricity, with a verified contract each", async () => {

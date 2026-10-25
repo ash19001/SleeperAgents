@@ -164,6 +164,17 @@ describe("composeAnswer", () => {
     expect(brief).toContain("Checked and ruled out or not enough data: Credit or one-off charge, Use changed beyond the weather, Switched fuel.");
   });
 
+  it("says so first when the question assumed the wrong direction", async () => {
+    const r = await result("gas-january"); // went up £32.18
+    const { fn, calls } = fake(["", ""]);
+    const a = await composeAnswer("Why was my gas bill so cheap in January?", r, { trace: new Trace(), chatFn: fn, expected: "down" });
+    expect(calls.find((c) => c.agent === "writer")!.messages[1].content).toContain("The household thinks this bill went down, but it went up. Say so plainly in your first sentence.");
+    expect(a.answer_markdown).toMatch(/^Your gas bill actually went up, not down: by \{F1\}, from \{F2\} to \{F3\}/);
+    expect(a.checked.by).toBe("template");
+    const same = await composeAnswer("Why did my gas bill go up?", r, { trace: new Trace(), chatFn: fake(["", ""]).fn, expected: "up" });
+    expect(same.answer_markdown).toMatch(/^Your gas bill went up by \{F1\}/);
+  });
+
   it("asks for one rewrite with the checker's problems", async () => {
     const r = await result("gas-january");
     const good = templateAnswer(r, buildFacts(r));

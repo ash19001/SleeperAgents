@@ -7,7 +7,10 @@ export type PairResult =
   | { ok: true; bill_a: Bill; bill_b: Bill }
   | { ok: false; reason: "no-bill" | "first-bill"; utility: Utility; period: string | null }
   // A month after the latest bill: the household can add the missing bill.
-  | { ok: false; reason: "missing"; utility: Utility; period: string; latest: Bill };
+  | { ok: false; reason: "missing"; utility: Utility; period: string; latest: Bill }
+  // The question names a year the bills don't cover: say so, and offer the
+  // same month in a year they do (when it has an earlier bill to compare with).
+  | { ok: false; reason: "other-year"; utility: Utility; period: string | null; years: string[]; first: Bill; latest: Bill; suggestion: Bill | null };
 
 const byStart = (a: Bill, b: Bill) => a.period_start.localeCompare(b.period_start);
 
@@ -21,8 +24,9 @@ function coversMonth(bill: Bill, period: string): boolean {
 // A month after the latest bill is missing: the household can add it. If no
 // bill covers an earlier month, the same month in another year is almost
 // always what was meant ("April" with bills from Oct 2025 to Sep 2026), so
-// try that, latest first.
-export function resolvePair(bills: Bill[], utility: Utility, period: string | null): PairResult {
+// try that, latest first, unless the question names the year: then say there
+// are no bills for it rather than quietly answering about another year.
+export function resolvePair(bills: Bill[], utility: Utility, period: string | null, namedYears: string[] = []): PairResult {
   const mine = bills.filter((b) => b.utility === utility).sort(byStart);
   let index = mine.length - 1;
   if (period) {
@@ -35,9 +39,17 @@ export function resolvePair(bills: Bill[], utility: Utility, period: string | nu
     }
   }
   if (index < 0) return { ok: false, reason: "no-bill", utility, period };
+  // A bill is in a named year if its label is ("Jan 2026", "Dec 2025–Jan 2026").
+  const labelYears: string[] = mine[index].label.match(/\d{4}/g) ?? [];
+  if (namedYears.length && !namedYears.some((y) => labelYears.includes(y))) {
+    return { ok: false, reason: "other-year", utility, period, years: namedYears, first: mine[0], latest: mine.at(-1)!, suggestion: index > 0 ? mine[index] : null };
+  }
   if (index === 0) return { ok: false, reason: "first-bill", utility, period };
   return { ok: true, bill_a: mine[index - 1], bill_b: mine[index] };
 }
+
+// The years a question names ("January 2021" → ["2021"]).
+export const yearsIn = (text: string) => [...new Set(text.match(/\b(?:19|20)\d{2}\b/g) ?? [])];
 
 const MONTH_RE = /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/i;
 const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];

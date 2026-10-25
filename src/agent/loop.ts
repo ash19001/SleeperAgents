@@ -40,6 +40,9 @@ export function parseReport<R>(text: string, schema: z.ZodType<R>): { ok: true; 
   }
 }
 
+// Tools that only read data; the rest (get_split, test_cause) work it out in code.
+const DATA_TOOLS = new Set(["get_bills", "get_meter_readings", "get_tariff", "get_weather"]);
+
 async function runTool(tool: Tool | undefined, name: string, rawArgs: string, inv: Investigation, agent: string): Promise<unknown> {
   const started = performance.now();
   const step = (label: string, route: string) =>
@@ -62,9 +65,13 @@ async function runTool(tool: Tool | undefined, name: string, rawArgs: string, in
     return { error: `Bad input for ${name}: ${(err as Error).message.slice(0, 200)}` };
   }
   try {
-    const result = await tool.run(args, inv);
+    // Its own read counter (everything else shared), so parallel tool calls
+    // each know whether they sent a query or used data read earlier.
+    const call = { ...inv, reads: 0 };
+    const result = await tool.run(args, call);
+    inv.reads += call.reads;
     const shown = rawArgs && rawArgs !== "{}" ? `${name}(${rawArgs})` : name;
-    step(shown, name === "recall_notes" ? "h-mem" : inv.data.name === "zetaris" ? "zetaris" : "local-sample");
+    step(shown, name === "recall_notes" ? "h-mem" : call.reads > 0 ? inv.data.name : DATA_TOOLS.has(name) ? "cache" : "code");
     return result;
   } catch (err) {
     step(`${name} failed`, "code");

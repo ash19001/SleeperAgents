@@ -31,11 +31,18 @@ function factsFor(table: FactsTable, cause: CauseId): AnswerFact[] {
   return table.facts.filter((f) => f.cause === cause || (f.key.startsWith("part:") && PART_CAUSES[f.key.slice(5) as PartId].includes(cause)));
 }
 
-function writerBrief(question: string, r: InvestigationResult, table: FactsTable, notes: Note[]): string {
+type Direction = "up" | "down" | "change";
+const actualDirection = (change: number) => (change > 0.005 ? "up" : change < -0.005 ? "down" : "the same");
+
+// The question assumed a direction ("so cheap") the bill didn't go.
+const wrongWay = (expected: Direction | undefined, change: number) => (expected === "up" || expected === "down") && actualDirection(change) !== expected;
+
+function writerBrief(question: string, r: InvestigationResult, table: FactsTable, notes: Note[], expected?: Direction): string {
   const ruledOut = r.findings.filter((f) => f.verdict !== "supported").map((f) => CAUSE_NAMES[f.cause]);
   return [
     `Question: "${question}"`,
     `${r.utility[0].toUpperCase()}${r.utility.slice(1)} bills: ${r.a.label}, then ${r.b.label}.`,
+    ...(wrongWay(expected, r.change) ? [`The household thinks this bill went ${expected}, but it went ${actualDirection(r.change)}. Say so plainly in your first sentence.`] : []),
     "",
     "Facts table:",
     ...table.facts.map((f) => `- {${f.id}} = ${f.value}: ${f.meaning} ${cite(f.evidence)}${f.required ? " (must use)" : ""}`),
@@ -52,7 +59,7 @@ function writerBrief(question: string, r: InvestigationResult, table: FactsTable
 }
 
 // The fallback: one sentence for the change, one per supported part.
-export function templateAnswer(r: InvestigationResult, table: FactsTable): string {
+export function templateAnswer(r: InvestigationResult, table: FactsTable, expected?: Direction): string {
   const fact = (k: string) => table.byKey.get(k)!;
   const supported = new Set(supportedCauses(r));
   const phrase: Record<PartId, () => string> = {
@@ -65,7 +72,11 @@ export function templateAnswer(r: InvestigationResult, table: FactsTable): strin
     oneoff: () => "A credit or one-off charge",
   };
   const change = fact("change");
-  const lines = [`Your ${r.utility} bill went ${r.change >= 0 ? "up" : "down"} by {${change.id}}, from {${fact("total_a").id}} to {${fact("total_b").id}} ${cite(change.evidence)}.`];
+  const lines = [
+    wrongWay(expected, r.change)
+      ? `Your ${r.utility} bill actually went ${actualDirection(r.change)}, not ${expected}: by {${change.id}}, from {${fact("total_a").id}} to {${fact("total_b").id}} ${cite(change.evidence)}.`
+      : `Your ${r.utility} bill went ${r.change >= 0 ? "up" : "down"} by {${change.id}}, from {${fact("total_a").id}} to {${fact("total_b").id}} ${cite(change.evidence)}.`,
+  ];
   const parts = table.facts.filter((f) => f.key.startsWith("part:"));
   for (const f of parts) {
     const p = f.key.slice(5) as PartId;
@@ -84,7 +95,8 @@ export interface Checked {
   problems: string[][]; // the checker's findings on each attempt that failed
 }
 
-export async function composeAnswer(question: string, r: InvestigationResult, ctx: { trace: Trace; chatFn?: ChatFn; notes?: Note[] }): Promise<Answer & { checked: Checked }> {
+// expected: the direction the question assumed ("why was it so cheap" is down).
+export async function composeAnswer(question: string, r: InvestigationResult, ctx: { trace: Trace; chatFn?: ChatFn; notes?: Note[]; expected?: Direction }): Promise<Answer & { checked: Checked }> {
   const chatFn = ctx.chatFn ?? chat;
   const table = buildFacts(r);
   const parts = components(r);
@@ -96,7 +108,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
 
   const messages: Message[] = [
     { role: "system", content: WRITER },
-    { role: "user", content: writerBrief(question, r, table, notes) },
+    { role: "user", content: writerBrief(question, r, table, notes, ctx.expected) },
   ];
   const problems: string[][] = [];
   const timeline: TimelineEntry[] = [];
@@ -139,7 +151,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     messages.push({ role: "user", content: `The checker found these problems:\n${found.map((p) => `- ${p}`).join("\n")}\nRewrite the answer to fix them. Reply with only the JSON object.` });
   }
   if (!text) {
-    text = templateAnswer(r, table);
+    text = templateAnswer(r, table, ctx.expected);
     const left = inspect(text);
     step(left.length ? `Used the template answer (checker: ${left.join(" ")})` : "Used the template answer: checked, passed", 0);
     timeline.push({ actor: CHECKER, text: "Used the plain version built from the measurements instead, and checked it." });

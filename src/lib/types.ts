@@ -147,6 +147,7 @@ export interface TriageRequest {
 export interface ClarifyOption {
   label: string;
   utility?: Utility;
+  question?: string; // ask exactly this when chosen (e.g. the same question for another year)
 }
 
 export type AskResult =

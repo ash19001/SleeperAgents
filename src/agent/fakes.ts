@@ -12,17 +12,17 @@ export function fakeReply(text: string, calls: [string, object][] = [], n = 0): 
 export function diligentSpecialist(opts: ChatOptions): { text: string; calls: [string, object][] } {
   const tool = opts.tools?.find((t) => t.function.name === "test_cause");
   const owned = ((tool?.function.parameters as { properties?: { cause?: { enum?: string[] } } })?.properties?.cause?.enum ?? []) as string[];
+  type Result = { cause: string; passes: boolean | null; evidence: string[] };
   const results = opts.messages
     .filter((m) => m.role === "tool")
-    .map((m) => {
+    .flatMap((m): Result[] => {
       try {
-        return JSON.parse(m.content ?? "") as { cause?: string; passes?: boolean | null; evidence?: string[] };
+        return (JSON.parse(m.content ?? "") as { results?: Result[] }).results ?? [];
       } catch {
-        return null;
+        return [];
       }
-    })
-    .filter((r): r is { cause: string; passes: boolean | null; evidence: string[] } => Boolean(r?.cause));
-  if (!results.length && owned.length) return { text: "", calls: owned.map((cause) => ["test_cause", { cause }]) };
+    });
+  if (!results.length && owned.length) return { text: "", calls: [["test_cause", { causes: owned }]] };
   const verdict = (p: boolean | null) => (p === true ? "supported" : p === false ? "ruled_out" : "inconclusive");
   const findings = results.map((r) => ({ cause: r.cause, verdict: verdict(r.passes), evidence: r.evidence ?? [], memory: [], reasoning: "Measured with test_cause." }));
   return { text: JSON.stringify({ findings, follow_up: null }), calls: [] };

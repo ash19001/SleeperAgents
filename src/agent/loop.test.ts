@@ -25,7 +25,7 @@ function investigation(capabilities = ["bills.read", "reads.read", "tariffs.read
     },
     "test-secret",
   );
-  return { utility: "gas", contract, data: localSource, a: bill("A-G-202512"), b: bill("A-G-202601"), evidence: new EvidenceLog(), trace: new Trace(), measured: new Map(), recalled: new Set(), cache: new Map() };
+  return { utility: "gas", contract, data: localSource, a: bill("A-G-202512"), b: bill("A-G-202601"), evidence: new EvidenceLog(), trace: new Trace(), measured: new Map(), recalled: new Set(), cache: new Map(), reads: 0 };
 }
 
 // A fake model that plays back scripted turns: tool calls, or a final text.
@@ -63,6 +63,15 @@ describe("runAgent", () => {
     expect(seen[1].messages.filter((m) => m.role === "tool")).toHaveLength(2);
     expect(inv.evidence.records.map((r) => r.id)).toEqual(["E1", "E2"]);
     expect(inv.trace.steps.filter((s) => s.step === "tool").map((s) => s.label)).toEqual(["get_bills", 'test_cause({"cause":"C3"})']);
+  });
+
+  it("labels each tool step by what it did: a query, data read earlier, or code", async () => {
+    const inv = investigation();
+    const { fn } = scripted([{ calls: [["get_bills", {}]] }, { calls: [["get_bills", {}], ["test_cause", { cause: "C3" }]] }, { calls: [["test_cause", { cause: "C3" }]] }, { text: '{"cause": "C3", "verdict": "supported"}' }]);
+    await runAgent({ ...spec, maxSteps: 5 }, "Test C3.", inv, fn);
+    // The second test_cause reuses the bills and weather read before, so it's code alone.
+    expect(inv.trace.steps.filter((s) => s.step === "tool").map((s) => [s.label?.split("(")[0], s.route])).toEqual([["get_bills", "local-sample"], ["get_bills", "cache"], ["test_cause", "local-sample"], ["test_cause", "code"]]);
+    expect(inv.reads).toBe(2); // bills, then weather
   });
 
   it("refuses a tool the contract doesn't allow, and tells the model", async () => {
@@ -110,6 +119,27 @@ describe("runAgent", () => {
 describe("tool specs", () => {
   it("describe test_cause's input as JSON Schema", () => {
     const s = toSpec(testCauseTool(["C1", "C2"]));
-    expect(s.function.parameters).toMatchObject({ type: "object", properties: { cause: { type: "string", enum: ["C1", "C2"] } }, required: ["cause"] });
+    expect(s.function.parameters).toMatchObject({ type: "object", properties: { causes: { type: "array", items: { type: "string", enum: ["C1", "C2"] } }, cause: { type: "string", enum: ["C1", "C2"] } } });
+  });
+});
+
+describe("test_cause", () => {
+  it("measures several causes in one call", async () => {
+    const inv = investigation();
+    const out = (await testCauseTool(["C1", "C3"]).run({ causes: ["C1", "C3"] }, inv)) as { results: { cause: string; passes: boolean }[] };
+    expect(out.results.map((r) => [r.cause, r.passes])).toEqual([["C1", true], ["C3", true]]);
+    expect([...inv.measured.keys()]).toEqual(["C1", "C3"]);
+  });
+
+  it("links household notes only to causes about use", async () => {
+    const inv = investigation();
+    inv.recalled.add("M1");
+    await testCauseTool(["C1", "C9"]).run({ causes: ["C1", "C9"], notes: ["M1"] }, inv);
+    expect(inv.measured.get("C1")?.memory).toEqual([]);
+    expect(inv.measured.get("C9")?.memory).toEqual(["M1"]);
+  });
+
+  it("refuses a call with no causes", () => {
+    expect(testCauseTool(["C1"]).input.safeParse({}).success).toBe(false);
   });
 });

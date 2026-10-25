@@ -69,11 +69,11 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
       }
       return (
         <>
-          <Message title="Which bill do you mean?" text={result.message} examples={opts.length ? undefined : examples} onAsk={onAsk} />
+          <Message title={opts.some((o) => o.question) ? "There's no bill for that date" : "Which bill do you mean?"} text={result.message} examples={opts.length ? undefined : examples} onAsk={onAsk} />
           {opts.length > 0 && (
             <div className="flex flex-wrap gap-2" aria-label="Choose a bill">
               {opts.map((o) => (
-                <button key={o.label} type="button" className={BUTTON_QUIET_SMALL} onClick={() => onAsk(`${lastQuestion} (I mean my ${o.utility ?? o.label.toLowerCase()} bill)`)}>
+                <button key={o.label} type="button" className={BUTTON_QUIET_SMALL} onClick={() => onAsk(o.question ?? `${lastQuestion} (I mean my ${o.utility ?? o.label.toLowerCase()} bill)`)}>
                   {o.label}
                 </button>
               ))}
@@ -238,7 +238,7 @@ function SplitBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) {
     </div>
   );
   return (
-    <Block id="h-split" title="Where the £ went" aside={legend}>
+    <Block id={`h-split-${a.utility}`} title="Where the £ went" aside={legend}>
       <div className="grid">
         {a.components.map((c) => {
           const zero = Math.round(c.gbp * 100) === 0;
@@ -315,7 +315,7 @@ function CauseItem({ cause, answer, onOpen, quiet }: { cause: Cause; answer: Ans
 function CausesBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) {
   const shown = [...a.causes.filter((c) => c.verdict === "supported"), ...a.causes.filter((c) => c.verdict === "inconclusive")];
   return (
-    <Block id="h-why" title="Why it changed">
+    <Block id={`h-why-${a.utility}`} title="Why it changed">
       {shown.length ? (
         <ul className="grid gap-3.5">{shown.map((c) => <CauseItem key={c.id} cause={c} answer={a} onOpen={onOpen} />)}</ul>
       ) : (
@@ -329,7 +329,7 @@ function RuledOutBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) 
   const ruled = a.causes.filter((c) => c.verdict === "ruled_out");
   if (!ruled.length) return null;
   return (
-    <Block id="h-ruled" title={`Ruled out (${ruled.length})`}>
+    <Block id={`h-ruled-${a.utility}`} title={`Ruled out (${ruled.length})`}>
       <ul className="grid gap-3">{ruled.map((c) => <CauseItem key={c.id} cause={c} answer={a} onOpen={onOpen} quiet />)}</ul>
     </Block>
   );
@@ -347,7 +347,7 @@ function SureBlock({ answer: a }: { answer: Answer }) {
   if (!s) return null;
   const [label, cls] = LEVEL[s.level];
   return (
-    <Block id="h-sure" title="How sure we are" aside={<span className={`rounded-full px-[9px] py-0.5 text-[0.82rem] font-bold ${cls}`}>{label}</span>}>
+    <Block id={`h-sure-${a.utility}`} title="How sure we are" aside={<span className={`rounded-full px-[9px] py-0.5 text-[0.82rem] font-bold ${cls}`}>{label}</span>}>
       <ul className="grid gap-1.5">
         {s.reasons.map((r) => (
           <li key={r} className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-2 text-ink-2">
@@ -378,7 +378,7 @@ function SureBlock({ answer: a }: { answer: Answer }) {
 function TimelineBlock({ answer: a }: { answer: Answer }) {
   if (!a.timeline?.length) return null;
   return (
-    <Block id="h-how" title="How the agents worked it out">
+    <Block id={`h-how-${a.utility}`} title="How the agents worked it out">
       <ol className="grid gap-3.5 border-l border-line pl-4">
         {a.timeline.map((t, i) => (
           <li key={i} className="relative grid gap-0.5">
@@ -402,7 +402,7 @@ function TimelineBlock({ answer: a }: { answer: Answer }) {
 function StepsBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) {
   if (!a.next_steps.length) return null;
   return (
-    <Block id="h-next" title="What to do next">
+    <Block id={`h-next-${a.utility}`} title="What to do next">
       <ul className="grid gap-2.5">
         {a.next_steps.map((s) => (
           <li key={s.action} className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-2.5">

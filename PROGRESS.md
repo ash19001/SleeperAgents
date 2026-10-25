@@ -90,3 +90,11 @@ Found: a Lightning database description may only contain letters, digits, `_ . -
 - Human in the loop: asking about a bill that isn't there yet ("October 2026") says it's missing and offers a form; the bill is checked (charges must add up to the total), saved in its supplier's format (`src/data/added.ts`, `.household/`), served with the feed, and Zetaris's cached copy is refreshed (`UNCACHE`/`CACHE TABLE`, about 1 s); then the question runs again. Live in the browser: 9 of 9 checks.
 - `data/README.md`; a server log line per agent step with model and receipt; `SAMPLE_MODE=true` maps to replay.
 Found: a follow-up that restates a verdict without re-testing must keep who measured it, or the case shows a false "untested" issue; the trace's total time added up parallel steps, so it now shows the elapsed time.
+
+**Fixes from reviewing a live run (26 Oct).** The user asked "why was my bill so cheap January 2021 (I mean my electricity bill)"; it took about 10 minutes and answered January 2026 without saying so. Fixed:
+1. A year the question names is respected: with no bill for it, the reply says so ("There's no electricity bill for January 2021: your electricity bills run from Oct 2025 to Sep 2026. Did you mean Jan 2026?") with a button for the nearest bill; without a named year, "April" still means the April on record. Live: 1.7 s.
+2. When the question assumes the wrong direction ("so cheap" but it rose £30.51), the writer is told and says so first; the template does too.
+3. (Cause of the 10 minutes: our demo recording ran at the same time on the same NVIDIA key; stopped.)
+4. `test_cause` takes several causes at once; each specialist now tests all its causes in one call. Notes attach only to the use-related causes (C7 to C9).
+5. Tool steps say what they did: `zetaris` when a query ran, `cache` for data read earlier in the investigation, `code` for calculations (each call counts its own queries, so parallel calls are labelled correctly).
+Live, January 2026 electricity: 138 s and 19 model calls (was about 10 minutes and 26), all with receipts, none failed, no follow-up round needed; the answer opens "Your electricity bill actually went up by £30.51 … rather than down as you thought". 160 tests pass.
