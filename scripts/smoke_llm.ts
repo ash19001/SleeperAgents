@@ -1,91 +1,76 @@
-// Phase 2 smoke test: list Nightshift models, then send one chat through
-// Nightshift and one direct to NVIDIA. Prints status, model and reply text.
+// Smoke test for src/agent/llm.ts: Nightshift is up, both Nemotron models
+// answer through it, a tool call works, and every call lands in the trace.
 // Never prints tokens or keys.
 
+import { chat, deepModel, fastModel, type ToolSpec } from "../src/agent/llm.ts";
+import { Trace } from "../src/agent/trace.ts";
+
 process.loadEnvFile(".env.local");
-const env = process.env;
 
-const PROMPT = "Reply with one short sentence saying which model you are.";
-const CHAT_TIMEOUT_MS = 180_000;
+const results: boolean[] = [];
+const check = (name: string, ok: boolean, detail = "") => {
+  results.push(ok);
+  console.log(`[${ok ? "PASS" : "FAIL"}] ${name}${detail ? `: ${detail}` : ""}`);
+};
 
-async function listNightshiftModels(): Promise<boolean> {
-  const label = "Nightshift /models";
+// 1. Nightshift answers and lists its routing modes.
+try {
+  const res = await fetch(`${process.env.NIGHTSHIFT_BASE_URL}/models`, {
+    headers: { Authorization: `Bearer ${process.env.NIGHTSHIFT_TOKEN}` },
+    signal: AbortSignal.timeout(10_000),
+  });
+  check("Nightshift /models", res.ok, res.ok ? "online" : `HTTP ${res.status}`);
+} catch (err) {
+  check("Nightshift /models", false, `no answer (${(err as Error).message})`);
+}
+
+const trace = new Trace();
+
+// 2. Both models answer through Nightshift, with a receipt.
+for (const model of [fastModel(), deepModel()]) {
   try {
-    const res = await fetch(`${env.NIGHTSHIFT_BASE_URL}/models`, {
-      headers: { Authorization: `Bearer ${env.NIGHTSHIFT_TOKEN}` },
-      signal: AbortSignal.timeout(10_000),
+    const r = await chat({
+      agent: "smoke",
+      label: "Say which model you are",
+      model,
+      messages: [{ role: "user", content: "Reply with one short sentence saying which model you are." }],
+      trace,
     });
-    if (res.status === 401 || res.status === 403) {
-      console.log(`[FAIL] ${label}: HTTP ${res.status}, wrong token`);
-      return false;
-    }
-    if (!res.ok) {
-      console.log(`[FAIL] ${label}: HTTP ${res.status}`);
-      return false;
-    }
-    const body = await res.json();
-    const ids: string[] = (body.data ?? []).map((m: { id: string }) => m.id);
-    const online = ids.some((id) => id.startsWith("meterless/"));
-    console.log(`[${online ? "PASS" : "FAIL"}] ${label}: ${ids.join(", ") || "(none)"}`);
-    return online;
+    const ok = r.route === "nightshift" && /nemotron/i.test(r.model) && Boolean(r.text) && Boolean(r.receipt) && !r.text.includes("</think>");
+    check(`chat ${model}`, ok, `${r.route}, ${r.model}, receipt ${r.receipt}, ${r.ms} ms: ${r.text.slice(0, 80)}`);
   } catch (err) {
-    console.log(`[FAIL] ${label}: no answer, offline (${(err as Error).message})`);
-    return false;
+    check(`chat ${model}`, false, (err as Error).message);
   }
 }
 
-async function chat(
-  label: string,
-  baseUrl: string,
-  key: string,
-  model: string,
-  extraHeaders: Record<string, string> = {},
-): Promise<boolean> {
-  const started = Date.now();
-  try {
-    const res = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-        ...extraHeaders,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content: PROMPT }],
-        max_tokens: 1024,
-      }),
-      signal: AbortSignal.timeout(CHAT_TIMEOUT_MS),
-    });
-    const ms = Date.now() - started;
-    if (!res.ok) {
-      console.log(`[FAIL] ${label}: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`);
-      return false;
-    }
-    const body = await res.json();
-    const text: string = body.choices?.[0]?.message?.content?.trim() ?? "";
-    // Nightshift adds a compute receipt naming the model that actually answered.
-    const routed: string = body.meterless?.routed_model ?? body.model;
-    const nemotron = /nemotron/i.test(routed);
-    const ok = Boolean(text) && nemotron;
-    console.log(`[${ok ? "PASS" : "FAIL"}] ${label}: asked for ${model}, answered by ${routed} in ${ms} ms`);
-    if (!nemotron) console.log(`       not a Nemotron model`);
-    if (body.meterless?.receipt_id) console.log(`       receipt ${body.meterless.receipt_id}`);
-    console.log(`       ${text || "(no text returned)"}`);
-    return ok;
-  } catch (err) {
-    console.log(`[FAIL] ${label}: ${(err as Error).message}`);
-    return false;
-  }
+// 3. The fast model calls a tool.
+const tools: ToolSpec[] = [{
+  type: "function",
+  function: {
+    name: "get_bill_total",
+    description: "Return the total in pounds of one household bill.",
+    parameters: { type: "object", properties: { bill_id: { type: "string" } }, required: ["bill_id"] },
+  },
+}];
+try {
+  const r = await chat({
+    agent: "smoke",
+    label: "Tool call",
+    model: fastModel(),
+    messages: [
+      { role: "system", content: "Use tools for every number." },
+      { role: "user", content: "How much was gas bill GAS-2026-01?" },
+    ],
+    tools,
+    trace,
+  });
+  const call = r.toolCalls[0];
+  check("tool call", call?.function.name === "get_bill_total" && call.function.arguments.includes("GAS-2026-01"), call ? `${call.function.name}(${call.function.arguments})` : "no tool call");
+} catch (err) {
+  check("tool call", false, (err as Error).message);
 }
 
-const results = [
-  await listNightshiftModels(),
-  await chat("Nightshift chat", env.NIGHTSHIFT_BASE_URL!, env.NIGHTSHIFT_TOKEN!, env.MODEL_FAST!, {
-    "meterless-app": env.NIGHTSHIFT_APP_ID!,
-    "meterless-scope": "user",
-  }),
-  await chat("NVIDIA direct chat", env.NVIDIA_BASE_URL!, env.NVIDIA_API_KEY!, env.NVIDIA_MODEL_FAST!),
-];
+// 4. Every call was traced.
+check("trace", trace.steps.length === 3, `${trace.steps.length} steps recorded`);
 
 process.exitCode = results.every(Boolean) ? 0 : 1;

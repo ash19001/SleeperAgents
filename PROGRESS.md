@@ -37,3 +37,6 @@ Checks: lint clean, `next build` passes, 17 API checks and 15 browser click-thro
 
 **Plan v2 (25 Oct).** `PLAN.md` rewritten: multi-agent design (guard, Lightning intake, Scout contracts, Ultra orchestrators, Lightning specialists, combiner, writer, code checker), Nemotron model per part, sponsor jobs, tech stack, rules 05 and 06, phases 3 to 11 with time boxes. Old phases 0 to 2 and the preview web app recorded under "Done so far".
 Found: Next.js defaults to port 3000, which Zetaris's UI uses; the app moves to port 5175 in Phase 3.
+
+**Phase 3, steps 3 and 5.** App on port 5175; zod 4.6.5 and Vitest 3.2.4 added (Vitest 5 doesn't list Node 25). `src/agent/llm.ts` and `trace.ts` built; `npm run smoke:llm` passes 5 of 5 through them (both models, receipts, a tool call, the trace).
+Found: Nightshift caches replies keyed on the user message alone (system message ignored) and drops tool calls from cached replies. `llm.ts` tags every call to skip the cache unless the caller opts in, retries an empty cached reply, and records `cached` in the trace.

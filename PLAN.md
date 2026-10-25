@@ -211,9 +211,9 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 - [ ] 1. **(you)** Run `openssl rand -hex 32` and add the result to `.env.local` as `SCOUT_SECRET=`. Scout signs contracts with it.
 - [ ] 2. **(you)** Check your NVIDIA usage allowance at build.nvidia.com. A question will take about 10 to 15 model calls.
-- [ ] 3. Run the app on port 5175 (`dev` and `start` scripts) so it never clashes with Zetaris's UI.
+- [x] 3. Run the app on port 5175 (`dev` and `start` scripts) so it never clashes with Zetaris's UI.
 - [ ] 4. Add `zod` and `vitest`; add the engine path aliases and `allowImportingTsExtensions`; prove one import from each engine compiles in `next build`.
-- [ ] 5. `src/agent/llm.ts`: `chat({agent, model, messages, tools})` through Nightshift with the app and scope headers; NVIDIA direct only on a network failure; 401, 403 and refusals are thrown, not swallowed; strips `</think>`; returns `{message, toolCalls, route, model, receipt, ms}` and adds a trace entry. Rewrite `scripts/smoke_llm.ts` to use it.
+- [x] 5. `src/agent/llm.ts`: `chat({agent, model, messages, tools})` through Nightshift with the app and scope headers; NVIDIA direct only on a network failure; 401, 403 and refusals are thrown, not swallowed; strips `</think>`; returns `{message, toolCalls, route, model, receipt, ms}` and adds a trace entry. Rewrite `scripts/smoke_llm.ts` to use it.
 - [ ] 6. `src/data/zetaris.ts`: `runSql(sql)` with bearer key, `X-Org-ID` and a fresh `X-Request-ID`; `evidence(id, title, sql)` refuses anything but `SELECT`, `WITH`, `SHOW` or `DESCRIBE`, converts number strings, and returns `{id, title, sql, rows, sha256, at}`.
 
 **Done when:** `npm run smoke:llm` passes through `llm.ts`, a `vitest` run passes, and `next build` compiles an import from each engine.

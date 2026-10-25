@@ -67,10 +67,13 @@ export interface NextStep {
 
 export interface TraceStep {
   step: string;
+  agent?: string;
   label?: string;
   route: string;
   model: string | null;
+  receipt?: string | null;
   ms: number;
+  detail?: Record<string, unknown>;
 }
 
 export interface Note {
