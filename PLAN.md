@@ -258,9 +258,9 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 6: Tools and specialists — Mon morning
 
-- [ ] 1. `src/billmodel/decompose.ts` and the weather fit (β, R²), as the `split_change` and `weather_fit` tools. Unit test: every bill pair sums to the penny.
-- [ ] 2. Specialist tools in `src/agent/tools/`: each is a typed function with a `zod` schema, runs read-only Zetaris queries through `evidence()`, checks its capability against the contract, and returns measurements plus evidence ids.
-- [ ] 3. Specialists (Lightning): Tariff, Billing, Weather, Usage (with H-MEM recall), Leak. Each takes one task from its orchestrator, calls its tools, and returns `{cause, verdict, effect_gbp, evidence, memory, reasoning, follow_up?}`, checked with `zod` and against the thresholds.
+- [x] 1. `src/billmodel/decompose.ts` and the weather fit (β, R²), as the `split_change` and `weather_fit` tools. Unit test: every bill pair sums to the penny.
+- [x] 2. Specialist tools in `src/agent/tools/`: each is a typed function with a `zod` schema, runs read-only Zetaris queries through `evidence()`, checks its capability against the contract, and returns measurements plus evidence ids. (Reads go through `DataSource`: local SAMPLE files until Zetaris is registered.)
+- [x] 3. Specialists (Lightning): Tariff, Billing, Weather, Usage (with H-MEM recall), Leak. Each takes one task from its orchestrator, calls its tools, and returns `{cause, verdict, effect_gbp, evidence, memory, reasoning, follow_up?}`, checked with `zod` and against the thresholds.
 
 **Done when:** each specialist, run alone on its planted event, returns the answer key's verdict with evidence.
 

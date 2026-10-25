@@ -89,6 +89,16 @@ describe("runAgent", () => {
     expect(run).toMatchObject({ report: { verdict: "ruled_out" }, steps: 2 });
   });
 
+  it("withholds tools on the last step and asks for the report", async () => {
+    const inv = investigation();
+    const { fn, seen } = scripted([{ calls: [["get_bills", {}]] }, { calls: [["get_bills", {}]] }, { text: '{"cause": "C3", "verdict": "supported"}' }]);
+    const run = await runAgent({ ...spec, maxSteps: 3 }, "Test.", inv, fn);
+    expect(run).toMatchObject({ report: { verdict: "supported" }, steps: 3 });
+    expect(seen[1].tools).toHaveLength(3);
+    expect(seen[2].tools).toBeUndefined();
+    expect(seen[2].messages.at(-1)?.content).toContain("No more tool calls");
+  });
+
   it("gives up after maxSteps", async () => {
     const inv = investigation();
     const { fn } = scripted(Array.from({ length: 5 }, () => ({ calls: [["get_bills", {}]] as [string, object][] })));

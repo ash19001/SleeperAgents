@@ -81,12 +81,16 @@ export async function runAgent<R>(spec: AgentSpec<R>, task: string, inv: Investi
   ];
   let toolCalls = 0;
   for (let step = 1; step <= maxSteps; step++) {
+    // The last step offers no tools, so the agent reports with what it has.
+    const last = step === maxSteps && maxSteps > 1;
+    if (last) messages.push({ role: "user", content: `No more tool calls. Reply now with only the JSON object:\n${spec.reportShape}` });
     let res: ChatResult;
     try {
-      res = await chatFn({ agent: spec.name, label: step === 1 ? "Start the task" : `Step ${step}`, model: spec.model, messages, tools: spec.tools.map(toSpec), thinking: spec.thinking, trace: inv.trace });
+      res = await chatFn({ agent: spec.name, label: step === 1 ? "Start the task" : last ? "Report" : `Step ${step}`, model: spec.model, messages, tools: last ? undefined : spec.tools.map(toSpec), thinking: spec.thinking, trace: inv.trace });
     } catch (err) {
       return { report: null, steps: step, toolCalls, error: (err as Error).message };
     }
+    if (last && res.toolCalls.length) break;
     if (res.toolCalls.length) {
       messages.push({ role: "assistant", content: res.message.content ?? "", tool_calls: res.toolCalls });
       const results = await Promise.all(res.toolCalls.map((c) => runTool(byName.get(c.function.name), c.function.name, c.function.arguments, inv, spec.name)));
