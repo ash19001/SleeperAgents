@@ -119,7 +119,7 @@ export interface TriageRequest {
     expiresAt: string;
     signature: string;
   };
-  orchestrator: { status: "placeholder" | "refused"; reason?: string; model?: string; ms: number };
+  orchestrator: { status: "placeholder" | "refused" | "done" | "error"; reason?: string; model?: string; ms: number };
 }
 
 export interface ClarifyOption {

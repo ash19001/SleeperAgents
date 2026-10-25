@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=22.18"
   },
+  "imports": {
+    "#meterless/*": "./vendor/meterless/*/reference/src/index.ts"
+  },
   "scripts": {
     "dev": "next dev -p 5175",
     "build": "next build",
@@ -15,7 +18,9 @@
     "smoke:llm": "node scripts/smoke_llm.ts",
     "eval:triage": "node scripts/eval_triage.ts",
     "data:preview": "node scripts/make_preview_SAMPLE.ts",
-    "data:area": "node scripts/lookup_area.ts"
+    "data:area": "node scripts/lookup_area.ts",
+    "try:specialists": "node scripts/try_specialists.ts",
+    "try:orchestrator": "node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts"
   },
   "dependencies": {
     "lucide-react": "1.55.0",

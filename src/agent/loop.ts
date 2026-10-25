@@ -28,7 +28,7 @@ export interface AgentRun<R> {
 
 export type ChatFn = (opts: ChatOptions) => Promise<ChatResult>;
 
-function parseReport<R>(text: string, schema: z.ZodType<R>): { ok: true; value: R } | { ok: false; error: string } {
+export function parseReport<R>(text: string, schema: z.ZodType<R>): { ok: true; value: R } | { ok: false; error: string } {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start < 0 || end < start) return { ok: false, error: "no JSON object in the reply" };

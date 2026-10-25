@@ -209,10 +209,10 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 3: Foundations — Sun afternoon
 
-- [ ] 1. **(you)** Run `openssl rand -hex 32` and add the result to `.env.local` as `SCOUT_SECRET=`. Scout signs contracts with it.
+- [x] 1. **(you)** Run `openssl rand -hex 32` and add the result to `.env.local` as `SCOUT_SECRET=`. Scout signs contracts with it.
 - [ ] 2. **(you)** Check your NVIDIA usage allowance at build.nvidia.com. A question will take about 10 to 15 model calls.
 - [x] 3. Run the app on port 5175 (`dev` and `start` scripts) so it never clashes with Zetaris's UI.
-- [ ] 4. Add `zod` and `vitest`; add the engine path aliases and `allowImportingTsExtensions`; prove one import from each engine compiles in `next build`.
+- [ ] 4. Add `zod` and `vitest`; add the engine path aliases and `allowImportingTsExtensions`; prove one import from each engine compiles in `next build`. (Aliases are `#meterless/*` in package.json `imports`; World Model and Markovian are in the build; H-MEM comes with Phase 8.)
 - [x] 5. `src/agent/llm.ts`: `chat({agent, model, messages, tools})` through Nightshift with the app and scope headers; NVIDIA direct only on a network failure; 401, 403 and refusals are thrown, not swallowed; strips `</think>`; returns `{message, toolCalls, route, model, receipt, ms}` and adds a trace entry. Rewrite `scripts/smoke_llm.ts` to use it.
 - [ ] 6. `src/data/zetaris.ts`: `runSql(sql)` with bearer key, `X-Org-ID` and a fresh `X-Request-ID`; `evidence(id, title, sql)` refuses anything but `SELECT`, `WITH`, `SHOW` or `DESCRIBE`, converts number strings, and returns `{id, title, sql, rows, sha256, at}`.
 
@@ -266,7 +266,7 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 7: Orchestrators, combiner, writer, checker — Mon late morning
 
-- [ ] 1. Orchestrator (Ultra), one per utility: verify the contract, run `split_change`, send each part to specialists in parallel, review their reports in the case file, ask follow-ups (at most 2 rounds), stop when every £ part is explained or ruled out.
+- [x] 1. Orchestrator (Ultra), one per utility: verify the contract, run `split_change`, send each part to specialists in parallel, review their reports in the case file, ask follow-ups (at most 2 rounds), stop when every £ part is explained or ruled out.
 - [ ] 2. Combiner (Ultra) for two or more utilities, including C9.
 - [ ] 3. Writer (Ultra) and `facts.ts`: placeholders and citations only; next steps from a fixed map (C4: send a meter reading; C1: compare fixed deals; C8: check the meter with every tap off; C6: nothing to fix).
 - [ ] 4. Checker (`verify.ts`): the rules in the answer contract, one rewrite, then the template.
@@ -277,8 +277,8 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 ## Phase 8: Memory and the case file — Mon midday
 
 - [ ] 1. `src/memory/hmem.ts` over H-MEM's named services: `MemoryStoreService` (notes and findings), `MemoryRetrievalService` (recall for the Usage specialist), `TrustLedgerService` (audit), feedback from the thumbs.
-- [ ] 2. `src/memory/casefile.ts` over World Model: one case per question; bills, meters and causes as entities with stable IDs; specialists write findings; orchestrators read `buildPromptContext`.
-- [ ] 3. Markovian for the orchestrator's review rounds (first to drop if late).
+- [x] 2. `src/memory/casefile.ts` over World Model: one case per question; bills, meters and causes as entities with stable IDs; specialists write findings; orchestrators read `buildPromptContext` (our `promptContext()`; the reference implementation has no such method).
+- [x] 3. Markovian for the orchestrator's review rounds (first to drop if late).
 - [ ] 4. After a checked answer, store each supported cause as a finding with its evidence ids.
 
 **Done when:** asking about April electricity before and after adding the heat pump note gives two different answers, the second citing `[M1]`, and the H-MEM audit shows the note created and recalled.
