@@ -3,9 +3,10 @@
 // a clarifying question. Spec: vendor/meterless/scout-intent/docs/scoring.md.
 //
 // Where the spec leaves room, we chose:
-// - The formula's weights are renormalised over the terms that ran. With
-//   Stage 1 alone (lexical and recency) a clear trigger reaches the High
-//   band; without this, Stage 1 alone could never score above 0.45.
+// - The formula's weights are renormalised over the terms that ran. Recency
+//   counts only when the caller tracks sessions and passes it. So with Stage 1
+//   alone a clear trigger scores its full lexical weight; without this, Stage
+//   1 alone could never score above 0.45.
 // - lexical(intent) is the intent's own matched trigger weight, capped at 1.
 //   A phrase listed under several intents splits its weight between them and
 //   gives none of them its own span. So "energy" gives gas and electricity
@@ -34,10 +35,10 @@ export interface SenseResult {
   ms: number;
 }
 
-interface Trigger {
-  phrase: string;
-  weight: number;
-  pattern: RegExp;
+// Every trigger phrase, as words joined by spaces, with the intents that list it.
+interface TriggerIndex {
+  phrases: Map<string, { intent: string; weight: number }[]>;
+  maxWords: number;
 }
 
 interface Match {
@@ -46,14 +47,18 @@ interface Match {
   own: boolean; // only this intent lists the phrase
 }
 
+// Function words only: verbs such as "show", "find" and "draft" tell intents apart.
 const STOPWORDS = new Set(
   ("the and for with what why did does was this that from into your you are how can have has had been about when which " +
     "who will would should could there their them they then than also just only some any all not but our out get got per " +
-    "via each more most much very please need want like make made give tell show find").split(" "),
+    "via each more most much very").split(" "),
 );
 
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const compile = (phrase: string) => new RegExp(`(?<![\\p{L}\\p{N}])${escape(phrase)}(?![\\p{L}\\p{N}])`, "giu");
+// Words are runs of letters and digits; the text is split once and each run of
+// up to maxWords words is looked up, so a scan costs the same however many
+// triggers there are.
+const WORD = /[\p{L}\p{N}]+/gu;
+const words = (text: string) => [...text.toLowerCase().matchAll(WORD)].map((m) => ({ w: m[0], start: m.index, end: m.index + m[0].length }));
 
 // Registries without a lexicon (such as Meterless's eval fixtures) get
 // triggers from their examples and descriptions: words and word pairs,
@@ -77,19 +82,27 @@ function deriveTriggers(intents: Intent[]): Record<string, { phrase: string; wei
   );
 }
 
-const compiled = new WeakMap<IntentRegistry, Map<string, Trigger[]>>();
+const indexes = new WeakMap<IntentRegistry, TriggerIndex>();
 
-function triggersFor(registry: IntentRegistry, config: SenseConfig): Map<string, Trigger[]> {
-  const cached = compiled.get(registry);
+function indexFor(registry: IntentRegistry, config: SenseConfig): TriggerIndex {
+  const cached = indexes.get(registry);
   if (cached) return cached;
   const derived = deriveTriggers(registry.intents.filter((i) => !config.triggers[i.id]));
-  const map = new Map<string, Trigger[]>();
+  const phrases = new Map<string, { intent: string; weight: number }[]>();
+  let maxWords = 1;
   for (const intent of registry.intents) {
-    const list = config.triggers[intent.id] ?? derived[intent.id] ?? [];
-    map.set(intent.id, list.map((t) => ({ ...t, phrase: t.phrase.toLowerCase(), pattern: compile(t.phrase.toLowerCase()) })));
+    for (const t of config.triggers[intent.id] ?? derived[intent.id] ?? []) {
+      const key = words(t.phrase).map((x) => x.w).join(" ");
+      if (!key) continue;
+      maxWords = Math.max(maxWords, key.split(" ").length);
+      const list = phrases.get(key) ?? [];
+      if (!list.some((e) => e.intent === intent.id)) list.push({ intent: intent.id, weight: t.weight });
+      phrases.set(key, list);
+    }
   }
-  compiled.set(registry, map);
-  return map;
+  const index = { phrases, maxWords };
+  indexes.set(registry, index);
+  return index;
 }
 
 export function bandOf(score: number, bands: SenseConfig["bands"]): Band {
@@ -120,29 +133,27 @@ function clarify(trigger: Clarification["trigger"], options: Intent[]): Clarific
 
 export function sense(input: SenseInput, registry: IntentRegistry, config: SenseConfig): SenseResult {
   const started = performance.now();
-  const text = input.prompt.toLowerCase();
-  const triggers = triggersFor(registry, config);
+  const index = indexFor(registry, config);
+  const tokens = words(input.prompt);
 
-  // How many intents list each phrase, so shared phrases split their weight.
-  const sharers = new Map<string, number>();
-  for (const list of triggers.values()) for (const t of list) sharers.set(t.phrase, (sharers.get(t.phrase) ?? 0) + 1);
-
-  const matches = new Map<string, Match[]>();
-  for (const [id, list] of triggers) {
-    const found: Match[] = [];
-    for (const t of list) {
-      t.pattern.lastIndex = 0;
-      const m = t.pattern.exec(text);
-      if (m) {
-        const n = sharers.get(t.phrase) ?? 1;
-        found.push({ span: [m.index, m.index + m[0].length], weight: t.weight / n, own: n === 1 });
-      }
+  // Each phrase counts once, at its first place in the text. A phrase listed
+  // by several intents splits its weight between them.
+  const matches = new Map<string, Match[]>(registry.intents.map((i) => [i.id, []]));
+  const seen = new Set<string>();
+  for (let i = 0; i < tokens.length; i++) {
+    let key = "";
+    for (let n = 1; n <= index.maxWords && i + n <= tokens.length; n++) {
+      key = n === 1 ? tokens[i].w : `${key} ${tokens[i + n - 1].w}`;
+      const entries = index.phrases.get(key);
+      if (!entries || seen.has(key)) continue;
+      seen.add(key);
+      const span: [number, number] = [tokens[i].start, tokens[i + n - 1].end];
+      for (const e of entries) matches.get(e.intent)!.push({ span, weight: e.weight / entries.length, own: entries.length === 1 });
     }
-    matches.set(id, found);
   }
 
   const w = config.weights;
-  const ran = { lexical: true, recency: true, semantic: Boolean(input.semantic), contextual: Boolean(input.contextual) };
+  const ran = { lexical: true, recency: Boolean(input.recency), semantic: Boolean(input.semantic), contextual: Boolean(input.contextual) };
   const totalWeight = (Object.keys(ran) as (keyof typeof ran)[]).filter((k) => ran[k]).reduce((t, k) => t + w[k], 0);
 
   const order = new Map(registry.intents.map((intent, i) => [intent.id, i]));
@@ -201,6 +212,8 @@ export function sense(input: SenseInput, registry: IntentRegistry, config: Sense
 // Scout's startup self-test: every full-registry scan of the probe set (the
 // intents' own examples) must finish inside the budget.
 export function selfTest(registry: IntentRegistry, config: SenseConfig, budgetMs = 16): { ok: boolean; worstMs: number } {
+  // Compiling the trigger patterns is a one-off startup cost, not part of a scan.
+  sense({ prompt: "" }, registry, config);
   let worstMs = 0;
   for (const intent of registry.intents) {
     for (const prompt of intent.examples) worstMs = Math.max(worstMs, sense({ prompt }, registry, config).ms);

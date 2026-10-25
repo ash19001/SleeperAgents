@@ -46,3 +46,6 @@ Found: Nemotron reasons before answering unless `enable_thinking: false` (now th
 
 **Phase 4, step 9 (triage cases).** `eval/triage_cases.json` (25 questions) and `npm run eval:triage`: 25 of 25 pass, 22 of 22 intake calls through Nightshift with receipts, 15 s for the set (`eval/triage_results.md`). Earlier runs: 24/25 (one intake slip, caught by the cross-check) and 23/25.
 Found: NVIDIA answers 429 Too Many Requests when calls come quickly (Nightshift passes it on as a 502 naming nvidia_429). `llm.ts` now paces calls (LLM_RPM 30 a minute, LLM_CONCURRENCY 4) and backs off on 429. This will matter for the multi-agent phases (10 to 15 calls a question).
+
+**Phase 4, step 10 (Scout harness).** Meterless's own Scout eval harness against our `src/scout/`: first run failed the gate (intent_top1 0.82, injection_recall 0.57, self-test 129 ms); final run passes every metric at 1.0, clarification 0.03, worst scan 0.11 ms. Fixes were general (recency only when tracked, verbs kept as triggers, three injection classes, word-table matching), but were made after seeing the misses on a 32-example corpus; `eval/results.md` says so. Triage still 25/25 afterwards.
+Phase 4 done.

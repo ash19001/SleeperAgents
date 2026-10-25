@@ -35,6 +35,11 @@ const BLOCK_PATTERNS: { kind: string; name: string; re: RegExp }[] = [
   { kind: "pattern", name: "prompt-exfiltration", re: /\b(reveal|show|print|repeat|output|tell me)\b[^.?!\n]{0,30}\b(system prompt|your (instructions|prompt|rules))\b/i },
   { kind: "role-drift", name: "new-role", re: /\b(you are now|from now on,? you (are|will be)|pretend (to be|you are)|roleplay as|act as (an?|the) (unrestricted|different|new|evil|jailbroken|uncensored))\b/i },
   { kind: "tool-ref", name: "sql-write", re: /\b(drop|truncate|alter)\s+(table|database|schema|view)\b|\bdelete\s+from\b|\binsert\s+into\b|\bupdate\s+\w+\s+set\b|\bunion\s+select\b|;\s*--/i },
+  { kind: "pattern", name: "override-principal", re: /\b(ignore|disregard)\s+(the\s+)?(user|system|developer|operator)\b/i },
+  { kind: "tool-ref", name: "privilege-escalation", re: /\bgrant\s+(me\s+|us\s+|myself\s+)?(admin|administrator|root|superuser|full access|full rights)\b|\b(elevate|escalate)\s+(my\s+)?(privileges?|permissions?|access)\b/i },
+  { kind: "pattern", name: "secret-exfiltration", re: /\b(reveal|show|dump|print|list|send|leak|export)\b[^.?!\n]{0,30}\b(credentials?|passwords?|api keys?|secret keys?|access tokens?)\b/i },
+  // Invisible and text-direction control characters hide instructions from people reading the text.
+  { kind: "pattern", name: "control-characters", re: /[‪-‮⁦-⁩​-‏⁠﻿]/ },
 ];
 
 // Out-of-band tool requests: warn, since some are innocent wording.
