@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* Layout: a two-pane bill desk. Bills, question and notes on the left; the
+   answer sheet on the right. One column below the lg breakpoint. */
+:root {
+  --bg: #eef3f1;
+  --surface: #ffffff;
+  --surface-2: #f4f7f6;
+  --ink: #0f1715;
+  --ink-2: #43504c;
+  --muted: #687571;
+  --line: #d8e1de;
+  --grid: #e6ecea;
+  --axis: #b9c5c1;
+  --accent: #0b6a63;
+  --accent-hover: #08564f;
+  --accent-ink: #ffffff;
+  --accent-wash: #d9eeea;
+  --bar: #93c8c1;
+  --bar-hover: #6fb4ab;
+  --bar-sel: #0b6a63;
+  --up: #e34948;
+  --down: #2a78d6;
+  --up-ink: #a92a28;
+  --down-ink: #1b5ba8;
+  --up-wash: #fbe4e3;
+  --down-wash: #e1ecfa;
+  --sample-bg: #f8ecc4;
+  --sample-ink: #4a3800;
+  --code-bg: #f1f5f4;
+  --tip-bg: #0f1715;
+  --tip-ink: #ffffff;
+  --backdrop: rgb(8 12 11 / 0.45);
+  --shadow: 0 1px 2px rgb(15 23 21 / 0.05), 0 8px 24px rgb(15 23 21 / 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1110;
+    --surface: #141a19;
+    --surface-2: #1b2221;
+    --ink: #e8eeec;
+    --ink-2: #b3bfbb;
+    --muted: #8a9793;
+    --line: #2a3432;
+    --grid: #202927;
+    --axis: #3d4a47;
+    --accent: #46c0b2;
+    --accent-hover: #6ad3c6;
+    --accent-ink: #04211e;
+    --accent-wash: #173733;
+    --bar: #2f6e66;
+    --bar-hover: #3f8a80;
+    --bar-sel: #5fd3c5;
+    --up: #e66767;
+    --down: #3987e5;
+    --up-ink: #f29a9a;
+    --down-ink: #8cbaf0;
+    --up-wash: #3a2020;
+    --down-wash: #172a42;
+    --sample-bg: #2f2710;
+    --sample-ink: #f3dc9c;
+    --code-bg: #0f1514;
+    --tip-bg: #e8eeec;
+    --tip-ink: #0c1110;
+    --backdrop: rgb(0 0 0 / 0.6);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c1110;
+  --surface: #141a19;
+  --surface-2: #1b2221;
+  --ink: #e8eeec;
+  --ink-2: #b3bfbb;
+  --muted: #8a9793;
+  --line: #2a3432;
+  --grid: #202927;
+  --axis: #3d4a47;
+  --accent: #46c0b2;
+  --accent-hover: #6ad3c6;
+  --accent-ink: #04211e;
+  --accent-wash: #173733;
+  --bar: #2f6e66;
+  --bar-hover: #3f8a80;
+  --bar-sel: #5fd3c5;
+  --up: #e66767;
+  --down: #3987e5;
+  --up-ink: #f29a9a;
+  --down-ink: #8cbaf0;
+  --up-wash: #3a2020;
+  --down-wash: #172a42;
+  --sample-bg: #2f2710;
+  --sample-ink: #f3dc9c;
+  --code-bg: #0f1514;
+  --tip-bg: #e8eeec;
+  --tip-ink: #0c1110;
+  --backdrop: rgb(0 0 0 / 0.6);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-grid: var(--grid);
+  --color-axis: var(--axis);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-wash: var(--accent-wash);
+  --color-bar: var(--bar);
+  --color-bar-hover: var(--bar-hover);
+  --color-bar-sel: var(--bar-sel);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-up-ink: var(--up-ink);
+  --color-down-ink: var(--down-ink);
+  --color-up-wash: var(--up-wash);
+  --color-down-wash: var(--down-wash);
+  --color-sample: var(--sample-bg);
+  --color-sample-ink: var(--sample-ink);
+  --color-code: var(--code-bg);
+  --color-tip: var(--tip-bg);
+  --color-tip-ink: var(--tip-ink);
+  --shadow-sheet: var(--shadow);
+  --font-sans: var(--font-source-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
+}
+
+/* Archivo at a slightly condensed width, for headings and big figures. */
+@utility headline {
+  font-family: var(--font-display);
+  font-stretch: 87%;
+}
+
+/* Side gutter that also clears a phone's side system bar. */
+@utility gutter {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Small mono caps label above a section. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@layer base {
+  :root {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* The evidence drawer: a side sheet on wide screens, a bottom sheet on phones. */
+dialog.drawer {
+  border: 0;
+  padding: 0;
+  margin: auto 0 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 88vh;
+  border-radius: 16px 16px 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+dialog.drawer::backdrop {
+  background: var(--backdrop);
+}
+@media (min-width: 768px) {
+  dialog.drawer {
+    margin: 0 0 0 auto;
+    width: min(580px, 100%);
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

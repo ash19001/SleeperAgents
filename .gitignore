@@ -4,3 +4,8 @@ node_modules/
 vendor/**/node_modules
 tmp/
 .claude/settings.local.json
+/.next/
+/out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
