@@ -8,13 +8,13 @@
    "to": "2025-11-30",
    "readingStatus": "Actual",
    "previousReadingLitres": 412300,
-   "currentReadingLitres": 430819,
-   "usedLitres": 18519,
-   "waterChargePounds": 37.78,
-   "sewerageChargePounds": 39.08,
+   "currentReadingLitres": 430955,
+   "usedLitres": 18655,
+   "waterChargePounds": 38.06,
+   "sewerageChargePounds": 39.36,
    "waterStandingPounds": 7.35,
    "sewerageStandingPounds": 9.69,
-   "totalPounds": 93.9
+   "totalPounds": 94.46
   },
   {
    "billNumber": "WC-202512",
@@ -22,8 +22,8 @@
    "from": "2025-12-01",
    "to": "2026-01-31",
    "readingStatus": "Actual",
-   "previousReadingLitres": 430819,
-   "currentReadingLitres": 449391,
+   "previousReadingLitres": 430955,
+   "currentReadingLitres": 449527,
    "usedLitres": 18572,
    "waterChargePounds": 37.89,
    "sewerageChargePounds": 39.19,
@@ -37,14 +37,14 @@
    "from": "2026-02-01",
    "to": "2026-03-31",
    "readingStatus": "Actual",
-   "previousReadingLitres": 449391,
-   "currentReadingLitres": 467106,
-   "usedLitres": 17715,
-   "waterChargePounds": 36.14,
-   "sewerageChargePounds": 37.38,
+   "previousReadingLitres": 449527,
+   "currentReadingLitres": 467304,
+   "usedLitres": 17777,
+   "waterChargePounds": 36.27,
+   "sewerageChargePounds": 37.51,
    "waterStandingPounds": 7.11,
    "sewerageStandingPounds": 9.38,
-   "totalPounds": 90.01
+   "totalPounds": 90.27
   },
   {
    "billNumber": "WC-202604",
@@ -52,14 +52,14 @@
    "from": "2026-04-01",
    "to": "2026-05-31",
    "readingStatus": "Actual",
-   "previousReadingLitres": 467106,
-   "currentReadingLitres": 487605,
-   "usedLitres": 20499,
-   "waterChargePounds": 45.3,
-   "sewerageChargePounds": 46.53,
+   "previousReadingLitres": 467304,
+   "currentReadingLitres": 489349,
+   "usedLitres": 22045,
+   "waterChargePounds": 48.72,
+   "sewerageChargePounds": 50.04,
    "waterStandingPounds": 7.94,
    "sewerageStandingPounds": 10.45,
-   "totalPounds": 110.22
+   "totalPounds": 117.15
   },
   {
    "billNumber": "WC-202606",
@@ -67,14 +67,14 @@
    "from": "2026-06-01",
    "to": "2026-07-31",
    "readingStatus": "Actual",
-   "previousReadingLitres": 487605,
-   "currentReadingLitres": 519143,
-   "usedLitres": 31538,
-   "waterChargePounds": 69.7,
-   "sewerageChargePounds": 71.59,
+   "previousReadingLitres": 489349,
+   "currentReadingLitres": 525072,
+   "usedLitres": 35723,
+   "waterChargePounds": 78.95,
+   "sewerageChargePounds": 81.09,
    "waterStandingPounds": 7.94,
    "sewerageStandingPounds": 10.45,
-   "totalPounds": 159.68
+   "totalPounds": 178.43
   },
   {
    "billNumber": "WC-202608",
@@ -82,14 +82,14 @@
    "from": "2026-08-01",
    "to": "2026-09-30",
    "readingStatus": "Actual",
-   "previousReadingLitres": 519143,
-   "currentReadingLitres": 550883,
-   "usedLitres": 31740,
-   "waterChargePounds": 70.15,
-   "sewerageChargePounds": 72.05,
+   "previousReadingLitres": 525072,
+   "currentReadingLitres": 559713,
+   "usedLitres": 34641,
+   "waterChargePounds": 76.56,
+   "sewerageChargePounds": 78.64,
    "waterStandingPounds": 7.94,
    "sewerageStandingPounds": 10.45,
-   "totalPounds": 160.59
+   "totalPounds": 173.59
   }
  ]
 }

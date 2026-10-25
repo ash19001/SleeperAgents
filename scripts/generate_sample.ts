@@ -74,7 +74,7 @@ for (const day of ALL_DAYS) {
   // Heat pump: the gas heat (90% boiler efficiency) delivered at a COP of 3, plus hot water.
   use.electricity.set(day, (7.5 + 0.15 * w.hdd + (pump ? 1.2 * w.hdd + 2.4 : 0)) * noise(0.06));
   // Water: base use, garden watering on warm dry days, and a hidden leak from mid-June.
-  const watering = 0.012 * Math.max(0, w.tmax - 15) + (w.rain < 0.5 && w.tmax > 18 ? 0.03 : 0);
+  const watering = 0.02 * Math.max(0, w.tmax - 15) + (w.rain < 0.5 && w.tmax > 18 ? 0.05 : 0);
   use.water.set(day, (0.3 + watering) * noise(0.05) + (day >= LEAK_FROM ? 0.15 : 0));
 }
 
