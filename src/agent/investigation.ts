@@ -45,6 +45,10 @@ export interface Investigation {
   cache: Map<string, Promise<unknown>>;
 }
 
+export function openInvestigation(fields: Omit<Investigation, "evidence" | "measured" | "cache">): Investigation {
+  return { ...fields, evidence: new EvidenceLog(), measured: new Map(), cache: new Map() };
+}
+
 const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 
 function once<T>(inv: Investigation, key: string, make: () => Promise<T>): Promise<T> {
