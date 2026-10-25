@@ -16,7 +16,8 @@ import { CAUSE_NAMES, PART_NAMES } from "../../lib/labels.ts";
 import type { Utility } from "../../lib/types.ts";
 import { CaseFile, type CaseFinding, type Review } from "../../memory/casefile.ts";
 import type { ExecutionContract } from "../../scout/types.ts";
-import { openInvestigation, pairSplit, type NotesMemory } from "../investigation.ts";
+import type { CauseId } from "../../billmodel/causes.ts";
+import { openInvestigation, pairSplit, type MeasuredCause, type NotesMemory } from "../investigation.ts";
 import { chat, deepModel, type Message } from "../llm.ts";
 import { parseReport, type ChatFn } from "../loop.ts";
 import { runSpecialist, SPECIALISTS, specialistsFor, type SpecialistName } from "../specialists.ts";
@@ -45,6 +46,7 @@ export interface InvestigationResult {
   change: number;
   parts: Record<PartId, number>;
   findings: CaseFinding[];
+  measured: Partial<Record<CauseId, MeasuredCause>>; // code's measurement behind each finding
   unexplained: PartId[];
   reviews: Review[];
   rounds: number; // specialist rounds run
@@ -182,6 +184,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
     change: split.change,
     parts: split.parts,
     findings: file.findings(),
+    measured: Object.fromEntries(inv.measured),
     unexplained: file.unexplained(),
     reviews,
     rounds,

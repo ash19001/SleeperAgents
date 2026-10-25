@@ -267,9 +267,9 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 ## Phase 7: Orchestrators, combiner, writer, checker — Mon late morning
 
 - [x] 1. Orchestrator (Ultra), one per utility: verify the contract, run `split_change`, send each part to specialists in parallel, review their reports in the case file, ask follow-ups (at most 2 rounds), stop when every £ part is explained or ruled out.
-- [ ] 2. Combiner (Ultra) for two or more utilities, including C9.
-- [ ] 3. Writer (Ultra) and `facts.ts`: placeholders and citations only; next steps from a fixed map (C4: send a meter reading; C1: compare fixed deals; C8: check the meter with every tap off; C6: nothing to fix).
-- [ ] 4. Checker (`verify.ts`): the rules in the answer contract, one rewrite, then the template.
+- [x] 2. Combiner (Ultra) for two or more utilities, including C9.
+- [x] 3. Writer (Ultra) and `facts.ts`: placeholders and citations only; next steps from a fixed map (C4: send a meter reading; C1: compare fixed deals; C8: check the meter with every tap off; C6: nothing to fix).
+- [x] 4. Checker (`verify.ts`): the rules in the answer contract, one rewrite, then the template.
 - [ ] 5. Save each live answer as JSON in `eval/answers/` for replay mode.
 
 **Done when:** "Why did my gas bill go up in January?" and "Why was my electricity bill lower in June?" give checked answers whose supported causes match the answer key, and "Why did my energy bills change in April?" returns both utilities with the fuel switch.

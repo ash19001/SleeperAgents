@@ -1,22 +1,30 @@
 // Runs the real orchestrator (Nemotron Ultra, Markovian rounds, World Model
-// case file) and its specialists on answer-key scenarios, and compares the
-// case file's findings with eval/scenarios.json.
+// case file) and its specialists on answer-key scenarios, compares the case
+// file's findings with eval/scenarios.json, then writes and checks each
+// answer. With --combine, also writes the summary across the scenarios.
 //
-// Run: node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts [scenario ids...]
+// Run: node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts [--combine] [scenario ids...]
 // (npm run try:orchestrator -- [ids]). The flag is needed because the
 // Meterless engines use TypeScript syntax Node can't strip.
 
 import { readFileSync } from "node:fs";
+import { composeAnswer } from "../src/agent/answer.ts";
+import { combine } from "../src/agent/combiner.ts";
 import { investigate } from "../src/agent/orchestrators/investigate.ts";
 import { createScout } from "../src/agent/scout.ts";
 import { Trace } from "../src/agent/trace.ts";
 import { localSource } from "../src/data/local.ts";
+import type { Answer, Fact } from "../src/lib/types.ts";
 
 process.loadEnvFile(".env.local");
 
 const INTENT = { electricity: "bill.explain.electricity", gas: "bill.explain.gas", water: "bill.explain.water" } as const;
 const { scenarios } = JSON.parse(readFileSync("eval/scenarios.json", "utf8"));
-const wanted = process.argv.slice(2);
+const args = process.argv.slice(2);
+const combineAll = args.includes("--combine");
+const wanted = args.filter((x) => !x.startsWith("--"));
+const fill = (text: string, facts: Fact[]) => text.replace(/\{(F\d+)\}/g, (m, id) => facts.find((f) => f.id === id)?.value ?? m);
+const answers: Answer[] = [];
 const chosen = wanted.length ? scenarios.filter((s: { id: string }) => wanted.includes(s.id)) : scenarios;
 const scout = createScout();
 const { rows: bills } = await localSource.bills();
@@ -48,8 +56,17 @@ for (const sc of chosen) {
     }
     if (r.unexplained.length) console.log(`   unexplained parts: ${r.unexplained.join(", ")}`);
     console.log(`   case file: ${r.caseFile.audit().length} audit entries, ${r.evidence.length} evidence records`);
+    const t = Date.now();
+    const answer = await composeAnswer(`Why did my ${sc.utility} bill change in ${b.label}?`, r, { trace });
+    answers.push(answer);
+    console.log(`   answer (${answer.checked.by}, ${Date.now() - t} ms${answer.checked.problems.length ? `; checker: ${answer.checked.problems.map((p) => p.join(" | ")).join(" || ")}` : ""}):\n   ${fill(answer.answer_markdown, answer.facts)}`);
+    console.log(`   next steps: ${answer.next_steps.map((n) => n.cause).join(", ") || "none"}`);
   } catch (err) {
     console.log(`\n${sc.id}: FAILED ${(err as Error).message}`);
   }
+}
+if (combineAll && answers.length > 1) {
+  const c = await combine("Why did my bills change?", answers, { trace: new Trace() });
+  console.log(`\nSummary (${c.by}): ${fill(c.summary_markdown, c.summary_facts)}`);
 }
 console.log(`\nAnswer key: ${keyOk}/${keyTotal}.`);
