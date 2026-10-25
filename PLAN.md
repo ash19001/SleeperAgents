@@ -270,7 +270,7 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 - [x] 2. Combiner (Ultra) for two or more utilities, including C9.
 - [x] 3. Writer (Ultra) and `facts.ts`: placeholders and citations only; next steps from a fixed map (C4: send a meter reading; C1: compare fixed deals; C8: check the meter with every tap off; C6: nothing to fix).
 - [x] 4. Checker (`verify.ts`): the rules in the answer contract, one rewrite, then the template.
-- [ ] 5. Save each live answer as JSON in `eval/answers/` for replay mode.
+- [x] 5. Save each live answer as JSON in `eval/answers/` for replay mode.
 
 **Done when:** "Why did my gas bill go up in January?" and "Why was my electricity bill lower in June?" give checked answers whose supported causes match the answer key, and "Why did my energy bills change in April?" returns both utilities with the fuel switch.
 
@@ -286,8 +286,8 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 ## Phase 9: Live page — Mon early afternoon (Cursor optional)
 
 - [ ] 1. `/api/ask` streams progress events; the page shows a live investigation panel (which agent is doing what) before the answer.
-- [ ] 2. Show `answers` (two or more utilities) with the summary first; show clarify options as buttons; show blocked messages plainly.
-- [ ] 3. "How this answer was made" lists every agent step with model, route, receipt and time.
+- [x] 2. Show `answers` (two or more utilities) with the summary first; show clarify options as buttons; show blocked messages plainly.
+- [x] 3. "How this answer was made" lists every agent step with model, route, receipt and time.
 - [ ] 4. Replay mode serves `eval/answers/` with the agents and Zetaris off, labelled on the page.
 - [ ] 5. **(you, optional)** Make one UI tweak in Cursor and keep its prompts in `docs/cursor-log.md`.
 

@@ -6,8 +6,8 @@ import type { AskResult, Bill, TriageRequest } from "@/lib/types";
 
 type Triage = Extract<AskResult, { kind: "triage" }>;
 
-// Temporary view while the orchestrators are placeholders: what triage
-// decided, the signed contract per utility, and what each orchestrator did.
+// Shown when no utility could be investigated: what triage decided, the
+// signed contract per utility, and why each orchestrator stopped.
 export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] }) {
   const label = (id: string) => bills.find((b) => b.bill_id === id)?.label ?? id;
   return (
@@ -31,7 +31,9 @@ export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] })
 
       {result.notes.length > 0 && <p className="text-sm text-ink-2">{result.notes.join(" ")}</p>}
       <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
-        The orchestrators are placeholders for now: each checks its contract and stops. The investigation itself comes next.
+        {result.requests.every((r) => r.orchestrator.status === "placeholder")
+          ? "The orchestrators checked their contracts but weren't given the data to investigate."
+          : "No bill could be investigated, so there's no answer. The reasons are below."}
       </p>
       <TraceList steps={result.trace} open />
     </>
@@ -39,7 +41,7 @@ export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] })
 }
 
 function RequestRow({ request: r, label }: { request: TriageRequest; label: (id: string) => string }) {
-  const ok = r.orchestrator.status === "placeholder";
+  const ok = r.orchestrator.status === "placeholder" || r.orchestrator.status === "done";
   return (
     <li className="grid gap-3 rounded-lg border border-line p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -76,7 +78,9 @@ function RequestRow({ request: r, label }: { request: TriageRequest; label: (id:
             The {r.utility} orchestrator verified the contract
           </span>
         ) : (
-          <span>The {r.utility} orchestrator refused the contract: {r.orchestrator.reason}</span>
+          <span>
+            The {r.utility} orchestrator {r.orchestrator.status === "error" ? "couldn't finish the investigation" : "refused the contract"}: {r.orchestrator.reason}
+          </span>
         )}
       </p>
     </li>

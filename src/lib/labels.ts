@@ -39,6 +39,9 @@ export const ROUTES: Record<string, string> = {
   "nvidia-direct": "via NVIDIA direct (fallback)",
   zetaris: "Zetaris, read-only SQL",
   "h-mem": "Meterless H-MEM",
+  "local-sample": "local SAMPLE file (Zetaris once registered)",
+  "world-model": "Meterless World Model (case file)",
+  markovian: "Meterless Markovian (review rounds)",
   code: "Code, no model",
 };
 

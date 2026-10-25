@@ -6,7 +6,8 @@
 // 4. every sentence that uses a cause's figure cites evidence;
 // 5. only supported causes have figures to give (see facts.ts), and each
 //    supported cause passes its threshold in code;
-// 6. every fact marked required (a supported part over £1) is used.
+// 6. every fact marked required (a supported part over £1) is used;
+// 7. no unit is repeated after a fact that already ends in it ("{F4} days").
 // It returns the problems in plain words, for the writer's one rewrite.
 
 import type { CauseId } from "../billmodel/causes.ts";
@@ -61,6 +62,11 @@ export function check(input: CheckInput): string[] {
   }
   for (const f of input.facts) {
     if (f.cause && found.get(f.cause)?.verdict !== "supported") errors.push(`{${f.id}} belongs to ${f.cause}, which isn't supported.`);
+  }
+
+  for (const f of input.facts) {
+    const unit = f.value.match(/([a-z]+)$/i)?.[1];
+    if (unit && new RegExp(`\\{${f.id}\\}\\s+${unit}\\b`, "i").test(input.text)) errors.push(`{${f.id}} already ends in "${unit}" (${f.value}); don't repeat it.`);
   }
 
   const usedAll = new Set([...input.text.matchAll(PLACEHOLDER)].map((m) => m[0].slice(1, -1)));

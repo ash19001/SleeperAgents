@@ -10,11 +10,11 @@ import { ulid } from "../scout/contract.ts";
 import { guard } from "../scout/guard.ts";
 import type { Scout, ScoutEvent } from "../scout/index.ts";
 import { sense } from "../scout/sense.ts";
-import type { UserRef } from "../scout/types.ts";
+import type { ExecutionContract, UserRef } from "../scout/types.ts";
 import type { AskResult, Bill, ClarifyOption, TraceStep, TriageRequest, Utility } from "../lib/types.ts";
 import { periodFromText, resolvePair } from "./bills.ts";
 import { runIntake, type Intake } from "./intake.ts";
-import { runOrchestrator } from "./orchestrators/index.ts";
+import { runOrchestrator, type OrchestratorResult } from "./orchestrators/index.ts";
 import { getScout, listen } from "./scout.ts";
 import { Trace } from "./trace.ts";
 
@@ -24,6 +24,8 @@ export interface TriageOptions {
   intake?: (question: string, bills: Bill[], trace?: Trace) => Promise<Intake | null>;
   user?: UserRef;
   surface?: string;
+  // Runs each utility's orchestrator; the pipeline passes one that investigates.
+  orchestrate?: (contract: ExecutionContract, ctx: { scout: Scout; trace: Trace }) => Promise<OrchestratorResult>;
 }
 
 const INTENT: Record<Utility, string> = {
@@ -150,7 +152,7 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
           const named = (decision.clarification?.options ?? []).map((o) => UTILITY[o.intent]).filter(Boolean);
           return clarify(decision.clarification?.question ?? "Which bill do you mean?", named.length ? named : [r.utility]);
         }
-        const done = await runOrchestrator(contract, { scout, trace });
+        const done = await (opts.orchestrate ?? runOrchestrator)(contract, { scout, trace });
         return {
           utility: r.utility,
           period: r.period,

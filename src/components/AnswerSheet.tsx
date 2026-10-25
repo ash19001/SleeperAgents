@@ -26,17 +26,24 @@ export function AnswerContent({ result, busy, mode, bills, examples, lastQuestio
   onAsk: (question: string) => void;
   onOpen: (ref: string, answer: Answer) => void;
 }) {
-  if (!result) {
-    return busy
-      ? <Message title="Working on it" text="Reading the question, testing the causes and checking the numbers." />
-      : <Message title="Ask about a bill" text="Tap a bar or type a question to see why that bill changed." examples={examples} onAsk={onAsk} />;
+  // Live answers take about a minute, so say so rather than fade the last one.
+  if (busy && (mode === "live" || !result)) {
+    return (
+      <Message
+        title="Working on it"
+        text={mode === "live" ? "The agents are investigating: reading the question, testing each cause and checking the numbers. This takes about a minute." : "Reading the question, testing the causes and checking the numbers."}
+      />
+    );
   }
+  if (!result) return <Message title="Ask about a bill" text="Tap a bar or type a question to see why that bill changed." examples={examples} onAsk={onAsk} />;
   switch (result.kind) {
     case "answer": {
       const a = result.answer;
       // A new key per answer resets the feedback buttons.
       return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} />;
     }
+    case "answers":
+      return <AnswersView key={`${result.question}|${result.answers.map((a) => a.bill_b).join()}`} result={result} mode={mode} bills={bills} onOpen={onOpen} />;
     case "clarify": {
       const opts = result.options ?? [];
       return (
@@ -95,7 +102,36 @@ function Message({ title, text, examples, onAsk }: { title: string; text: string
   );
 }
 
-function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: Mode; bills: Bill[]; onOpen: Open }) {
+type AnswersResult = Extract<AskResult, { kind: "answers" }>;
+
+// Two or more utilities: the combiner's summary, then one answer each, then
+// the trace once for the whole question.
+function AnswersView({ result, mode, bills, onOpen }: { result: AnswersResult; mode: Mode; bills: Bill[]; onOpen: (ref: string, answer: Answer) => void }) {
+  // The summary's {F#} come from its own facts; it has no citations.
+  const summary = { ...result.answers[0], facts: result.summary_facts, evidence: [], memory: [] };
+  return (
+    <>
+      <header className="grid gap-1.5">
+        <p className="eyebrow">{result.answers.map((a) => UTILITIES[a.utility].name).join(" and ")}</p>
+        <h2 id="answer-title" className="headline text-[clamp(1.3rem,1.05rem+1vw,1.7rem)] leading-tight font-bold">“{result.question}”</h2>
+      </header>
+      {result.summary_markdown && (
+        <p className="max-w-[66ch] text-[1.08rem] leading-[1.65]">
+          <RichText text={result.summary_markdown} answer={summary} onOpen={() => {}} />
+        </p>
+      )}
+      {result.notes.length > 0 && <p className="text-sm text-muted">{result.notes.join(" ")}</p>}
+      {result.answers.map((a) => (
+        <article key={a.utility} aria-label={`${UTILITIES[a.utility].name} bill`} className="grid gap-6 border-t-2 border-line pt-6">
+          <AnswerView answer={a} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} nested />
+        </article>
+      ))}
+      <TraceList steps={result.trace} />
+    </>
+  );
+}
+
+function AnswerView({ answer: a, mode, bills, onOpen, nested }: { answer: Answer; mode: Mode; bills: Bill[]; onOpen: Open; nested?: boolean }) {
   const A = bills.find((b) => b.bill_id === a.bill_a);
   const B = bills.find((b) => b.bill_id === a.bill_b);
   const from = a.total_a ?? A?.total_gbp;
@@ -106,7 +142,7 @@ function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: 
         <p className="eyebrow">
           {UTILITIES[a.utility].name} · {A?.label ?? a.bill_a} → {B?.label ?? a.bill_b}
         </p>
-        <h2 id="answer-title" className="headline text-[clamp(1.3rem,1.05rem+1vw,1.7rem)] leading-tight font-bold">“{a.question}”</h2>
+        {!nested && <h2 id="answer-title" className="headline text-[clamp(1.3rem,1.05rem+1vw,1.7rem)] leading-tight font-bold">“{a.question}”</h2>}
         <div className="mt-2.5 flex flex-wrap items-baseline gap-x-3.5 gap-y-1.5">
           <span className="headline text-[clamp(2.6rem,2rem+3vw,3.6rem)] leading-none font-extrabold tracking-[-0.02em]">
             {money(a.change_gbp, true)}
@@ -122,8 +158,9 @@ function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: 
       <CausesBlock answer={a} onOpen={onOpen} />
       <RuledOutBlock answer={a} onOpen={onOpen} />
       <StepsBlock answer={a} onOpen={onOpen} />
+      {a.checked && <p className="flex items-center gap-1.5 text-sm text-ink-2"><Check aria-hidden className="size-3.5 flex-none text-accent" strokeWidth={2.5} />{CHECKED[a.checked.by]}</p>}
       <Feedback answer={a} />
-      <TraceList steps={a.trace} note={mode === "preview" ? "Preview: these times are typical figures from test calls, not from this answer." : undefined} />
+      {!nested && <TraceList steps={a.trace} note={mode === "preview" ? "Preview: these times are typical figures from test calls, not from this answer." : undefined} />}
     </>
   );
 }
@@ -213,6 +250,12 @@ function SplitBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) {
   );
 }
 
+const CHECKED: Record<NonNullable<Answer["checked"]>["by"], string> = {
+  writer: "Checked in code: every number matches a measurement and every reason cites its evidence.",
+  rewrite: "Checked in code after one rewrite: every number matches a measurement and every reason cites its evidence.",
+  template: "The written answer didn't pass the checks, so this is the plain version built from the measurements.",
+};
+
 const PILL: Record<Cause["verdict"], string> = {
   supported: "bg-accent-wash text-ink",
   ruled_out: "border border-line text-muted",
@@ -294,8 +337,8 @@ function Feedback({ answer }: { answer: Answer }) {
   async function send(value: "helpful" | "not_helpful") {
     setRating(value);
     try {
-      const res = await postJson<{ stored: boolean }>("/api/feedback", { question: answer.question, bill_b: answer.bill_b, rating: value });
-      setStatus(res.stored ? "Thanks. Your feedback is saved with this answer." : "Thanks. Feedback isn't saved in preview mode.");
+      const res = await postJson<{ stored: boolean }>("/api/feedback", { question: answer.question, bill_a: answer.bill_a, bill_b: answer.bill_b, rating: value, memory: answer.memory.map((n) => n.id) });
+      setStatus(res.stored ? "Thanks. Your feedback is saved in the household memory." : "Thanks. Feedback is only saved in live mode.");
     } catch (err) {
       setStatus(`Couldn't save feedback: ${(err as Error).message}`);
     }

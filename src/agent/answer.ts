@@ -143,7 +143,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     facts: table.facts.map(({ id, value, evidence }) => ({ id, value, evidence })),
     answer_markdown: text,
     next_steps: nextSteps(r),
-    evidence: r.evidence.map(({ id, title, sql, rows, sha256, at }) => ({ id, title, sql, rows, sha256, at })),
+    evidence: r.evidence.map(({ id, title, source, sql, rows, sha256, at }) => ({ id, title, source, sql, rows, sha256, at })),
     memory: notes,
     trace: ctx.trace.steps,
     checked: { by, problems },

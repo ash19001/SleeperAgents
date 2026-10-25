@@ -162,7 +162,7 @@ export function nextSteps(r: InvestigationResult): NextStep[] {
     const f = found.get(cause);
     if (f?.verdict !== "supported" || !NEXT[cause]) continue;
     if (cause === "C7" && (found.get("C8")?.verdict === "supported" || found.get("C9")?.verdict === "supported")) continue;
-    steps.push({ cause, action: NEXT[cause]!, evidence: f.evidence });
+    steps.push({ cause, action: NEXT[cause]!, evidence: [...f.evidence, ...f.memory] });
   }
   return steps;
 }

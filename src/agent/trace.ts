@@ -4,7 +4,12 @@
 import type { TraceStep } from "../lib/types.ts";
 
 export class Trace {
-  readonly steps: TraceStep[] = [];
+  readonly steps: TraceStep[];
+
+  // Pass a list to keep adding to an earlier trace's steps.
+  constructor(steps: TraceStep[] = []) {
+    this.steps = steps;
+  }
 
   add(step: TraceStep): TraceStep {
     this.steps.push(step);

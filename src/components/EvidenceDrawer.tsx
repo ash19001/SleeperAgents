@@ -77,11 +77,16 @@ function EvidenceBody({ refId, answer, mode }: { refId: string; answer: Answer; 
           Preview: this query hasn&apos;t run yet. It shows what the agent will send to Zetaris.
         </p>
       )}
+      {ev.source === "local-sample" && (
+        <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
+          Read from the SAMPLE supplier file on this machine. The same read becomes a Zetaris query once the data is registered there.
+        </p>
+      )}
       <div className="flex items-center justify-between gap-3">
-        <h3 className="eyebrow">Query sent to Zetaris</h3>
+        <h3 className="eyebrow">{ev.source === "local-sample" ? "How it was read" : "Query sent to Zetaris"}</h3>
         <span className="flex items-center gap-2">
           <span role="status" className="text-sm text-muted">{copied}</span>
-          <button type="button" onClick={copy} className={BUTTON_QUIET_SMALL}>Copy SQL</button>
+          <button type="button" onClick={copy} className={BUTTON_QUIET_SMALL}>{ev.source === "local-sample" ? "Copy" : "Copy SQL"}</button>
         </span>
       </div>
       <pre className="overflow-x-auto rounded-lg border border-line bg-code px-3.5 py-3 font-mono text-[0.8rem] leading-relaxed whitespace-pre">

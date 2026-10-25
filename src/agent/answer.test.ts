@@ -90,6 +90,8 @@ describe("checker", () => {
     expect(check(inputFor(r, ok.replace(`{${f.get("change")!.id}}`, "£32.18")))).toEqual(expect.arrayContaining([expect.stringContaining('writes the number "£32.18"'), expect.stringContaining("leaves out {F1}")]));
     expect(check(inputFor(r, `${ok} It was {F99} [E9].`))).toEqual(expect.arrayContaining(["{F99} isn't in the facts table.", "[E9] isn't an evidence or note id for this answer."]));
     expect(check(inputFor(r, `${ok} The weather added {${f.get("part:weather")!.id}}.`))).toEqual([expect.stringContaining("without citing its evidence")]);
+    const days = f.get("C3:days_b")!.id;
+    expect(check(inputFor(r, `${ok} It covered {${days}} days [E1].`))).toEqual([`{${days}} already ends in "days" (35 days); don't repeat it.`]);
   });
 
   it("catches parts that don't add up and unsupported causes marked supported", async () => {

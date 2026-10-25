@@ -33,6 +33,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
 
   const selected =
     result?.kind === "answer" ? result.answer.bill_b
+    : result?.kind === "answers" ? (result.answers.find((a) => a.utility === utility) ?? result.answers[0]).bill_b
     : result?.kind === "no_preview" ? result.bill_id
     : result?.kind === "triage" ? (result.requests.find((r) => r.utility === utility) ?? result.requests[0])?.bill_b ?? null
     : null;
@@ -47,10 +48,11 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
       const res = await postJson<AskResult>("/api/ask", { question: q });
       setResult(res);
       if (res.kind === "answer") setUtility(res.answer.utility);
+      if (res.kind === "answers") setUtility(res.answers[0].utility);
       if (res.kind === "no_preview") setUtility(res.utility);
       if (res.kind === "triage" && res.requests.length) setUtility(res.requests[0].utility);
       setAnnouncement(
-        res.kind === "answer" ? "Answer ready."
+        res.kind === "answer" || res.kind === "answers" ? "Answer ready."
         : res.kind === "triage" ? "Triage ready."
         : res.kind === "clarify" || res.kind === "general" ? res.message
         : res.kind === "blocked" ? res.reason

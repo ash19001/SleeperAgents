@@ -160,7 +160,7 @@ export class CaseFile {
     const graph = this.wm.view("graph");
     const [from] = graph.neighborsOf(this.id, { via: "compares_from" });
     const [to] = graph.neighborsOf(this.id, { via: "compares_to" });
-    const bill = (e: Entity) => `${e.attrs.label} (${e.attrs.period_start} to ${e.attrs.period_end}, ${e.attrs.days} days, £${Number(e.attrs.total_gbp).toFixed(2)}, ${e.attrs.read_type === "E" ? "estimated" : "actual"} reading)`;
+    const bill = (e: Entity) => `${e.attrs.label} (${e.attrs.period_start} to ${e.attrs.period_end}, ${e.attrs.days} days, £${Number(e.attrs.total_gbp).toFixed(2)}, ${e.attrs.read_type} reading)`;
     const { change, parts, fit_trusted, evidence } = this.split();
     const findings = this.findings();
     const lines = [

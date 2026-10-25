@@ -32,6 +32,7 @@ export interface Bill {
 export interface Evidence {
   id: string;
   title: string;
+  source?: "zetaris" | "local-sample"; // local-sample: read from a SAMPLE file until the data is in Zetaris
   sql: string;
   rows: number;
   sha256: string;
@@ -98,6 +99,8 @@ export interface Answer {
   evidence: Evidence[];
   memory: Note[];
   trace: TraceStep[];
+  // Live answers: who wrote the text that passed the checker.
+  checked?: { by: "writer" | "rewrite" | "template"; problems: string[][] };
 }
 
 // One utility's part of a triaged question: its bills, its signed Scout
@@ -129,6 +132,15 @@ export interface ClarifyOption {
 
 export type AskResult =
   | { kind: "answer"; answer: Answer }
+  | {
+      kind: "answers"; // two or more utilities: the summary, then one answer each
+      question: string;
+      answers: Answer[];
+      summary_markdown: string;
+      summary_facts: Fact[];
+      notes: string[]; // utilities that couldn't be answered, and why
+      trace: TraceStep[];
+    }
   | { kind: "clarify"; message: string; options?: ClarifyOption[]; trace?: TraceStep[] }
   | { kind: "no_preview"; bill_id: string; utility: Utility }
   | { kind: "blocked"; reason: string; trace?: TraceStep[] }

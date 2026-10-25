@@ -1,45 +1,69 @@
-// Where the page's data comes from, by mode. Live mode runs the agents;
-// until Phase 5 they read the SAMPLE preview bills. Replay is still to come.
+// Where the page's data comes from, by mode.
+// - preview: the hand-written SAMPLE answers.
+// - live: the agents answer every question from the SAMPLE household's
+//   supplier files (Zetaris once registered), with notes in H-MEM. Each
+//   answer is recorded for replay.
+// - replay: the recorded answers, with the agents off.
 
-import { triage } from "@/agent/triage";
+import { answerQuestion } from "@/agent/pipeline";
+import { localSource } from "@/data/local";
+import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
 import * as preview from "./preview";
+import { loadReplay, recordedQuestions, saveReplay } from "./replay";
 import type { AskResult, Bill, Household, Note } from "./types";
 
-function notBuilt(): never {
-  throw new Error(`${getMode()} mode isn't built yet. Set WHYBILL_MODE=preview or live in .env.local`);
-}
-
-// Preview and live both use the SAMPLE household until the data moves to Zetaris.
-const sampleData = () => getMode() !== "replay";
+const live = () => getMode() === "live";
 
 export const examples = preview.previewExamples;
 export const suggestedNote = preview.previewSuggestedNote;
 export const previewAnswerIds = () => (getMode() === "preview" ? preview.previewAnswerIds : []);
 
 export async function getHousehold(): Promise<Household> {
-  return sampleData() ? preview.previewHousehold() : notBuilt();
+  return preview.previewHousehold();
 }
 
+// Live and replay show the bills the agents read; preview has its own set.
 export async function getBills(): Promise<Bill[]> {
-  return sampleData() ? preview.previewBills() : notBuilt();
+  if (getMode() === "preview") return preview.previewBills();
+  const { rows } = await localSource.bills();
+  return rows.map(({ utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp }) => ({
+    utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp,
+  }));
 }
 
 export async function getNotes(): Promise<Note[]> {
-  return sampleData() ? preview.previewNotes() : notBuilt();
+  return live() ? householdMemory().notes() : preview.previewNotes();
 }
 
 export async function addNote(text: string): Promise<Note> {
-  return sampleData() ? preview.previewAddNote(text) : notBuilt();
+  return live() ? householdMemory().addNote(text) : preview.previewAddNote(text);
 }
 
 export async function ask(question: string): Promise<AskResult> {
   const mode = getMode();
   if (mode === "preview") return preview.previewAsk(question);
-  if (mode === "live") return triage(question, { bills: preview.previewBills() });
-  return notBuilt();
+  const notes = await getNotes();
+  if (mode === "replay") {
+    const recording = loadReplay(question, notes);
+    if (recording) return recording.result;
+    const recorded = recordedQuestions();
+    return {
+      kind: "general",
+      message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question.${recorded.length ? ` Recorded: ${recorded.map((q) => `“${q}”`).join(", ")}.` : ""}`,
+    };
+  }
+  const result = await answerQuestion(question, { bills: await getBills(), data: localSource, memory: householdMemory() });
+  saveReplay(question, notes, result);
+  return result;
 }
 
-export async function saveFeedback(_input: { question: string; bill_b: string; rating: string }): Promise<{ stored: boolean }> {
-  return sampleData() ? { stored: false } : notBuilt();
+// Thumbs on an answer: in live mode, H-MEM feedback on the notes it cited
+// and the findings saved from it.
+export async function saveFeedback(input: { question: string; bill_a?: string; bill_b: string; rating: string; memory?: string[] }): Promise<{ stored: boolean; updated?: number }> {
+  if (!live() || !input.bill_a) return { stored: false };
+  const memory = householdMemory();
+  const cited = memory.notes().filter((n) => input.memory?.includes(n.id));
+  const updated = memory.feedback({ bill_a: input.bill_a, bill_b: input.bill_b, memory: cited }, input.rating === "helpful");
+  return { stored: true, updated };
 }
