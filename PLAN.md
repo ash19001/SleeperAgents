@@ -220,14 +220,14 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 4: Triage — Sun afternoon to evening
 
-- [ ] 1. `src/scout/` registry: `bill.explain.electricity`, `bill.explain.gas`, `bill.explain.water` and `GENERAL`, each with examples, capabilities, risk class, surfaces and roles, in Scout's intent shape.
-- [ ] 2. Sense: Scout's Stage-1 keyword scan, its scoring formula and confidence bands (high 0.80, medium 0.55, low 0.40), multi-intent and clarification rules.
-- [ ] 3. Guard: injection patterns, SQL keywords, out-of-scope tool requests, personal-details redaction (account numbers, card numbers, emails, phone numbers), 500-character limit.
-- [ ] 4. Intake agent (`src/agent/intake.ts`, Lightning): raw text to `{requests[{utility, period, direction}], unclear?}`, checked with `zod`; months resolved to bill pairs in code. Bills come from `preview_SAMPLE.json` until Phase 5, then from Zetaris.
-- [ ] 5. Route and Recommend: capability map (`bills.read`, `reads.read`, `tariffs.read`, `weather.read`, `water_charges.read`, `memory.recall`, `memory.write`, `casefile.write`) and model profiles (Lightning, Ultra).
-- [ ] 6. Contracts: canonical JSON, HMAC-SHA256 with `SCOUT_SECRET`, 5-minute expiry, `verifyContract`; telemetry events into the trace. Unit tests for signing, tampering and expiry.
-- [ ] 7. Placeholder orchestrators (`src/agent/orchestrators/`): verify the contract's signature, expiry and scope, refuse otherwise, and return `{utility, bill_a, bill_b, model, contractId, status: "placeholder"}`.
-- [ ] 8. `/api/ask` in live mode runs triage and returns `{kind: "triage"}` (or `clarify` or `blocked`); the page shows a temporary triage card.
+- [x] 1. `src/scout/` registry: `bill.explain.electricity`, `bill.explain.gas`, `bill.explain.water` and `GENERAL`, each with examples, capabilities, risk class, surfaces and roles, in Scout's intent shape.
+- [x] 2. Sense: Scout's Stage-1 keyword scan, its scoring formula and confidence bands (high 0.80, medium 0.55, low 0.40), multi-intent and clarification rules.
+- [x] 3. Guard: injection patterns, SQL keywords, out-of-scope tool requests, personal-details redaction (account numbers, card numbers, emails, phone numbers), 500-character limit.
+- [x] 4. Intake agent (`src/agent/intake.ts`, Lightning): raw text to `{requests[{utility, period, direction}], unclear?}`, checked with `zod`; months resolved to bill pairs in code. Bills come from `preview_SAMPLE.json` until Phase 5, then from Zetaris.
+- [x] 5. Route and Recommend: capability map (`bills.read`, `reads.read`, `tariffs.read`, `weather.read`, `water_charges.read`, `memory.recall`, `memory.write`, `casefile.write`) and model profiles (Lightning, Ultra).
+- [x] 6. Contracts: canonical JSON, HMAC-SHA256 with `SCOUT_SECRET`, 5-minute expiry, `verifyContract`; telemetry events into the trace. Unit tests for signing, tampering and expiry.
+- [x] 7. Placeholder orchestrators (`src/agent/orchestrators/`): verify the contract's signature, expiry and scope, refuse otherwise, and return `{utility, bill_a, bill_b, model, contractId, status: "placeholder"}`.
+- [x] 8. `/api/ask` in live mode runs triage and returns `{kind: "triage"}` (or `clarify` or `blocked`); the page shows a temporary triage card.
 - [ ] 9. `eval/triage_cases.json`: about 25 questions with expected results, covering "energy bills", "heating bill", "my bills", both utilities named, water, months, injection attempts and personal details. `scripts/eval_triage.ts` scores them.
 - [ ] 10. Run Meterless's Scout harness against our build (`SCOUT_IMPL=... npm run evals` in `vendor/meterless/scout-intent`). Time box: 45 minutes. Record the score as it is in `eval/results.md`.
 

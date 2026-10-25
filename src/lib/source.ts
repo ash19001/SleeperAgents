@@ -1,40 +1,45 @@
-// Where the page's data comes from, by mode. Only preview exists so far; the
-// agent (live) and recorded answers (replay) plug in here.
+// Where the page's data comes from, by mode. Live mode runs the agents;
+// until Phase 5 they read the SAMPLE preview bills. Replay is still to come.
 
+import { triage } from "@/agent/triage";
 import { getMode } from "./mode";
 import * as preview from "./preview";
 import type { AskResult, Bill, Household, Note } from "./types";
 
 function notBuilt(): never {
-  throw new Error(`${getMode()} mode isn't built yet. Set WHYBILL_MODE=preview in .env.local`);
+  throw new Error(`${getMode()} mode isn't built yet. Set WHYBILL_MODE=preview or live in .env.local`);
 }
 
-const isPreview = () => getMode() === "preview";
+// Preview and live both use the SAMPLE household until the data moves to Zetaris.
+const sampleData = () => getMode() !== "replay";
 
 export const examples = preview.previewExamples;
 export const suggestedNote = preview.previewSuggestedNote;
-export const previewAnswerIds = () => (isPreview() ? preview.previewAnswerIds : []);
+export const previewAnswerIds = () => (getMode() === "preview" ? preview.previewAnswerIds : []);
 
 export async function getHousehold(): Promise<Household> {
-  return isPreview() ? preview.previewHousehold() : notBuilt();
+  return sampleData() ? preview.previewHousehold() : notBuilt();
 }
 
 export async function getBills(): Promise<Bill[]> {
-  return isPreview() ? preview.previewBills() : notBuilt();
+  return sampleData() ? preview.previewBills() : notBuilt();
 }
 
 export async function getNotes(): Promise<Note[]> {
-  return isPreview() ? preview.previewNotes() : notBuilt();
+  return sampleData() ? preview.previewNotes() : notBuilt();
 }
 
 export async function addNote(text: string): Promise<Note> {
-  return isPreview() ? preview.previewAddNote(text) : notBuilt();
+  return sampleData() ? preview.previewAddNote(text) : notBuilt();
 }
 
 export async function ask(question: string): Promise<AskResult> {
-  return isPreview() ? preview.previewAsk(question) : notBuilt();
+  const mode = getMode();
+  if (mode === "preview") return preview.previewAsk(question);
+  if (mode === "live") return triage(question, { bills: preview.previewBills() });
+  return notBuilt();
 }
 
 export async function saveFeedback(_input: { question: string; bill_b: string; rating: string }): Promise<{ stored: boolean }> {
-  return isPreview() ? { stored: false } : notBuilt();
+  return sampleData() ? { stored: false } : notBuilt();
 }

@@ -4,22 +4,25 @@ import { ArrowRight, Check, CircleQuestionMark, ThumbsDown, ThumbsUp, X } from "
 import { type ReactNode, useState } from "react";
 import { Chip, Chips } from "./Chip";
 import { Examples } from "./Examples";
+import { TraceList } from "./TraceList";
+import { TriageCard } from "./TriageCard";
 import { BUTTON_QUIET_SMALL } from "./ui";
 import { postJson } from "@/lib/client";
-import { fmtMs, money } from "@/lib/format";
-import { CAUSE_NAMES, MODEL_NAMES, PART_NAMES, ROUTES, UTILITIES, VERDICTS } from "@/lib/labels";
+import { money } from "@/lib/format";
+import { CAUSE_NAMES, PART_NAMES, UTILITIES, VERDICTS } from "@/lib/labels";
 import type { Answer, AskResult, Bill, Cause, Mode } from "@/lib/types";
 
 export type Result = AskResult | { kind: "error"; message: string } | null;
 
 type Open = (ref: string) => void;
 
-export function AnswerContent({ result, busy, mode, bills, examples, onAsk, onOpen }: {
+export function AnswerContent({ result, busy, mode, bills, examples, lastQuestion, onAsk, onOpen }: {
   result: Result;
   busy: boolean;
   mode: Mode;
   bills: Bill[];
   examples: string[];
+  lastQuestion: string;
   onAsk: (question: string) => void;
   onOpen: (ref: string, answer: Answer) => void;
 }) {
@@ -34,8 +37,40 @@ export function AnswerContent({ result, busy, mode, bills, examples, onAsk, onOp
       // A new key per answer resets the feedback buttons.
       return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} />;
     }
-    case "clarify":
-      return <Message title="Which bill do you mean?" text={result.message} examples={examples} onAsk={onAsk} />;
+    case "clarify": {
+      const opts = result.options ?? [];
+      return (
+        <>
+          <Message title="Which bill do you mean?" text={result.message} examples={opts.length ? undefined : examples} onAsk={onAsk} />
+          {opts.length > 0 && (
+            <div className="flex flex-wrap gap-2" aria-label="Choose a bill">
+              {opts.map((o) => (
+                <button key={o.label} type="button" className={BUTTON_QUIET_SMALL} onClick={() => onAsk(`${lastQuestion} (I mean my ${o.utility ?? o.label.toLowerCase()} bill)`)}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {result.trace && <TraceList steps={result.trace} />}
+        </>
+      );
+    }
+    case "blocked":
+      return (
+        <>
+          <Message title="I can't help with that question" text={result.reason} examples={examples} onAsk={onAsk} />
+          {result.trace && <TraceList steps={result.trace} />}
+        </>
+      );
+    case "general":
+      return (
+        <>
+          <Message title="Ask about a bill" text={result.message} examples={examples} onAsk={onAsk} />
+          {result.trace && <TraceList steps={result.trace} />}
+        </>
+      );
+    case "triage":
+      return <TriageCard result={result} bills={bills} />;
     case "no_preview":
       return (
         <Message
@@ -88,7 +123,7 @@ function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: 
       <RuledOutBlock answer={a} onOpen={onOpen} />
       <StepsBlock answer={a} onOpen={onOpen} />
       <Feedback answer={a} />
-      <TraceBlock answer={a} mode={mode} />
+      <TraceList steps={a.trace} note={mode === "preview" ? "Preview: these times are typical figures from test calls, not from this answer." : undefined} />
     </>
   );
 }
@@ -277,35 +312,5 @@ function Feedback({ answer }: { answer: Answer }) {
       </button>
       <span role="status" className="text-sm text-muted">{status}</span>
     </div>
-  );
-}
-
-function TraceBlock({ answer: a, mode }: { answer: Answer; mode: Mode }) {
-  if (!a.trace.length) return null;
-  const total = a.trace.reduce((t, s) => t + s.ms, 0);
-  return (
-    <details className="group border-t border-line pt-4">
-      <summary className="flex cursor-pointer list-none flex-wrap justify-between gap-x-3 gap-y-1 [&::-webkit-details-marker]:hidden">
-        <span className="eyebrow before:content-['+_'] group-open:before:content-['−_']">How this answer was made</span>
-        <span className="text-sm text-muted">{a.trace.length} steps, {fmtMs(total)}</span>
-      </summary>
-      <ol className="mt-3.5 grid list-decimal gap-2.5 pl-6">
-        {a.trace.map((s) => (
-          <li key={s.step} className="pl-1">
-            <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
-              <span className="font-semibold">{s.label ?? s.step}</span>
-              <span className="text-ink-2 tabular-nums">{fmtMs(s.ms)}</span>
-            </div>
-            <div className="text-[0.92rem] text-ink-2">
-              {s.model ? `${MODEL_NAMES[s.model] ?? s.model} ${ROUTES[s.route] ?? s.route}` : (ROUTES[s.route] ?? s.route)}
-            </div>
-            {s.model && <div className="font-mono text-[0.74rem] break-all text-muted">{s.model}</div>}
-          </li>
-        ))}
-      </ol>
-      {mode === "preview" && (
-        <p className="mt-3 text-sm text-muted">Preview: these times are typical figures from test calls, not from this answer.</p>
-      )}
-    </details>
   );
 }

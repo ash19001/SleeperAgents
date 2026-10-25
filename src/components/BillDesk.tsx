@@ -31,7 +31,11 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   const [announcement, setAnnouncement] = useState("");
   const answerRef = useRef<HTMLElement>(null);
 
-  const selected = result?.kind === "answer" ? result.answer.bill_b : result?.kind === "no_preview" ? result.bill_id : null;
+  const selected =
+    result?.kind === "answer" ? result.answer.bill_b
+    : result?.kind === "no_preview" ? result.bill_id
+    : result?.kind === "triage" ? (result.requests.find((r) => r.utility === utility) ?? result.requests[0])?.bill_b ?? null
+    : null;
 
   async function ask(text: string) {
     const q = text.trim();
@@ -44,7 +48,14 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
       setResult(res);
       if (res.kind === "answer") setUtility(res.answer.utility);
       if (res.kind === "no_preview") setUtility(res.utility);
-      setAnnouncement(res.kind === "answer" ? "Answer ready." : res.kind === "clarify" ? res.message : "No preview answer for this bill.");
+      if (res.kind === "triage" && res.requests.length) setUtility(res.requests[0].utility);
+      setAnnouncement(
+        res.kind === "answer" ? "Answer ready."
+        : res.kind === "triage" ? "Triage ready."
+        : res.kind === "clarify" || res.kind === "general" ? res.message
+        : res.kind === "blocked" ? res.reason
+        : "No preview answer for this bill.",
+      );
     } catch (err) {
       setResult({ kind: "error", message: (err as Error).message });
       setAnnouncement("Couldn't get an answer.");
@@ -97,6 +108,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
             bills={bills}
             examples={examples}
             onAsk={ask}
+            lastQuestion={lastQuestion}
             onOpen={(ref, answer) => setDrawer({ ref, answer })}
           />
         </section>

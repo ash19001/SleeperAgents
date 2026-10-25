@@ -55,6 +55,14 @@ describe("triage", () => {
     expect(r.kind === "clarify" && r.options?.map((o) => o.utility)).toEqual(["electricity", "gas", "water"]);
   });
 
+  it("goes with the words when the intake agent asks but the text names a utility", async () => {
+    const intake = fixed({ requests: [], unclear: { question: "Which bill do you mean?", options: ["electricity", "gas", "water"] } });
+    const r = await triage("Why is my bill so high? (I mean my gas bill)", { bills, scout, intake, user: user() });
+    expect(r.kind).toBe("triage");
+    expect(r.kind === "triage" && r.requests.map((q) => q.utility)).toEqual(["gas"]);
+    expect(r.kind === "triage" && r.trace.some((s) => s.step === "cross-check")).toBe(true);
+  });
+
   it("falls back to Scout's keywords when the intake agent fails", async () => {
     const r = await triage("Why did my gas bill go up in January?", { bills, scout, intake: fixed(null), user: user() });
     expect(r.kind).toBe("triage");

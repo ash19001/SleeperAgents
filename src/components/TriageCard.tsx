@@ -1,0 +1,84 @@
+import { Check, ShieldCheck, X } from "lucide-react";
+import { TraceList } from "./TraceList";
+import { fmtDateTime } from "@/lib/format";
+import { MODEL_NAMES, UTILITIES } from "@/lib/labels";
+import type { AskResult, Bill, TriageRequest } from "@/lib/types";
+
+type Triage = Extract<AskResult, { kind: "triage" }>;
+
+// Temporary view while the orchestrators are placeholders: what triage
+// decided, the signed contract per utility, and what each orchestrator did.
+export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] }) {
+  const label = (id: string) => bills.find((b) => b.bill_id === id)?.label ?? id;
+  return (
+    <>
+      <header className="grid gap-1.5">
+        <p className="eyebrow">Live · triage</p>
+        <h2 id="answer-title" className="headline text-[clamp(1.3rem,1.05rem+1vw,1.7rem)] leading-tight font-bold">“{result.question}”</h2>
+        <p className="text-ink-2">
+          {result.source === "intake"
+            ? `Read by the intake agent (Nemotron 3.5 Lightning) and checked by Scout. ${result.requests.length === 1 ? "One utility" : `${result.requests.length} utilities`} to investigate.`
+            : "The intake agent was unavailable, so Scout's keyword rules read the question."}
+        </p>
+        {result.redactions.length > 0 && <p className="text-sm text-muted">Hidden before any model saw it: {result.redactions.join(", ")}.</p>}
+      </header>
+
+      <ul className="grid gap-4">
+        {result.requests.map((r) => (
+          <RequestRow key={r.contract.contractId} request={r} label={label} />
+        ))}
+      </ul>
+
+      {result.notes.length > 0 && <p className="text-sm text-ink-2">{result.notes.join(" ")}</p>}
+      <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
+        The orchestrators are placeholders for now: each checks its contract and stops. The investigation itself comes next.
+      </p>
+      <TraceList steps={result.trace} open />
+    </>
+  );
+}
+
+function RequestRow({ request: r, label }: { request: TriageRequest; label: (id: string) => string }) {
+  const ok = r.orchestrator.status === "placeholder";
+  return (
+    <li className="grid gap-3 rounded-lg border border-line p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h3 className="headline text-lg font-bold">{UTILITIES[r.utility].name}</h3>
+        <span className="text-sm text-ink-2">
+          {label(r.bill_a)} → {label(r.bill_b)} · {r.direction === "change" ? "any change" : r.direction}
+        </span>
+      </div>
+      <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[0.92rem]">
+        <dt className="text-muted">Contract</dt>
+        <dd className="font-mono text-[0.8rem] break-all">{r.contract.contractId}</dd>
+        <dt className="text-muted">Intent</dt>
+        <dd>
+          {r.contract.intent}, confidence {r.contract.confidence.toFixed(2)} ({r.contract.band}), risk {r.contract.risk}
+        </dd>
+        <dt className="text-muted">Model</dt>
+        <dd>{MODEL_NAMES[r.contract.model] ?? r.contract.model}</dd>
+        <dt className="text-muted">Allowed</dt>
+        <dd className="flex flex-wrap gap-1">
+          {r.contract.capabilities.map((c) => (
+            <span key={c} className="rounded-[5px] border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[0.72rem]">{c}</span>
+          ))}
+        </dd>
+        <dt className="text-muted">Expires</dt>
+        <dd>{fmtDateTime(r.contract.expiresAt)}</dd>
+        <dt className="text-muted">Signature</dt>
+        <dd className="font-mono text-[0.76rem] break-all text-muted">{r.contract.signature.slice(0, 32)}…</dd>
+      </dl>
+      <p className="flex items-center gap-2 text-[0.95rem]">
+        {ok ? <ShieldCheck aria-hidden className="size-4 text-accent" /> : <X aria-hidden className="size-4 text-up-ink" />}
+        {ok ? (
+          <span>
+            <Check aria-hidden className="mr-1 inline size-3.5" />
+            The {r.utility} orchestrator verified the contract
+          </span>
+        ) : (
+          <span>The {r.utility} orchestrator refused the contract: {r.orchestrator.reason}</span>
+        )}
+      </p>
+    </li>
+  );
+}

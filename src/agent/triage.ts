@@ -86,15 +86,20 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
 
     // 2. The intake agent reads the question; Scout's keywords if it can't.
     const read = await intake(text, opts.bills, trace);
-    if (read?.unclear) return clarify(read.unclear.question, read.unclear.options);
+    // Utilities the text names outright: High band on Scout's keywords alone.
+    const keywords = sense({ prompt: text }, scout.registry, scout.config);
+    const named = keywords.candidates.filter((c) => UTILITY[c.intent] && c.score >= scout.config.bands.high).map((c) => UTILITY[c.intent]);
 
     let requests = read?.requests ?? [];
     let source: "intake" | "keywords" = "intake";
-    if (requests.length) {
-      // Cross-check: utilities the text names outright (High band on keywords
-      // alone) must match what the intake agent read. If not, ask.
-      const keywords = sense({ prompt: text }, scout.registry, scout.config);
-      const named = keywords.candidates.filter((c) => UTILITY[c.intent] && c.score >= scout.config.bands.high).map((c) => UTILITY[c.intent]);
+    if (read?.unclear) {
+      if (!named.length) return clarify(read.unclear.question, read.unclear.options);
+      // The intake agent asked, but the text names a utility: go with the words.
+      trace.add({ step: "cross-check", agent: "scout", label: `The intake agent asked which bill; the text names ${named.join(", ")}`, route: "code", model: null, ms: 0 });
+      source = "keywords";
+      requests = named.map((utility) => ({ utility, period: periodFromText(text, opts.bills), direction: direction(text) }));
+    } else if (requests.length) {
+      // Cross-check: utilities the text names must match what the intake agent read. If not, ask.
       const asked = requests.map((r) => r.utility);
       if (named.length && (named.some((u) => !asked.includes(u)) || asked.some((u) => !named.includes(u)))) {
         trace.add({ step: "cross-check", agent: "scout", label: `Keywords name ${named.join(", ")}; the intake agent read ${asked.join(", ")}`, route: "code", model: null, ms: 0 });
@@ -103,7 +108,7 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
     } else {
       source = "keywords";
       if (!read) trace.add({ step: "fallback", agent: "triage", label: "Intake agent unavailable; used Scout's keywords", route: "code", model: null, ms: 0 });
-      const sensed = sense({ prompt: text }, scout.registry, scout.config);
+      const sensed = keywords;
       if (sensed.clarification) return clarify(sensed.clarification.question, sensed.clarification.options.map((o) => UTILITY[o.intent]).filter(Boolean));
       const intents = sensed.multi.length ? sensed.multi.map((c) => c.intent) : [sensed.top.intent];
       const utilities = intents.map((i) => UTILITY[i]).filter(Boolean);

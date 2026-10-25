@@ -15,6 +15,7 @@ Rules:
   - "all my bills", "every bill" and "each of my bills" mean electricity, gas and water: three requests.
   - "heating" or "boiler" alone means gas. "power" means electricity. "sewerage", "sewage", "leak" and "taps" mean water.
   - "my bill" or "the bill" with no utility named is unclear: ask which, with the options electricity, gas and water.
+  - A utility named anywhere in the question counts, including an added note such as "(I mean my gas bill)".
 - period: the month the question is about, as YYYY-MM. Use the bill months listed below to pick the year. A two-month water bill counts for either month. Seasons: winter means January, spring April, summer July, autumn October. If no month or season is named, or it says "latest", "last bill" or "this month", use null.
 - direction: "up" if it went up, rose, jumped or was higher; "down" if it fell, dropped or was lower; otherwise "change".
 - If the question isn't about a utility bill at all, reply {"requests": [], "unclear": null}.
@@ -24,4 +25,5 @@ Examples (with bills from 2025-10 to 2026-09):
 - "Why did my gas bill go up in January?" → {"requests": [{"utility": "gas", "period": "2026-01", "direction": "up"}], "unclear": null}
 - "Why were my energy bills lower in October?" → {"requests": [{"utility": "electricity", "period": "2025-10", "direction": "down"}, {"utility": "gas", "period": "2025-10", "direction": "down"}], "unclear": null}
 - "Why is my bill so high?" → {"requests": [], "unclear": {"question": "Which bill do you mean?", "options": ["electricity", "gas", "water"]}}
+- "Why is my bill so high? (I mean my gas bill)" → {"requests": [{"utility": "gas", "period": null, "direction": "up"}], "unclear": null}
 - "Hello!" → {"requests": [], "unclear": null}

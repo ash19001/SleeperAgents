@@ -40,3 +40,6 @@ Found: Next.js defaults to port 3000, which Zetaris's UI uses; the app moves to 
 
 **Phase 3, steps 3 and 5.** App on port 5175; zod 4.6.5 and Vitest 3.2.4 added (Vitest 5 doesn't list Node 25). `src/agent/llm.ts` and `trace.ts` built; `npm run smoke:llm` passes 5 of 5 through them (both models, receipts, a tool call, the trace).
 Found: Nightshift caches replies keyed on the user message alone (system message ignored) and drops tool calls from cached replies. `llm.ts` tags every call to skip the cache unless the caller opts in, retries an empty cached reply, and records `cached` in the trace.
+
+**Phase 4, steps 1 to 8 (triage).** Our Scout (`src/scout/`: registry, Sense, Guard, Route, Recommend, contracts, `decide()`), the Lightning intake agent, bill-pair lookup, `triage.ts` and placeholder orchestrators; `/api/ask` in live mode runs triage and the page shows a triage card with contracts and the trace. 78 unit tests pass; live: "energy bills in January" gives two verified contracts in 0.8 s, injection blocked in 4 ms, "my bill" asks which, browser flow 6 of 6.
+Found: Nemotron reasons before answering unless `enable_thinking: false` (now the default in `llm.ts`); the intake agent needed the exact bill months and worked examples; a keyword cross-check now catches intake mistakes both ways.
