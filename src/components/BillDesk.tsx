@@ -6,8 +6,8 @@ import { BillsCard } from "./BillsCard";
 import { EvidenceDrawer, type DrawerTarget } from "./EvidenceDrawer";
 import { NotesCard } from "./NotesCard";
 import { TopBar } from "./TopBar";
-import { postJson } from "@/lib/client";
-import type { AskResult, Bill, Household, Mode, Note, Utility } from "@/lib/types";
+import { postJson, postStream } from "@/lib/client";
+import type { AskResult, Bill, Household, Mode, Note, TraceStep, Utility } from "@/lib/types";
 
 // The whole page: bills and notes on the left, the answer sheet on the right.
 export function BillDesk({ mode, household, bills, initialNotes, initialResult, examples, suggestedNote, previewIds }: {
@@ -24,6 +24,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   const [utility, setUtility] = useState<Utility>(first?.utility ?? "gas");
   const [result, setResult] = useState<Result>(initialResult);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<TraceStep[]>([]);
   const [question, setQuestion] = useState(first?.question ?? "");
   const [lastQuestion, setLastQuestion] = useState(first?.question ?? "");
   const [notes, setNotes] = useState(initialNotes);
@@ -44,8 +45,11 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     setQuestion(q);
     setLastQuestion(q);
     setBusy(true);
+    setProgress([]);
+    // Live answers take a while: show the agents at work straight away.
+    if (mode === "live") requestAnimationFrame(showAnswer);
     try {
-      const res = await postJson<AskResult>("/api/ask", { question: q });
+      const res = mode === "live" ? await askLive(q) : await postJson<AskResult>("/api/ask", { question: q });
       setResult(res);
       if (res.kind === "answer") setUtility(res.answer.utility);
       if (res.kind === "answers") setUtility(res.answers[0].utility);
@@ -64,11 +68,26 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     } finally {
       setBusy(false);
     }
-    // On one-column layouts the answer sits below the bills, so bring it into view.
-    if (window.matchMedia("(max-width: 1023px)").matches) {
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      answerRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-    }
+    showAnswer();
+  }
+
+  // On one-column layouts the answer sits below the bills, so bring it into view.
+  function showAnswer() {
+    if (!window.matchMedia("(max-width: 1023px)").matches) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    answerRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }
+
+  // Live answers stream each agent step, then the result.
+  async function askLive(q: string): Promise<AskResult> {
+    let result: AskResult | null = null;
+    await postStream("/api/ask", { question: q }, (event) => {
+      if (event.type === "step") setProgress((steps) => [...steps, event.step as TraceStep]);
+      if (event.type === "result") result = event.result as AskResult;
+      if (event.type === "error") throw new Error(String(event.message));
+    });
+    if (!result) throw new Error("The answer stream ended without a result");
+    return result;
   }
 
   async function addNote(text: string) {
@@ -101,11 +120,12 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           ref={answerRef}
           aria-labelledby="answer-title"
           aria-busy={busy}
-          className="grid min-w-0 scroll-mt-4 gap-6 rounded-xl border border-line bg-surface px-[18px] py-[22px] shadow-sheet transition-opacity aria-busy:opacity-50 sm:px-8 sm:pt-7 sm:pb-[30px] lg:col-start-2 lg:row-span-2 lg:row-start-1"
+          className={`grid min-w-0 scroll-mt-4 gap-6 rounded-xl border border-line bg-surface px-[18px] py-[22px] shadow-sheet transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"} sm:px-8 sm:pt-7 sm:pb-[30px] lg:col-start-2 lg:row-span-2 lg:row-start-1`}
         >
           <AnswerContent
             result={result}
             busy={busy}
+            progress={progress}
             mode={mode}
             bills={bills}
             examples={examples}

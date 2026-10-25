@@ -3,7 +3,8 @@
 // to them only as {F1}, {F2}, … and never writes a number itself, so every
 // figure on the page traces back to a measurement. Parts get a fact only
 // when a supported cause explains them, so the writer can't give a £ figure
-// for a cause that was ruled out.
+// for a cause that was ruled out. A part over £1 that no cause could decide
+// (not enough data) gets a fact marked open, so the text says it's unexplained.
 
 import type { CauseId } from "../billmodel/causes.ts";
 import type { PartId } from "../billmodel/decompose.ts";
@@ -13,7 +14,7 @@ import { PART_CAUSES } from "../memory/casefile.ts";
 import type { InvestigationResult } from "./orchestrators/investigate.ts";
 
 export interface AnswerFact extends Fact {
-  key: string; // what it is: "change", "part:weather", "C1:price_a", …
+  key: string; // what it is: "change", "part:weather", "open:usage_other", "C1:price_a", …
   meaning: string; // for the writer's prompt
   cause?: CauseId; // set when the fact belongs to a supported cause
   required?: boolean; // the text must use it: a supported part over £1
@@ -60,6 +61,12 @@ export function buildFacts(r: InvestigationResult): FactsTable {
     });
   }
 
+  // Parts over £1 still open: a cause couldn't decide for lack of data.
+  for (const p of r.unexplained) {
+    const why = PART_CAUSES[p].map((c) => r.measured[c]?.detail.reason).find(Boolean);
+    add(`open:${p}`, pounds(r.parts[p]), r.evidence.filter((e) => e.title.endsWith(" bills") || e.title === "Daily weather").map((e) => e.id), `${PART_NAMES[p]}: ${r.parts[p] >= 0 ? "added to" : "took off"} the bill, NOT explained (${why ?? "not enough data"})`, { required: true });
+  }
+
   // The measured values behind each supported cause.
   for (const f of r.findings.filter((x) => x.verdict === "supported")) {
     const d = r.measured[f.cause]?.detail ?? {};
@@ -102,6 +109,44 @@ export function buildFacts(r: InvestigationResult): FactsTable {
     }
   }
   return { facts, byKey: new Map(facts.map((f) => [f.key, f])) };
+}
+
+// What a supported cause's measurement says, in plain words with no
+// numbers, for the writer: which way it went, so it can't guess wrong.
+export function causeStory(r: InvestigationResult, cause: CauseId): string {
+  const d = r.measured[cause]?.detail ?? {};
+  const num = (k: string) => Number(d[k] ?? 0);
+  const more = (x: number) => (x >= 0 ? "up" : "down");
+  switch (cause) {
+    case "C1":
+      return `The unit rate went ${more(num("price_b") - num("price_a"))}.`;
+    case "C2":
+      return `The standing charge went ${more(num("standing_b_p") - num("standing_a_p"))}.`;
+    case "C3":
+      return `The later bill covered ${num("days_b") > num("days_a") ? "more" : "fewer"} days than the earlier one.`;
+    case "C4": {
+      // correction = billed units minus the units the meter shows were used.
+      const [ea, eb] = [num("correction_a"), num("correction_b")];
+      const parts: string[] = [];
+      if (ea < 0) parts.push("the earlier bill used an estimated reading that was too low, so it charged for fewer units than were used, which made it smaller");
+      if (ea > 0) parts.push("the earlier bill charged for extra units catching up an even earlier estimate that was too low, which made it bigger");
+      if (eb < 0) parts.push("the later bill used an estimated reading that was too low, so it charged for fewer units than were used, which made it smaller");
+      if (eb > 0) parts.push("the later bill charged for extra units catching up the earlier estimate that was too low, which made it bigger");
+      return parts.length ? `${parts.join("; and ")}.`.replace(/^t/, "T") : "An estimated reading moved the billed units.";
+    }
+    case "C5":
+      return `The later bill has ${num("oneoff_b") - num("oneoff_a") < 0 ? `a credit${d.note_b ? ` (${String(d.note_b).toLowerCase().replace(/_/g, " ")})` : ""}` : "a one-off charge"} that the earlier one didn't.`;
+    case "C6":
+      return r.utility === "water"
+        ? `The later period was ${num("driver_b") > num("driver_a") ? "warmer" : "cooler"}, so you used ${num("driver_b") > num("driver_a") ? "more" : "less"} water.`
+        : `The later period was ${num("driver_b") > num("driver_a") ? "colder" : "milder"}, so you used ${num("driver_b") > num("driver_a") ? "more" : "less"} for heating.`;
+    case "C7":
+      return `Your use went ${more(r.parts.usage_other)} by more than the weather explains${r.utility === "water" ? "" : " (for example a new appliance, or someone at home more)"}.`;
+    case "C8":
+      return "Water use beyond the weather is up and staying up, and no household note explains it: possibly a leak.";
+    case "C9":
+      return `Beyond the weather, gas use fell and electricity use rose: a switch from gas to electric heating${r.findings.find((f) => f.cause === "C9")?.memory.length ? ", which a household note confirms" : ""}.`;
+  }
 }
 
 // One plain line per cause, from its measurement, for the causes table.

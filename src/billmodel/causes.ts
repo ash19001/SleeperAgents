@@ -18,6 +18,12 @@ export interface Measurement {
 }
 
 const pct = (from: number, to: number) => (from ? ((to - from) / Math.abs(from)) * 100 : 0);
+
+// With no weather fit at all (too few earlier bills), the weather and the
+// household's own use can't be told apart, so use-based tests can't decide.
+// A fit that exists but no longer holds (a heat pump, say) is different: the
+// change from the old pattern is exactly what C7 measures.
+const NO_FIT = "not enough earlier bills to separate the weather from your use";
 const r = (x: number, dp = 2) => Math.round(x * 10 ** dp) / 10 ** dp;
 
 export function measure(
@@ -56,12 +62,14 @@ export function measure(
       return { cause, value: r(share), passes, threshold: `weather ≥ ${T.C6_weather_share_pct}% of the use change, same direction, R² ≥ ${T.C6_min_r2}`, effect_gbp: parts.weather, detail: { r2: r(s.fit.r2), beta: r(s.fit.beta, 3), driver_a: r(A.h), driver_b: r(B.h), fit_bills: s.fit.n } };
     }
     case "C7": {
+      if (!s.fit) return { cause, value: null, passes: null, threshold: `use beyond the weather moves daily use by ≥ ${T.C7_other_change_pct}%`, effect_gbp: parts.usage_other, detail: { reason: NO_FIT } };
       const change = A.q ? (s.otherPerDay / A.q) * 100 : 0;
       return { cause, value: r(change), passes: Math.abs(change) >= T.C7_other_change_pct, threshold: `use beyond the weather moves daily use by ≥ ${T.C7_other_change_pct}%`, effect_gbp: parts.usage_other, detail: { other_per_day: r(s.otherPerDay, 3), daily_use_a: r(A.q, 3), fitted: Boolean(s.fit) } };
     }
     case "C8": {
       // A leak shows as a rise beyond the weather that stays: up this time, or
       // up last time and not back down this time ("two bills running").
+      if (!s.fit) return { cause, value: null, passes: null, threshold: `water use beyond the weather up ≥ ${T.C8_other_rise_pct}% and staying up, with no note to explain it`, effect_gbp: parts.usage_other, detail: { reason: NO_FIT } };
       const change = A.q ? (s.otherPerDay / A.q) * 100 : 0;
       const before = extra.previous && extra.previous.A.q ? (extra.previous.otherPerDay / extra.previous.A.q) * 100 : null;
       const sustained = change >= T.C8_other_rise_pct || (before !== null && before >= T.C8_other_rise_pct && change > -T.C8_other_rise_pct / 3);

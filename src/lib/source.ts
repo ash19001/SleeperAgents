@@ -11,7 +11,7 @@ import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
 import * as preview from "./preview";
 import { loadReplay, recordedQuestions, saveReplay } from "./replay";
-import type { AskResult, Bill, Household, Note } from "./types";
+import type { AskResult, Bill, Household, Note, TraceStep } from "./types";
 
 const live = () => getMode() === "live";
 
@@ -40,7 +40,8 @@ export async function addNote(text: string): Promise<Note> {
   return live() ? householdMemory().addNote(text) : preview.previewAddNote(text);
 }
 
-export async function ask(question: string): Promise<AskResult> {
+// onStep hears each agent step as it happens (live mode only).
+export async function ask(question: string, onStep?: (step: TraceStep) => void): Promise<AskResult> {
   const mode = getMode();
   if (mode === "preview") return preview.previewAsk(question);
   const notes = await getNotes();
@@ -53,7 +54,7 @@ export async function ask(question: string): Promise<AskResult> {
       message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question.${recorded.length ? ` Recorded: ${recorded.map((q) => `“${q}”`).join(", ")}.` : ""}`,
     };
   }
-  const result = await answerQuestion(question, { bills: await getBills(), data: localSource, memory: householdMemory() });
+  const result = await answerQuestion(question, { bills: await getBills(), data: localSource, memory: householdMemory(), onStep });
   saveReplay(question, notes, result);
   return result;
 }

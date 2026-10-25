@@ -37,7 +37,7 @@ export async function answerQuestion(question: string, opts: PipelineOptions): P
 
   const done = result.requests.filter((q) => found.has(q.contract.contractId));
   if (!done.length) return result;
-  const trace = new Trace(result.trace);
+  const trace = new Trace(result.trace, opts.onStep);
   const notes = opts.memory?.notes() ?? [];
   const answers = await Promise.all(done.map((q) => composeAnswer(question, found.get(q.contract.contractId)!, { trace, chatFn: opts.chatFn, notes })));
   for (const a of answers) opts.memory?.saveFindings(a);

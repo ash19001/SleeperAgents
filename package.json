@@ -20,7 +20,8 @@
     "data:preview": "node scripts/make_preview_SAMPLE.ts",
     "data:area": "node scripts/lookup_area.ts",
     "try:specialists": "node scripts/try_specialists.ts",
-    "try:orchestrator": "node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts"
+    "try:orchestrator": "node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts",
+    "eval:answers": "node --experimental-transform-types --no-warnings scripts/eval_answers.ts"
   },
   "dependencies": {
     "lucide-react": "1.55.0",

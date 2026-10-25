@@ -13,7 +13,7 @@ import type { PartId } from "../billmodel/decompose.ts";
 import { CAUSE_NAMES } from "../lib/labels.ts";
 import type { Answer, Note } from "../lib/types.ts";
 import { PART_CAUSES } from "../memory/casefile.ts";
-import { buildFacts, causesTable, components, nextSteps, type AnswerFact, type FactsTable } from "./facts.ts";
+import { buildFacts, causesTable, causeStory, components, nextSteps, type AnswerFact, type FactsTable } from "./facts.ts";
 import { chat, deepModel, type Message } from "./llm.ts";
 import { parseReport, type ChatFn } from "./loop.ts";
 import type { InvestigationResult } from "./orchestrators/investigate.ts";
@@ -39,11 +39,12 @@ function writerBrief(question: string, r: InvestigationResult, table: FactsTable
     "Facts table:",
     ...table.facts.map((f) => `- {${f.id}} = ${f.value}: ${f.meaning} ${cite(f.evidence)}${f.required ? " (must use)" : ""}`),
     "",
-    "Supported causes (give these as the reasons):",
+    "Supported causes (give these as the reasons, and describe each only as its line says):",
     ...supportedCauses(r).map((c) => {
       const f = r.findings.find((x) => x.cause === c)!;
-      return `- ${CAUSE_NAMES[c]}: facts ${factsFor(table, c).map((x) => `{${x.id}}`).join(", ") || "none"}; evidence ${cite([...f.evidence, ...f.memory])}`;
+      return `- ${CAUSE_NAMES[c]}: ${causeStory(r, c)} Facts ${factsFor(table, c).map((x) => `{${x.id}}`).join(", ") || "none"}; evidence ${cite([...f.evidence, ...f.memory])}`;
     }),
+    ...table.facts.filter((f) => f.key.startsWith("open:")).map((f) => `Not explained: {${f.id}} (${f.meaning}). Say plainly that this part can't be explained yet and why.`),
     `Checked and ruled out or not enough data: ${ruledOut.join(", ") || "none"}.`,
     notes.length ? `Household notes: ${notes.map((n) => `[${n.id}] "${n.text}"`).join("; ")}` : "Household notes: none.",
   ].join("\n");
@@ -69,7 +70,11 @@ export function templateAnswer(r: InvestigationResult, table: FactsTable): strin
     const p = f.key.slice(5) as PartId;
     lines.push(`${phrase[p]()} ${r.parts[p] >= 0 ? "added" : "took off"} {${f.id}} ${cite(f.evidence)}.`);
   }
-  if (!parts.length) lines.push("Nothing on the bill changed enough to count as a cause.");
+  for (const f of table.facts.filter((x) => x.key.startsWith("open:"))) {
+    const p = f.key.slice(5) as PartId;
+    lines.push(`Another {${f.id}} ${r.parts[p] >= 0 ? "was added" : "came off"} that can't be explained yet: ${r.measured[PART_CAUSES[p].find((c) => r.measured[c]?.detail.reason)!]?.detail.reason ?? "there isn't enough data"} ${cite(f.evidence)}.`);
+  }
+  if (!parts.length && !lines[1]) lines.push("Nothing on the bill changed enough to count as a cause.");
   return lines.join(" ");
 }
 

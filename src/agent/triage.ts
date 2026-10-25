@@ -24,6 +24,7 @@ export interface TriageOptions {
   intake?: (question: string, bills: Bill[], trace?: Trace) => Promise<Intake | null>;
   user?: UserRef;
   surface?: string;
+  onStep?: (step: TraceStep) => void; // hears each trace step as it lands
   // Runs each utility's orchestrator; the pipeline passes one that investigates.
   orchestrate?: (contract: ExecutionContract, ctx: { scout: Scout; trace: Trace }) => Promise<OrchestratorResult>;
 }
@@ -64,7 +65,7 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
   const intake = opts.intake ?? runIntake;
   const user = opts.user ?? { id: "household", role: "household" };
   const surface = opts.surface ?? "web";
-  const trace = new Trace();
+  const trace = new Trace([], opts.onStep);
   const traceId = ulid();
   const stop = listen(traceId, (e) => trace.add(eventStep(e)));
   const clarify = (message: string, utilities: Utility[]): AskResult => ({ kind: "clarify", message, options: options(utilities), trace: trace.steps });

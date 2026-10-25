@@ -71,6 +71,13 @@ describe("cause measurements on the planted events", () => {
     for (const c of ["C1", "C2", "C3", "C4", "C5", "C7"] as const) expect([c, measure(c, s, a, b).passes]).toEqual([c, false]);
   });
 
+  it("can't separate use from the weather with no fit", () => {
+    const s = split("A-G-202510", "A-G-202511"); // one earlier bill
+    const [a, b] = [bill("A-G-202510"), bill("A-G-202511")];
+    expect(s.fit).toBeNull();
+    expect(measure("C7", s, a, b)).toMatchObject({ passes: null, detail: { reason: expect.stringContaining("separate the weather") } });
+  });
+
   it("doesn't trust a weather fit that spans the heat pump", () => {
     const s = split("A-G-202607", "A-G-202608");
     expect(s.fit?.reliable).toBe(false);

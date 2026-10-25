@@ -5,14 +5,18 @@ import type { TraceStep } from "../lib/types.ts";
 
 export class Trace {
   readonly steps: TraceStep[];
+  private onStep?: (step: TraceStep) => void;
 
-  // Pass a list to keep adding to an earlier trace's steps.
-  constructor(steps: TraceStep[] = []) {
+  // Pass a list to keep adding to an earlier trace's steps, and a listener
+  // to hear each step as it lands (the page's live progress).
+  constructor(steps: TraceStep[] = [], onStep?: (step: TraceStep) => void) {
     this.steps = steps;
+    this.onStep = onStep;
   }
 
   add(step: TraceStep): TraceStep {
     this.steps.push(step);
+    this.onStep?.(step);
     return step;
   }
 

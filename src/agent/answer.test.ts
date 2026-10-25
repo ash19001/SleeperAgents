@@ -5,7 +5,7 @@ import type { Utility } from "../lib/types.ts";
 import { issueContract } from "../scout/contract.ts";
 import { composeAnswer, templateAnswer } from "./answer.ts";
 import { combine } from "./combiner.ts";
-import { buildFacts, components } from "./facts.ts";
+import { buildFacts, causeStory, components } from "./facts.ts";
 import type { ChatOptions, ChatResult } from "./llm.ts";
 import { investigate, type InvestigationResult } from "./orchestrators/investigate.ts";
 import { Trace } from "./trace.ts";
@@ -68,6 +68,23 @@ describe("facts", () => {
     expect(byKey.get("C3:days_b")?.value).toBe("35 days");
     expect(byKey.get("C1:price_b")?.value).toMatch(/^\d+\.\d\dp per kWh$/);
     expect(byKey.get("part:standing")?.required).toBe(false); // under £1
+  });
+});
+
+describe("cause lines for the writer", () => {
+  it("say which way the estimate went", async () => {
+    // November's estimate was too low; December caught the units up.
+    expect(causeStory(await result("gas-estimate"), "C4")).toBe("The later bill used an estimated reading that was too low, so it charged for fewer units than were used, which made it smaller.");
+    expect(causeStory(await result("gas-catch-up"), "C4")).toMatch(/^The earlier bill used an estimated reading that was too low.*; and the later bill charged for extra units catching up/);
+    expect(causeStory(await result("gas-january"), "C4")).toMatch(/^The earlier bill charged for extra units catching up/);
+  });
+
+  it("mark a part nothing could explain, and say so in the template", async () => {
+    const r = await result("gas-estimate"); // one earlier bill: no weather fit
+    expect(r.findings.find((f) => f.cause === "C7")?.verdict).toBe("inconclusive");
+    const open = buildFacts(r).byKey.get("open:usage_other")!;
+    expect(open).toMatchObject({ required: true, value: "£25.50" });
+    expect(templateAnswer(r, buildFacts(r))).toContain(`Another {${open.id}} was added that can't be explained yet: not enough earlier bills to separate the weather from your use`);
   });
 });
 

@@ -4,21 +4,23 @@ import { ArrowRight, Check, CircleQuestionMark, ThumbsDown, ThumbsUp, X } from "
 import { type ReactNode, useState } from "react";
 import { Chip, Chips } from "./Chip";
 import { Examples } from "./Examples";
+import { LiveProgress } from "./LiveProgress";
 import { TraceList } from "./TraceList";
 import { TriageCard } from "./TriageCard";
 import { BUTTON_QUIET_SMALL } from "./ui";
 import { postJson } from "@/lib/client";
 import { money } from "@/lib/format";
 import { CAUSE_NAMES, PART_NAMES, UTILITIES, VERDICTS } from "@/lib/labels";
-import type { Answer, AskResult, Bill, Cause, Mode } from "@/lib/types";
+import type { Answer, AskResult, Bill, Cause, Mode, TraceStep } from "@/lib/types";
 
 export type Result = AskResult | { kind: "error"; message: string } | null;
 
 type Open = (ref: string) => void;
 
-export function AnswerContent({ result, busy, mode, bills, examples, lastQuestion, onAsk, onOpen }: {
+export function AnswerContent({ result, busy, progress, mode, bills, examples, lastQuestion, onAsk, onOpen }: {
   result: Result;
   busy: boolean;
+  progress?: TraceStep[];
   mode: Mode;
   bills: Bill[];
   examples: string[];
@@ -26,8 +28,9 @@ export function AnswerContent({ result, busy, mode, bills, examples, lastQuestio
   onAsk: (question: string) => void;
   onOpen: (ref: string, answer: Answer) => void;
 }) {
-  // Live answers take about a minute, so say so rather than fade the last one.
-  if (busy && (mode === "live" || !result)) {
+  // Live answers take a while, so show the agents at work rather than fade the last answer.
+  if (busy && mode === "live" && progress) return <LiveProgress steps={progress} />;
+  if (busy && !result) {
     return (
       <Message
         title="Working on it"
