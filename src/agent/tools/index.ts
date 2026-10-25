@@ -114,6 +114,8 @@ export function testCauseTool(causes: CauseId[]): Tool {
     }),
     run: async (input, inv) => {
       const { cause, notes = [] } = input as { cause: CauseId; notes?: string[] };
+      const unknown = notes.filter((id) => !inv.recalled.has(id));
+      if (unknown.length) return { error: `${unknown.join(", ")} ${unknown.length === 1 ? "isn't a note" : "aren't notes"} you recalled with recall_notes. Pass only ids it returned.` };
       const m = await testCause(inv, cause, notes);
       return { cause, passes: m.passes, value: m.value, threshold: m.threshold, effect_gbp: m.effect_gbp, detail: m.detail, evidence: m.evidence };
     },
@@ -122,14 +124,16 @@ export function testCauseTool(causes: CauseId[]): Tool {
 
 export const recallNotes: Tool = {
   name: "recall_notes",
-  description: "Search the household's notes (things the bills can't show, like a new appliance or a heat pump) for anything relevant to these bills.",
+  description: "Search the household's notes (things the bills can't show, like a new appliance or a heat pump). Returns the notes that could bear on these bills, best match first. Use a note only if it explains this change.",
   needs: () => ["memory.recall"],
   input: z.object({ query: z.string().min(2).max(200).describe("What to look for, e.g. 'heat pump' or 'new appliance'") }),
   run: async (input, inv) => {
     const { query } = input as { query: string };
     if (!inv.memory) return { notes: [], note: "Household memory isn't connected." };
     const notes = await inv.memory.recall(query, { utility: inv.utility, from: inv.a.period_start, to: inv.b.period_end });
-    return { notes: notes.map((n) => ({ id: n.id, text: n.text, added: n.created })) };
+    if (!notes.length) return { notes: [], note: "No household notes cover these bills." };
+    for (const n of notes) inv.recalled.add(n.id);
+    return { notes: notes.map((n) => ({ id: n.id, text: n.text, added: n.created, ...(n.relevance === undefined ? {} : { relevance: n.relevance }) })) };
   },
 };
 

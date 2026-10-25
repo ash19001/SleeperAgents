@@ -24,7 +24,8 @@ export class EvidenceLog {
 }
 
 export interface NotesMemory {
-  recall(query: string, opts: { utility: Utility; from: string; to: string }): Promise<Note[]>;
+  // Notes that could bear on the bills, best match first, with H-MEM's score.
+  recall(query: string, opts: { utility: Utility; from: string; to: string }): Promise<(Note & { relevance?: number; about?: string | null })[]>;
 }
 
 export interface MeasuredCause extends Measurement {
@@ -42,11 +43,12 @@ export interface Investigation {
   trace: Trace;
   memory?: NotesMemory;
   measured: Map<CauseId, MeasuredCause>;
+  recalled: Set<string>; // note ids recall_notes has returned; only these can be cited
   cache: Map<string, Promise<unknown>>;
 }
 
-export function openInvestigation(fields: Omit<Investigation, "evidence" | "measured" | "cache">): Investigation {
-  return { ...fields, evidence: new EvidenceLog(), measured: new Map(), cache: new Map() };
+export function openInvestigation(fields: Omit<Investigation, "evidence" | "measured" | "recalled" | "cache">): Investigation {
+  return { ...fields, evidence: new EvidenceLog(), measured: new Map(), recalled: new Set(), cache: new Map() };
 }
 
 const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);

@@ -276,10 +276,10 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 8: Memory and the case file — Mon midday
 
-- [ ] 1. `src/memory/hmem.ts` over H-MEM's named services: `MemoryStoreService` (notes and findings), `MemoryRetrievalService` (recall for the Usage specialist), `TrustLedgerService` (audit), feedback from the thumbs.
+- [x] 1. `src/memory/hmem.ts` over H-MEM's named services: `MemoryStoreService` (notes and findings), `MemoryRetrievalService` (recall for the Usage specialist), `TrustLedgerService` (audit), feedback from the thumbs.
 - [x] 2. `src/memory/casefile.ts` over World Model: one case per question; bills, meters and causes as entities with stable IDs; specialists write findings; orchestrators read `buildPromptContext` (our `promptContext()`; the reference implementation has no such method).
 - [x] 3. Markovian for the orchestrator's review rounds (first to drop if late).
-- [ ] 4. After a checked answer, store each supported cause as a finding with its evidence ids.
+- [x] 4. After a checked answer, store each supported cause as a finding with its evidence ids.
 
 **Done when:** asking about April electricity before and after adding the heat pump note gives two different answers, the second citing `[M1]`, and the H-MEM audit shows the note created and recalled.
 

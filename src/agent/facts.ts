@@ -53,7 +53,7 @@ export function buildFacts(r: InvestigationResult): FactsTable {
   parts.sort((x, y) => Math.abs(r.parts[y]) - Math.abs(r.parts[x]));
   for (const p of parts) {
     const causes = PART_CAUSES[p].filter(supported);
-    const evidence = causes.flatMap((c) => found.get(c)!.evidence);
+    const evidence = causes.flatMap((c) => [...found.get(c)!.evidence, ...found.get(c)!.memory]);
     add(`part:${p}`, pounds(r.parts[p]), evidence, `${PART_NAMES[p]}: ${r.parts[p] >= 0 ? "added to" : "took off"} the bill (explained by ${causes.map((c) => `${c} ${CAUSE_NAMES[c]}`).join(" and ")})`, {
       cause: causes[0],
       required: Math.abs(r.parts[p]) >= MATERIAL_GBP,
@@ -141,7 +141,7 @@ export function causesTable(r: InvestigationResult): Cause[] {
 
 export function components(r: InvestigationResult): Part[] {
   const found = new Map(r.findings.map((f) => [f.cause, f]));
-  return (Object.keys(r.parts) as PartId[]).map((p) => ({ id: p, gbp: r.parts[p], evidence: uniq(PART_CAUSES[p].flatMap((c) => found.get(c)?.evidence ?? [])) }));
+  return (Object.keys(r.parts) as PartId[]).map((p) => ({ id: p, gbp: r.parts[p], evidence: uniq(PART_CAUSES[p].flatMap((c) => [...(found.get(c)?.evidence ?? []), ...(found.get(c)?.memory ?? [])])) }));
 }
 
 // Next steps from a fixed map, for supported causes only.

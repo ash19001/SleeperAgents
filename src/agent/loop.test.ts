@@ -25,7 +25,7 @@ function investigation(capabilities = ["bills.read", "reads.read", "tariffs.read
     },
     "test-secret",
   );
-  return { utility: "gas", contract, data: localSource, a: bill("A-G-202512"), b: bill("A-G-202601"), evidence: new EvidenceLog(), trace: new Trace(), measured: new Map(), cache: new Map() };
+  return { utility: "gas", contract, data: localSource, a: bill("A-G-202512"), b: bill("A-G-202601"), evidence: new EvidenceLog(), trace: new Trace(), measured: new Map(), recalled: new Set(), cache: new Map() };
 }
 
 // A fake model that plays back scripted turns: tool calls, or a final text.
