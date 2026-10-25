@@ -121,9 +121,17 @@ function nvidiaDirect(): Route {
 // NVIDIA's API answers 429 when calls come too fast for the account's
 // allowance (Nightshift passes it on as a 502 naming nvidia_429). So calls
 // wait for a slot, at most LLM_RPM starts a minute and LLM_CONCURRENCY at
-// once, and back off on a 429 before trying again.
+// once. A 429 cools every call in the process down, not just the one that
+// got it: all calls wait out the back-off, and the rate is halved for the
+// next two minutes, so parallel agents don't keep hitting the limit.
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const rpm = () => Number(process.env.LLM_RPM) || 30;
+const RECENT_429_MS = 120_000;
+let coolUntil = 0;
+let last429 = 0;
+const rpm = () => {
+  const base = Number(process.env.LLM_RPM) || 30;
+  return Date.now() - last429 < RECENT_429_MS ? Math.max(4, Math.floor(base / 2)) : base;
+};
 const concurrency = () => Number(process.env.LLM_CONCURRENCY) || 4;
 const starts: number[] = [];
 let active = 0;
@@ -138,6 +146,10 @@ async function slot(stats: CallStats): Promise<() => void> {
   for (;;) {
     const now = Date.now();
     while (starts.length && now - starts[0] > 60_000) starts.shift();
+    if (now < coolUntil) {
+      await sleep(Math.min(1000, coolUntil - now));
+      continue;
+    }
     if (active < concurrency() && starts.length < rpm()) {
       active++;
       starts.push(now);
@@ -167,8 +179,12 @@ async function post(route: Route, body: unknown, timeoutMs: number, stats: CallS
     if (res.ok) return res.json();
     const detail = (await res.text()).slice(0, 300);
     const limited = res.status === 429 || /nvidia_429|too many requests/i.test(detail);
-    if ((limited && attempt < 4) || (!limited && res.status >= 500 && attempt === 0)) {
-      const wait = limited ? Number(res.headers.get("retry-after")) * 1000 || 2000 * 2 ** attempt : 1000;
+    if ((limited && attempt < 6) || (!limited && res.status >= 500 && attempt === 0)) {
+      const wait = limited ? Number(res.headers.get("retry-after")) * 1000 || Math.min(30_000, 4000 * 2 ** attempt) : 1000;
+      if (limited) {
+        last429 = Date.now();
+        coolUntil = Math.max(coolUntil, Date.now() + wait);
+      }
       stats.retries++;
       stats.waitedMs += wait;
       await sleep(wait + Math.random() * 250);
