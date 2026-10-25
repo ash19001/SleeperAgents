@@ -21,7 +21,9 @@
     "data:area": "node scripts/lookup_area.ts",
     "try:specialists": "node scripts/try_specialists.ts",
     "try:orchestrator": "node --experimental-transform-types --no-warnings scripts/try_orchestrator.ts",
-    "eval:answers": "node --experimental-transform-types --no-warnings scripts/eval_answers.ts"
+    "eval:answers": "node --experimental-transform-types --no-warnings scripts/eval_answers.ts",
+    "zetaris:setup": "node scripts/zetaris_setup.ts",
+    "zetaris:check": "node scripts/check_zetaris.ts"
   },
   "dependencies": {
     "lucide-react": "1.55.0",

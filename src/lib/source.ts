@@ -1,12 +1,12 @@
 // Where the page's data comes from, by mode.
 // - preview: the hand-written SAMPLE answers.
-// - live: the agents answer every question from the SAMPLE household's
-//   supplier files (Zetaris once registered), with notes in H-MEM. Each
-//   answer is recorded for replay.
+// - live: the agents answer every question from the SAMPLE household's data
+//   through Zetaris (or the local files when its views aren't registered),
+//   with notes in H-MEM. Each answer is recorded for replay.
 // - replay: the recorded answers, with the agents off.
 
 import { answerQuestion } from "@/agent/pipeline";
-import { localSource } from "@/data/local";
+import { dataSource } from "@/data";
 import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
 import * as preview from "./preview";
@@ -26,7 +26,7 @@ export async function getHousehold(): Promise<Household> {
 // Live and replay show the bills the agents read; preview has its own set.
 export async function getBills(): Promise<Bill[]> {
   if (getMode() === "preview") return preview.previewBills();
-  const { rows } = await localSource.bills();
+  const { rows } = await (await dataSource()).bills();
   return rows.map(({ utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp }) => ({
     utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp,
   }));
@@ -54,7 +54,7 @@ export async function ask(question: string, onStep?: (step: TraceStep) => void):
       message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question.${recorded.length ? ` Recorded: ${recorded.map((q) => `“${q}”`).join(", ")}.` : ""}`,
     };
   }
-  const result = await answerQuestion(question, { bills: await getBills(), data: localSource, memory: householdMemory(), onStep });
+  const result = await answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep });
   saveReplay(question, notes, result);
   return result;
 }

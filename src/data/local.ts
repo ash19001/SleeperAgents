@@ -63,7 +63,8 @@ const round2 = (x: number) => Math.round(x * 100) / 100;
 const ukDate = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
 const MONTH = (m: number) => new Date(Date.UTC(2000, m - 1, 1)).toLocaleString("en-GB", { month: "short", timeZone: "UTC" }).replace("Sept", "Sep");
 
-function label(from: string, to: string, twoMonthly: boolean): { label: string; months: number[] } {
+// A bill's display label and months, from its dates (shared with the Zetaris source).
+export function label(from: string, to: string, twoMonthly: boolean): { label: string; months: number[] } {
   const [fy, fm] = [Number(from.slice(0, 4)), Number(from.slice(5, 7))];
   const [ty, tm] = [Number(to.slice(0, 4)), Number(to.slice(5, 7))];
   if (!twoMonthly) {
