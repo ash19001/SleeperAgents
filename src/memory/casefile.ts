@@ -37,6 +37,8 @@ export interface Review {
   requests: { specialist: string; task: string; by?: "agent" | "code" }[]; // code: sent back by the issue check
   note: string;
   by: "agent" | "code"; // code: Ultra's reply was unusable, so code decided
+  issues?: Issue[]; // issues code had found when this review was made
+  reasoning?: string; // what Ultra thought first, when its reasoning is on
 }
 
 // A problem code found in a specialist's work, for the orchestrator to send back.

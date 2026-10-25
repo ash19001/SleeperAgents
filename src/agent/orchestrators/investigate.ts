@@ -39,6 +39,7 @@ export interface InvestigationContext {
   data: DataSource;
   memory?: NotesMemory;
   chatFn?: ChatFn;
+  thinking?: boolean; // the orchestrator reasons before it plans and reviews; default ORCHESTRATOR_THINKING
 }
 
 export interface InvestigationResult {
@@ -104,6 +105,7 @@ function carryState(file: CaseFile, log: string[]): string {
 
 export async function investigate(contract: ExecutionContract, utility: Utility, ctx: InvestigationContext): Promise<InvestigationResult> {
   const chatFn = ctx.chatFn ?? chat;
+  const thinking = ctx.thinking ?? process.env.ORCHESTRATOR_THINKING === "true";
   const agent = `orchestrator:${utility}`;
   const step = (label: string, route: string, ms: number, detail?: Record<string, unknown>) => ctx.trace.add({ step: "orchestrator", agent, label, route, model: null, ms, detail });
 
@@ -145,9 +147,10 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
     ];
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const res = await chatFn({ agent, label: n === 0 ? "Plan the investigation" : last ? "Final review" : `Review round ${rounds}`, model: deepModel(), messages, maxTokens: 1200, trace: ctx.trace });
+        // With reasoning on, the thinking comes out of the same token budget, so allow for it.
+        const res = await chatFn({ agent, label: n === 0 ? "Plan the investigation" : last ? "Final review" : `Review round ${rounds}`, model: deepModel(), messages, maxTokens: thinking ? 8000 : 1200, thinking, trace: ctx.trace });
         const parsed = parseReport(res.text, Decision);
-        if (parsed.ok) return { round: n + 1, ...parsed.value, by: "agent" };
+        if (parsed.ok) return { round: n + 1, ...parsed.value, by: "agent", ...(res.reasoning ? { reasoning: res.reasoning.slice(0, 4000) } : {}) };
         messages.push({ role: "assistant", content: res.text }, { role: "user", content: `That wasn't usable: ${parsed.error}. Reply with only the JSON object.` });
       } catch {
         break;
@@ -163,6 +166,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
     reflect: false,
     stepFn: async ({ step: n, carryover }) => {
       const last = n === MAX_FOLLOW_UPS + 1;
+      const openIssues = n > 0 ? file.issues() : [];
       const review = await decide(n, carryover, last);
       const asked = new Map<SpecialistName, string>();
       const refused = new Set<SpecialistName>(); // asked again after their one follow-up
@@ -186,7 +190,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
         for (const [specialist, issues] of bySpecialist) tasks.push({ specialist, task: issues.map((i) => issueTask(i, file)).join(" "), by: "code" });
       }
       const closing = n > 0 && tasks.length === 0;
-      await file.recordReview({ ...review, done: closing, requests: tasks }, deepModel());
+      await file.recordReview({ ...review, done: closing, requests: tasks, ...(openIssues.length ? { issues: openIssues } : {}) }, deepModel());
 
       const ultraAsked = tasks.filter((t) => t.by === "agent");
       const codeAsked = tasks.filter((t) => t.by === "code" && n > 0);

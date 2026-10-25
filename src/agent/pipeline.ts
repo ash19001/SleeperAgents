@@ -19,6 +19,7 @@ export interface PipelineOptions extends Omit<TriageOptions, "orchestrate"> {
   data: DataSource;
   memory?: HouseholdMemory;
   chatFn?: ChatFn;
+  onInvestigation?: (r: InvestigationResult) => void; // for evaluation scripts
 }
 
 const NAME: Record<Utility, string> = { electricity: "Electricity", gas: "Gas", water: "Water" };
@@ -29,7 +30,10 @@ export async function answerQuestion(question: string, opts: PipelineOptions): P
     ...opts,
     orchestrate: async (contract, ctx) => {
       const r = await runOrchestrator(contract, { ...ctx, data: opts.data, memory: opts.memory, chatFn: opts.chatFn });
-      if (r.investigation) found.set(contract.contractId, r.investigation);
+      if (r.investigation) {
+        found.set(contract.contractId, r.investigation);
+        opts.onInvestigation?.(r.investigation);
+      }
       return r;
     },
   });

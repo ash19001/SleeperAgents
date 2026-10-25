@@ -76,7 +76,7 @@ async function aprilElectricity(mem: HouseholdMemory) {
     }
     if (opts.agent === "writer") text = "";
     const toolCalls: ToolCall[] = calls.map(([name, args], i) => ({ id: `c${n}-${i}`, type: "function", function: { name, arguments: JSON.stringify(args) } }));
-    return { text: calls.length ? "" : text, message: { role: "assistant", content: "", tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+    return { text: calls.length ? "" : text, reasoning: "", message: { role: "assistant", content: "", tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
   };
   const trace = new Trace();
   const r = await investigate(contract, "electricity", { trace, data: localSource, memory: mem, chatFn });

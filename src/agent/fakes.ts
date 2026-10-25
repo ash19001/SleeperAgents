@@ -4,7 +4,7 @@ import type { ChatOptions, ChatResult, ToolCall } from "./llm.ts";
 
 export function fakeReply(text: string, calls: [string, object][] = [], n = 0): ChatResult {
   const toolCalls: ToolCall[] = calls.map(([name, args], i) => ({ id: `call-${n}-${i}`, type: "function", function: { name, arguments: JSON.stringify(args) } }));
-  return { text, message: { role: "assistant", content: text, tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+  return { text, reasoning: "", message: { role: "assistant", content: text, tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
 }
 
 // A specialist that does its job: on its first turn it tests every cause it

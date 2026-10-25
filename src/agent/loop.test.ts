@@ -37,7 +37,7 @@ function scripted(turns: ({ calls: [string, object][] } | { text: string })[]) {
     const turn = turns[n++] ?? { text: "" };
     const toolCalls: ToolCall[] = "calls" in turn ? turn.calls.map(([name, args], i) => ({ id: `call-${n}-${i}`, type: "function", function: { name, arguments: JSON.stringify(args) } })) : [];
     const text = "text" in turn ? turn.text : "";
-    return { text, message: { role: "assistant", content: text, tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+    return { text, reasoning: "", message: { role: "assistant", content: text, tool_calls: toolCalls }, toolCalls, route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
   };
   return { fn, seen };
 }

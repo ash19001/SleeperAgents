@@ -7,6 +7,13 @@
 // Nightshift has a response cache that keys on the user message alone and
 // drops tool calls from cached replies (found 25 Oct 2026). So each call is
 // made unique with a short request tag unless the caller opts into the cache.
+//
+// Nightshift also keeps its own memory of past answers. With
+// `meterless-scope: user` it injects up to three of them into every prompt
+// (found 26 Oct 2026: ~900 extra tokens a call, and agents copied earlier
+// answers word for word). Calls use `session` scope by default, so each
+// investigation reasons only from its own evidence; household memory is the
+// app's own H-MEM, used deliberately through recall_notes.
 
 import { randomUUID } from "node:crypto";
 import type { Trace } from "./trace.ts";
@@ -53,6 +60,7 @@ export interface ChatResult {
   message: Message; // the raw assistant message, for tool-call loops
   toolCalls: ToolCall[];
   route: "nightshift";
+  reasoning: string; // what the model thought before answering, when thinking is on
   model: string; // the model that actually answered
   receipt: string | null; // Nightshift's compute receipt id
   cached: boolean; // served from Nightshift's cache
@@ -107,7 +115,7 @@ function nightshift(): Route {
     headers: {
       Authorization: `Bearer ${required("NIGHTSHIFT_TOKEN")}`,
       "meterless-app": process.env.NIGHTSHIFT_APP_ID || "why-my-bill",
-      "meterless-scope": "user",
+      "meterless-scope": process.env.NIGHTSHIFT_SCOPE || "session",
     },
   };
 }
@@ -245,8 +253,11 @@ async function attempt(opts: ChatOptions, started: number, stats: CallStats): Pr
     message = data.choices?.[0]?.message ?? { role: "assistant", content: "" };
   }
 
+  const raw = message.content ?? "";
+  const thought = raw.lastIndexOf("</think>");
   const result: ChatResult = {
-    text: stripThinking(message.content ?? ""),
+    text: stripThinking(raw),
+    reasoning: thought >= 0 ? raw.slice(0, thought).replace(/<think>/g, "").trim() : "",
     message,
     toolCalls: message.tool_calls ?? [],
     route: route.name,
@@ -263,7 +274,7 @@ async function attempt(opts: ChatOptions, started: number, stats: CallStats): Pr
     model: result.model,
     receipt: result.receipt,
     ms: result.ms,
-    detail: { cached, ...stats },
+    detail: { cached, ...stats, tokens: data.usage?.completion_tokens ?? null, memories: data.meterless?.receipt?.hmem?.injected ?? 0, ...(result.reasoning ? { reasoning_chars: result.reasoning.length } : {}) },
   });
   return result;
 }
