@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "note": "Model profiles Scout's Recommend stage chooses from. Both are NVIDIA Nemotron, called through Meterless Nightshift.",
+  "profiles": [
+    {
+      "id": "nemotron-lightning",
+      "provider": "nvidia via meterless-nightshift",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "latencyP95Ms": 5000,
+      "capabilities": ["function_calling", "json"],
+      "dataClasses": ["public", "household"],
+      "tasks": ["intake", "specialist", "respond"]
+    },
+    {
+      "id": "nemotron-ultra",
+      "provider": "nvidia via meterless-nightshift",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "latencyP95Ms": 12000,
+      "capabilities": ["function_calling", "json", "reasoning"],
+      "dataClasses": ["public", "household"],
+      "tasks": ["orchestrate", "combine", "write"]
+    }
+  ]
+}

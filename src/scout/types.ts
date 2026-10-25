@@ -74,7 +74,7 @@ export interface ModelProfile {
   id: string;
   provider: string;
   model: string;
-  context: number;
+  context?: number;
   latencyP95Ms: number;
   capabilities: string[]; // "function_calling", "json", "reasoning"
   dataClasses: string[]; // data classes this profile is cleared for

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "note": "Scout's capability graph for Why My Bill: each abstract capability an intent may hold, and the concrete tools that serve it. Zetaris tools are read-only; the only writes go to household memory and the case file.",
+  "capabilities": {
+    "bills.read": [{ "tool": "zetaris.whybill.bills", "readOnly": true, "local": true }],
+    "reads.read": [{ "tool": "zetaris.whybill.reads", "readOnly": true, "local": true }],
+    "tariffs.read": [{ "tool": "zetaris.whybill.tariffs", "readOnly": true, "local": true }],
+    "weather.read": [{ "tool": "zetaris.whybill.weather_daily", "readOnly": true, "local": true }],
+    "water_charges.read": [{ "tool": "zetaris.whybill.water_charges", "readOnly": true, "local": true }],
+    "memory.recall": [{ "tool": "hmem.MemoryRetrievalService", "readOnly": true, "local": true }],
+    "memory.write": [{ "tool": "hmem.MemoryStoreService", "readOnly": false, "local": true }],
+    "casefile.write": [{ "tool": "worldmodel.casefile", "readOnly": false, "local": true }]
+  }
+}
