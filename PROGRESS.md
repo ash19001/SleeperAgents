@@ -34,3 +34,6 @@ Own test suites: H-MEM, World Model and Markovian each pass 10 of 10. Scout Inte
 
 **Web page moved to Next.js.** Next.js 16.3.8 (App Router, TypeScript), Tailwind 4, lucide-react icons, fonts via `next/font`. Page in `src/app/page.tsx` (server-rendered) and `src/components/`; API routes in `src/app/api/*` (status, household, bills, notes, ask, note, feedback); data access by mode in `src/lib/source.ts`, with `WHYBILL_MODE` = preview (default), replay or live. Old `web/` single file removed; preview data is now `data/sample/preview_SAMPLE.json`.
 Checks: lint clean, `next build` passes, 17 API checks and 15 browser click-through checks (headless Chromium at phone size) pass with no console errors. Static hosting on GitHub Pages no longer fits (API routes need a server); Vercel would host replay mode.
+
+**Plan v2 (25 Oct).** `PLAN.md` rewritten: multi-agent design (guard, Lightning intake, Scout contracts, Ultra orchestrators, Lightning specialists, combiner, writer, code checker), Nemotron model per part, sponsor jobs, tech stack, rules 05 and 06, phases 3 to 11 with time boxes. Old phases 0 to 2 and the preview web app recorded under "Done so far".
+Found: Next.js defaults to port 3000, which Zetaris's UI uses; the app moves to port 5175 in Phase 3.
