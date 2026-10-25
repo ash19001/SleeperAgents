@@ -1,0 +1,161 @@
+{
+ "note": "SAMPLE data: a made-up household, priced with real Octopus tariffs (region G) and real Manchester weather. Not a real account.",
+ "records": [
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2025-09-30",
+   "register_kwh": 18420,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2025-10-31",
+   "register_kwh": 18672,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2025-11-30",
+   "register_kwh": 18931,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2025-12-28",
+   "register_kwh": 19174,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-02-01",
+   "register_kwh": 19501,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-03-01",
+   "register_kwh": 19748,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-04-01",
+   "register_kwh": 20207,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-05-01",
+   "register_kwh": 20711,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-06-01",
+   "register_kwh": 21139,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-06-29",
+   "register_kwh": 21449,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-07-31",
+   "register_kwh": 21769,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-08-31",
+   "register_kwh": 22083,
+   "source": "SMART"
+  },
+  {
+   "fuel": "ELECTRICITY",
+   "read_date": "2026-09-30",
+   "register_kwh": 22413,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2025-09-30",
+   "register_kwh": 31870,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2025-10-31",
+   "register_kwh": 32650,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2025-11-30",
+   "register_kwh": 33813,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2025-12-28",
+   "register_kwh": 34947,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-02-01",
+   "register_kwh": 36826,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-03-01",
+   "register_kwh": 38077,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-04-01",
+   "register_kwh": 38595,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-05-01",
+   "register_kwh": 38640,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-06-01",
+   "register_kwh": 38686,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-06-29",
+   "register_kwh": 38728,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-07-31",
+   "register_kwh": 38776,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-08-31",
+   "register_kwh": 38822,
+   "source": "SMART"
+  },
+  {
+   "fuel": "GAS",
+   "read_date": "2026-09-30",
+   "register_kwh": 38866,
+   "source": "SMART"
+  }
+ ]
+}

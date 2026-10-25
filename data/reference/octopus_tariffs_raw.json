@@ -1,0 +1,183 @@
+{
+ "product": "VAR-22-11-01",
+ "region": "G",
+ "fetched": "2026-10-25T16:15:36.256Z",
+ "series": {
+  "electricity.unit_rate": [
+   {
+    "value_exc_vat": 26.4892,
+    "value_inc_vat": 26.4892,
+    "valid_from": "2026-09-30T23:00:00Z",
+    "valid_to": null,
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 24.8839,
+    "value_inc_vat": 26.128095,
+    "valid_from": "2026-06-30T23:00:00Z",
+    "valid_to": "2026-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 23.5266,
+    "value_inc_vat": 24.70293,
+    "valid_from": "2026-03-31T23:00:00Z",
+    "valid_to": "2026-06-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 27.0925,
+    "value_inc_vat": 28.447125,
+    "valid_from": "2026-01-01T00:00:00Z",
+    "valid_to": "2026-03-31T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 25.8187,
+    "value_inc_vat": 27.109635,
+    "valid_from": "2025-09-30T23:00:00Z",
+    "valid_to": "2026-01-01T00:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 25.3829,
+    "value_inc_vat": 26.652045,
+    "valid_from": "2025-06-30T23:00:00Z",
+    "valid_to": "2025-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   }
+  ],
+  "electricity.standing_charge": [
+   {
+    "value_exc_vat": 44.2119,
+    "value_inc_vat": 44.2119,
+    "valid_from": "2026-09-30T23:00:00Z",
+    "valid_to": null,
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 42.2113,
+    "value_inc_vat": 44.321865,
+    "valid_from": "2026-06-30T23:00:00Z",
+    "valid_to": "2026-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 44.8371,
+    "value_inc_vat": 47.078955,
+    "valid_from": "2026-03-31T23:00:00Z",
+    "valid_to": "2026-06-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 48.4596,
+    "value_inc_vat": 50.88258,
+    "valid_from": "2026-01-01T00:00:00Z",
+    "valid_to": "2026-03-31T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 47.8073,
+    "value_inc_vat": 50.197665,
+    "valid_from": "2025-09-30T23:00:00Z",
+    "valid_to": "2026-01-01T00:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 45.61,
+    "value_inc_vat": 47.8905,
+    "valid_from": "2025-06-30T23:00:00Z",
+    "valid_to": "2025-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   }
+  ],
+  "gas.unit_rate": [
+   {
+    "value_exc_vat": 7.4883,
+    "value_inc_vat": 7.862715,
+    "valid_from": "2026-09-30T23:00:00Z",
+    "valid_to": null,
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 6.8921,
+    "value_inc_vat": 7.236705,
+    "valid_from": "2026-06-30T23:00:00Z",
+    "valid_to": "2026-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 5.3819,
+    "value_inc_vat": 5.650995,
+    "valid_from": "2026-03-31T23:00:00Z",
+    "valid_to": "2026-06-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 5.6141,
+    "value_inc_vat": 5.894805,
+    "valid_from": "2026-01-01T00:00:00Z",
+    "valid_to": "2026-03-31T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 5.9516,
+    "value_inc_vat": 6.24918,
+    "valid_from": "2025-09-30T23:00:00Z",
+    "valid_to": "2026-01-01T00:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 6.0049,
+    "value_inc_vat": 6.305145,
+    "valid_from": "2025-06-30T23:00:00Z",
+    "valid_to": "2025-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   }
+  ],
+  "gas.standing_charge": [
+   {
+    "value_exc_vat": 27.4785,
+    "value_inc_vat": 28.852425,
+    "valid_from": "2026-09-30T23:00:00Z",
+    "valid_to": null,
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 27.6476,
+    "value_inc_vat": 29.02998,
+    "valid_from": "2026-06-30T23:00:00Z",
+    "valid_to": "2026-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 27.6997,
+    "value_inc_vat": 29.084685,
+    "valid_from": "2026-03-31T23:00:00Z",
+    "valid_to": "2026-06-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 32.2688,
+    "value_inc_vat": 33.88224,
+    "valid_from": "2026-01-01T00:00:00Z",
+    "valid_to": "2026-03-31T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 31.6347,
+    "value_inc_vat": 33.216435,
+    "valid_from": "2025-09-30T23:00:00Z",
+    "valid_to": "2026-01-01T00:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   },
+   {
+    "value_exc_vat": 27.5854,
+    "value_inc_vat": 28.96467,
+    "valid_from": "2025-06-30T23:00:00Z",
+    "valid_to": "2025-09-30T23:00:00Z",
+    "payment_method": "DIRECT_DEBIT"
+   }
+  ]
+ }
+}

@@ -1,0 +1,189 @@
+{
+  "note": "SAMPLE data: a made-up household, priced with real Octopus tariffs (region G) and real Manchester weather. Not a real account. Event 3 (real tariff changes) shows up as C1 and C2 in the pairs that span 1 Jan, 1 Apr and 1 Jul.",
+  "scenarios": [
+    {
+      "id": "gas-estimate",
+      "event": 1,
+      "utility": "gas",
+      "bill_a": "A-G-202510",
+      "bill_b": "A-G-202511",
+      "must_support": [
+        "C4"
+      ],
+      "must_rule_out": [
+        "C5",
+        "C9"
+      ],
+      "note": "November used an estimate 15% low"
+    },
+    {
+      "id": "gas-catch-up",
+      "event": 1,
+      "utility": "gas",
+      "bill_a": "A-G-202511",
+      "bill_b": "A-G-202512",
+      "must_support": [
+        "C4"
+      ],
+      "must_rule_out": [
+        "C5",
+        "C9"
+      ],
+      "note": "December catches up November's estimate"
+    },
+    {
+      "id": "gas-january",
+      "event": 2,
+      "utility": "gas",
+      "bill_a": "A-G-202512",
+      "bill_b": "A-G-202601",
+      "must_support": [
+        "C3",
+        "C6",
+        "C4",
+        "C1"
+      ],
+      "must_rule_out": [
+        "C5",
+        "C9"
+      ],
+      "note": "35 days after 28, coldest month, December's catch-up, unit rate down on 1 Jan"
+    },
+    {
+      "id": "elec-january",
+      "event": 2,
+      "utility": "electricity",
+      "bill_a": "A-E-202512",
+      "bill_b": "A-E-202601",
+      "must_support": [
+        "C3",
+        "C1"
+      ],
+      "must_rule_out": [
+        "C4",
+        "C5",
+        "C9"
+      ],
+      "note": "35 days after 28, unit rate up on 1 Jan"
+    },
+    {
+      "id": "elec-april",
+      "event": 4,
+      "utility": "electricity",
+      "bill_a": "A-E-202603",
+      "bill_b": "A-E-202604",
+      "must_support": [
+        "C7",
+        "C9",
+        "C1"
+      ],
+      "must_rule_out": [
+        "C4",
+        "C5"
+      ],
+      "note": "Heat pump from 15 March: electricity up beyond weather, gas down; unit rate down on 1 Apr"
+    },
+    {
+      "id": "gas-april",
+      "event": 4,
+      "utility": "gas",
+      "bill_a": "A-G-202603",
+      "bill_b": "A-G-202604",
+      "must_support": [
+        "C7",
+        "C9"
+      ],
+      "must_rule_out": [
+        "C4",
+        "C5"
+      ],
+      "note": "Heat pump from 15 March: gas falls beyond weather"
+    },
+    {
+      "id": "elec-june",
+      "event": 5,
+      "utility": "electricity",
+      "bill_a": "A-E-202605",
+      "bill_b": "A-E-202606",
+      "must_support": [
+        "C5",
+        "C3"
+      ],
+      "must_rule_out": [
+        "C1",
+        "C2",
+        "C4",
+        "C9"
+      ],
+      "note": "£50 goodwill credit, 28 days after 31"
+    },
+    {
+      "id": "water-april-rise",
+      "event": 6,
+      "utility": "water",
+      "bill_a": "WC-202602",
+      "bill_b": "WC-202604",
+      "must_support": [
+        "C1"
+      ],
+      "must_rule_out": [
+        "C4",
+        "C5"
+      ],
+      "note": "Charges rise on 1 April"
+    },
+    {
+      "id": "water-summer-leak",
+      "event": 7,
+      "utility": "water",
+      "bill_a": "WC-202604",
+      "bill_b": "WC-202606",
+      "must_support": [
+        "C6",
+        "C8"
+      ],
+      "must_rule_out": [
+        "C1",
+        "C4",
+        "C5"
+      ],
+      "note": "Hot, dry July and a hidden leak from 15 June"
+    },
+    {
+      "id": "water-leak-continues",
+      "event": 7,
+      "utility": "water",
+      "bill_a": "WC-202606",
+      "bill_b": "WC-202608",
+      "must_support": [
+        "C8"
+      ],
+      "must_rule_out": [
+        "C1",
+        "C4",
+        "C5"
+      ],
+      "note": "The leak is still running"
+    },
+    {
+      "id": "control",
+      "event": 8,
+      "utility": "gas",
+      "bill_a": "A-G-202607",
+      "bill_b": "A-G-202608",
+      "must_support": [],
+      "must_rule_out": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C9"
+      ],
+      "note": "Same tariff quarter, 32 vs 31 days, gas for cooking only: nothing should be supported"
+    }
+  ]
+}

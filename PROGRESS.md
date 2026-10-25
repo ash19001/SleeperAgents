@@ -49,3 +49,6 @@ Found: NVIDIA answers 429 Too Many Requests when calls come quickly (Nightshift 
 
 **Phase 4, step 10 (Scout harness).** Meterless's own Scout eval harness against our `src/scout/`: first run failed the gate (intent_top1 0.82, injection_recall 0.57, self-test 129 ms); final run passes every metric at 1.0, clarification 0.03, worst scan 0.11 ms. Fixes were general (recency only when tracked, verbs kept as triggers, three injection classes, word-table matching), but were made after seeing the misses on a 32-example corpus; `eval/results.md` says so. Triage still 25/25 afterwards.
 Phase 4 done.
+
+**Phase 5, steps 2 to 5 (data).** Real Flexible Octopus prices (VAR-22-11-01, region G, direct debit; changes 1 Oct, 1 Jan, 1 Apr, 1 Jul) and real Manchester weather (Open-Meteo, Oct 2024 to Oct 2026) saved in `data/reference/`. `scripts/generate_sample.ts` builds the SAMPLE household (seeded), the eight planted events, three supplier files in different shapes (`data/sample/*_SAMPLE.{json,csv}`) and the answer key `eval/scenarios.json` (11 scenarios).
+Found (Phase 5 step 1): Zetaris file tables read only from S3 paths, not local disk. Plan: serve the supplier files from the app as JSON APIs and register them as Zetaris REST tables (reachable at host.docker.internal), alongside Octopus and Open-Meteo. To test when registering.
