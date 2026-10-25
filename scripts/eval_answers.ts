@@ -4,13 +4,15 @@
 // April electricity with the heat pump note, and "energy bills in April",
 // and records every answer in eval/answers/ for replay mode.
 //
+// Reads through Zetaris when its views answer (src/data/index.ts).
+//
 // Run: npm run eval:answers [-- scenario ids...]   (results: eval/answers_results.md)
 
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { answerQuestion } from "../src/agent/pipeline.ts";
-import { localSource } from "../src/data/local.ts";
+import { dataSource } from "../src/data/index.ts";
 import { saveReplay } from "../src/lib/replay.ts";
 import type { Answer, AskResult } from "../src/lib/types.ts";
 import { HouseholdMemory } from "../src/memory/hmem.ts";
@@ -21,7 +23,9 @@ type Scenario = { id: string; utility: string; bill_a: string; bill_b: string; m
 const { scenarios } = JSON.parse(readFileSync("eval/scenarios.json", "utf8")) as { scenarios: Scenario[] };
 const { examples, suggested_note: NOTE } = JSON.parse(readFileSync("data/sample/preview_SAMPLE.json", "utf8")) as { examples: string[]; suggested_note: string };
 const wanted = process.argv.slice(2);
-const { rows: allBills } = await localSource.bills();
+// Zetaris when its views answer, otherwise the local files (the results say which).
+const source = await dataSource();
+const { rows: allBills } = await source.bills();
 const bills = allBills.map(({ units_true: _u, energy_gbp: _e, standing_gbp: _s, standing_gbp_per_day: _d, supplier: _p, adjustment_note: _n, ...b }) => b);
 const NAME: Record<string, string> = { electricity: "electricity", gas: "gas", water: "water" };
 
@@ -38,7 +42,7 @@ const rows: Row[] = [];
 async function run(name: string, question: string, opts: { notes?: string[]; scenario?: Scenario } = {}): Promise<AskResult> {
   const mem = memory(opts.notes);
   const started = Date.now();
-  const result = await answerQuestion(question, { bills, data: localSource, memory: mem, user: { id: `eval-${name}`, role: "household" } });
+  const result = await answerQuestion(question, { bills, data: source, memory: mem, user: { id: `eval-${name}`, role: "household" } });
   const ms = Date.now() - started;
   saveReplay(question, mem.notes(), result);
   const answers: Answer[] = result.kind === "answer" ? [result.answer] : result.kind === "answers" ? result.answers : [];
@@ -94,7 +98,7 @@ const [ok, total] = scored.reduce(([o, t], r) => { const [a, b] = r.key.split(" 
 const md = [
   "# Answer evaluation",
   "",
-  `Run ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC with the whole pipeline (Nemotron via Meterless Nightshift). Each scenario is asked the way the page asks when its bar is clicked. Answer key: eval/scenarios.json.`,
+  `Run ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC with the whole pipeline (Nemotron via Meterless Nightshift), reading the data ${source.name === "zetaris" ? "through Zetaris" : "from the local SAMPLE files"}. Each scenario is asked the way the page asks when its bar is clicked. Answer key: eval/scenarios.json.`,
   "",
   `**Answer key: ${ok} of ${total} checks.** Checker: ${rows.flatMap((r) => r.checked.split(", ")).filter((c) => c === "writer").length} answers passed on the first draft, ${rows.flatMap((r) => r.checked.split(", ")).filter((c) => c === "rewrite").length} after one rewrite, ${rows.flatMap((r) => r.checked.split(", ")).filter((c) => c === "template").length} fell back to the template.`,
   "",

@@ -20,7 +20,7 @@
 -- =============================================================================
 
 -- Step 0: the Lightning database for the raw sources, and the view container.
-CREATE LIGHTNING DATABASE WHYBILL_SRC DESCRIBE BY "Why My Bill sources: SAMPLE supplier feeds, Octopus tariffs, Open-Meteo weather";
+CREATE LIGHTNING DATABASE WHYBILL_SRC DESCRIBE BY "Why My Bill sources, SAMPLE supplier feeds, Octopus tariffs, Open-Meteo weather";
 
 CREATE SCHEMASTORE CONTAINER whybill;
 

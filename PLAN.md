@@ -214,7 +214,7 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 - [x] 3. Run the app on port 5175 (`dev` and `start` scripts) so it never clashes with Zetaris's UI.
 - [ ] 4. Add `zod` and `vitest`; add the engine path aliases and `allowImportingTsExtensions`; prove one import from each engine compiles in `next build`. (Aliases are `#meterless/*` in package.json `imports`; World Model and Markovian are in the build; H-MEM comes with Phase 8.)
 - [x] 5. `src/agent/llm.ts`: `chat({agent, model, messages, tools})` through Nightshift with the app and scope headers; NVIDIA direct only on a network failure; 401, 403 and refusals are thrown, not swallowed; strips `</think>`; returns `{message, toolCalls, route, model, receipt, ms}` and adds a trace entry. Rewrite `scripts/smoke_llm.ts` to use it.
-- [ ] 6. `src/data/zetaris.ts`: `runSql(sql)` with bearer key, `X-Org-ID` and a fresh `X-Request-ID`; `evidence(id, title, sql)` refuses anything but `SELECT`, `WITH`, `SHOW` or `DESCRIBE`, converts number strings, and returns `{id, title, sql, rows, sha256, at}`.
+- [x] 6. `src/data/zetaris.ts`: `runSql(sql)` with bearer key, `X-Org-ID` and a fresh `X-Request-ID`; `evidence(id, title, sql)` refuses anything but `SELECT`, `WITH`, `SHOW` or `DESCRIBE`, converts number strings, and returns `{id, title, sql, rows, sha256, at}`.
 
 **Done when:** `npm run smoke:llm` passes through `llm.ts`, a `vitest` run passes, and `next build` compiles an import from each engine.
 
@@ -235,13 +235,13 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 
 ## Phase 5: Data — Sun evening (Zetaris steps need your yes)
 
-- [ ] 1. Read Zetaris's file and REST cookbooks and SQL gotchas in `../getting-started`. Find out whether Zetaris (in Docker) can read CSV files from this repo; if not, **(you)** either add a Docker volume or upload the files in the Zetaris UI. Write the registration steps in `PROGRESS.md`.
+- [x] 1. Read Zetaris's file and REST cookbooks and SQL gotchas in `../getting-started`. Find out whether Zetaris (in Docker) can read CSV files from this repo; if not, **(you)** either add a Docker volume or upload the files in the Zetaris UI. Write the registration steps in `PROGRESS.md`.
 - [x] 2. `scripts/fetch_tariffs.ts`: Octopus household variable product, region G, unit rates and standing charges for electricity and gas, 1 Oct 2025 to 20 Oct 2026 (`value_inc_vat`). Save raw JSON and a CSV in `data/reference/`.
 - [x] 3. `scripts/fetch_weather.ts`: Open-Meteo archive for M1 (53.4775, -2.2361), 1 Oct 2024 to 20 Oct 2026, daily mean and max temperature and rain; heating degree days = max(0, 15.5 − mean).
 - [x] 4. `data/reference/water_charges_SAMPLE.csv`: United Utilities style 2025/26 and 2026/27 rates (water and sewerage £/m³, fixed charge), rise on 1 April, labelled illustrative.
 - [x] 5. `scripts/generate_sample.ts` (fixed seed): daily use = α + β × weather + noise, priced with the real tariffs, then the planted events below. Files in `data/sample/`, deliberately in different shapes: `supplierA_energy_bills_SAMPLE.csv` (monthly, kWh, pence, read flag A/E, line items), `supplierA_meter_reads_SAMPLE.csv`, `waterco_bills_SAMPLE.csv` (two-monthly, litres, pounds, Actual/Estimated, water and sewerage lines). Answer key in `eval/scenarios.json`.
-- [ ] 6. Register the CSVs (and Octopus and Open-Meteo as REST sources, time box one hour; otherwise their saved CSVs) in Zetaris; create views in `whybill`: `bills` (one shape for all utilities, including `units_true`), `reads`, `weather_daily` (with `hdd`), `tariffs`, `water_charges`. Dry run first, then wait for a yes.
-- [ ] 7. `scripts/check_data.ts`: every bill's parts sum to its total within £0.01; true units present. Switch `src/lib/source.ts` and the intake agent's bill lookup to Zetaris.
+- [x] 6. Register the CSVs (and Octopus and Open-Meteo as REST sources, time box one hour; otherwise their saved CSVs) in Zetaris; create views in `whybill`: `bills` (one shape for all utilities, including `units_true`), `reads`, `weather_daily` (with `hdd`), `tariffs`, `water_charges`. Dry run first, then wait for a yes.
+- [x] 7. `scripts/check_data.ts`: every bill's parts sum to its total within £0.01; true units present. Switch `src/lib/source.ts` and the intake agent's bill lookup to Zetaris. (Done as `scripts/check_zetaris.ts` and `src/data/index.ts`.)
 
 **Planted events** (each in the answer key with its bill pair):
 
