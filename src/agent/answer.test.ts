@@ -5,7 +5,9 @@ import type { Utility } from "../lib/types.ts";
 import { issueContract } from "../scout/contract.ts";
 import { composeAnswer, templateAnswer } from "./answer.ts";
 import { combine } from "./combiner.ts";
+import { assess } from "./confidence.ts";
 import { buildFacts, causeStory, components } from "./facts.ts";
+import { diligentSpecialist, fakeReply } from "./fakes.ts";
 import type { ChatOptions, ChatResult } from "./llm.ts";
 import { investigate, type InvestigationResult } from "./orchestrators/investigate.ts";
 import { Trace } from "./trace.ts";
@@ -13,20 +15,21 @@ import { check, sentences } from "./verify.ts";
 
 const { scenarios } = JSON.parse(readFileSync("eval/scenarios.json", "utf8")) as { scenarios: { id: string; utility: Utility; bill_a: string; bill_b: string }[] };
 
-// A fake model: the orchestrator plans then closes, specialists report at
-// once (code settles every cause), and the writer/combiner play back `texts`.
+// A fake model: the orchestrator plans then closes, specialists test their
+// causes and report, and the writer/combiner play back `texts`.
 function fake(texts: string[] = []) {
   const calls: ChatOptions[] = [];
   let orch = 0;
   let n = 0;
   const fn = async (opts: ChatOptions): Promise<ChatResult> => {
     calls.push(structuredClone(opts));
-    const text = opts.agent.startsWith("orchestrator:")
-      ? JSON.stringify(orch++ % 2 === 0 ? { done: false, requests: [], note: "" } : { done: true, requests: [], note: "Done." })
-      : opts.agent.startsWith("specialist:")
-        ? '{"findings": [], "follow_up": null}'
-        : (texts[n++] ?? "");
-    return { text, message: { role: "assistant", content: text }, toolCalls: [], route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+    if (opts.agent.startsWith("specialist:")) {
+      const r = diligentSpecialist(opts);
+      return fakeReply(r.text, r.calls, calls.length);
+    }
+    return fakeReply(
+      opts.agent.startsWith("orchestrator:") ? JSON.stringify(orch++ % 2 === 0 ? { done: false, requests: [], note: "" } : { done: true, requests: [], note: "Done." }) : (texts[n++] ?? ""),
+    );
   };
   return { fn, calls };
 }
@@ -85,6 +88,31 @@ describe("cause lines for the writer", () => {
     const open = buildFacts(r).byKey.get("open:usage_other")!;
     expect(open).toMatchObject({ required: true, value: "£25.50" });
     expect(templateAnswer(r, buildFacts(r))).toContain(`Another {${open.id}} was added that can't be explained yet: not enough earlier bills to separate the weather from your use`);
+  });
+});
+
+describe("confidence", () => {
+  it("is high when supported causes explain the change and the weather fit holds", async () => {
+    const a = assess(await result("gas-january"));
+    expect(a).toMatchObject({ level: "high", explained_pct: 97 });
+    expect(a.reasons[1]).toMatch(/^Past bills predict your use from the weather well \(R² \d\.\d\d over \d+ bills\)/);
+  });
+
+  it("is low when much of the change can't be explained", async () => {
+    const a = assess(await result("gas-estimate")); // one earlier bill: weather and use can't be separated
+    expect(a.level).toBe("low");
+    expect(a.limitations).toEqual(expect.arrayContaining([expect.stringMatching(/^There aren't enough earlier bills/), expect.stringMatching(/^The Nov 2025 bill used an estimated reading/), expect.stringMatching(/^Use beyond the weather \(£25\.50\) can't be explained yet/)]));
+  });
+
+  it("is medium when a heat pump breaks the weather fit", async () => {
+    const a = assess(await result("elec-april"));
+    expect(a.level).toBe("medium");
+    expect(a.limitations[0]).toMatch(/^Your use no longer follows its old pattern/);
+  });
+
+  it("calls a leak a pattern, not a confirmed fault, and a flat bill high", async () => {
+    expect(assess(await result("water-summer-leak")).limitations).toContain("A possible leak is a pattern in the readings, not a confirmed fault. The meter check in “What to do next” confirms it.");
+    expect(assess(await result("control"))).toMatchObject({ level: "high", reasons: [expect.stringMatching(/^The bill barely moved \(£0\.41\)/), expect.anything()] });
   });
 });
 

@@ -1,6 +1,8 @@
-// Every model call goes through here. Meterless Nightshift first; NVIDIA
-// direct only when Nightshift can't be reached, and the trace says so.
-// Wrong keys and refusals are raised, never retried on the other route.
+// Every model call goes through here, and through Meterless Nightshift: it
+// holds the NVIDIA key and routes to Nemotron, so the app never sees that
+// key. If Nightshift can't be reached the call fails with a clear message,
+// and the callers' own fallbacks take over (keyword intake, causes settled
+// in code, the template answer; replay mode for demos).
 //
 // Nightshift has a response cache that keys on the user message alone and
 // drops tool calls from cached replies (found 25 Oct 2026). So each call is
@@ -50,7 +52,7 @@ export interface ChatResult {
   text: string; // the reply with any reasoning before </think> removed
   message: Message; // the raw assistant message, for tool-call loops
   toolCalls: ToolCall[];
-  route: "nightshift" | "nvidia-direct";
+  route: "nightshift";
   model: string; // the model that actually answered
   receipt: string | null; // Nightshift's compute receipt id
   cached: boolean; // served from Nightshift's cache
@@ -110,16 +112,8 @@ function nightshift(): Route {
   };
 }
 
-function nvidiaDirect(): Route {
-  return {
-    name: "nvidia-direct",
-    url: `${process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1"}/chat/completions`,
-    headers: { Authorization: `Bearer ${required("NVIDIA_API_KEY")}` },
-  };
-}
-
-// NVIDIA's API answers 429 when calls come too fast for the account's
-// allowance (Nightshift passes it on as a 502 naming nvidia_429). So calls
+// NVIDIA answers 429 when calls come too fast for the account's allowance
+// (Nightshift passes it on as a 502 naming nvidia_429). So calls
 // wait for a slot, at most LLM_RPM starts a minute and LLM_CONCURRENCY at
 // once. A 429 cools every call in the process down, not just the one that
 // got it: all calls wait out the back-off, and the rate is halved for the
@@ -210,13 +204,12 @@ async function send(opts: ChatOptions, fresh: boolean, stats: CallStats) {
     max_tokens: opts.maxTokens ?? (opts.thinking ? 4096 : 1024),
   };
   const timeoutMs = opts.timeoutMs ?? 120_000;
-  let route = nightshift();
+  const route = nightshift();
   try {
     return { route, data: await post(route, body, timeoutMs, stats) };
   } catch (err) {
-    if (!unreachable(err)) throw err;
-    route = nvidiaDirect();
-    return { route, data: await post(route, body, timeoutMs, stats) };
+    if (unreachable(err)) throw new LlmError(`Meterless Nightshift isn't reachable at ${route.url}. Is the Nightshift app running?`, route.name);
+    throw err;
   }
 }
 
@@ -231,7 +224,7 @@ export async function chat(opts: ChatOptions): Promise<ChatResult> {
       step: opts.agent,
       agent: opts.agent,
       label: `${opts.label} (failed)`,
-      route: err instanceof LlmError ? err.route : "nightshift",
+      route: "nightshift",
       model: opts.model,
       receipt: null,
       ms: Date.now() - started,

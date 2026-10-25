@@ -7,6 +7,7 @@
 // Reads through Zetaris when its views answer (src/data/index.ts).
 //
 // Run: npm run eval:answers [-- scenario ids...]   (results: eval/answers_results.md)
+//      npm run eval:answers -- --demo   (only the page's examples, the note and "energy", for replay)
 
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,7 +23,8 @@ process.loadEnvFile(".env.local");
 type Scenario = { id: string; utility: string; bill_a: string; bill_b: string; must_support: string[]; must_rule_out: string[] };
 const { scenarios } = JSON.parse(readFileSync("eval/scenarios.json", "utf8")) as { scenarios: Scenario[] };
 const { examples, suggested_note: NOTE } = JSON.parse(readFileSync("data/sample/preview_SAMPLE.json", "utf8")) as { examples: string[]; suggested_note: string };
-const wanted = process.argv.slice(2);
+const demo = process.argv.includes("--demo");
+const wanted = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 // Zetaris when its views answer, otherwise the local files (the results say which).
 const source = await dataSource();
 const { rows: allBills } = await source.bills();
@@ -47,7 +49,7 @@ async function run(name: string, question: string, opts: { notes?: string[]; sce
   saveReplay(question, mem.notes(), result);
   const answers: Answer[] = result.kind === "answer" ? [result.answer] : result.kind === "answers" ? result.answers : [];
   const trace = result.kind === "answer" ? result.answer.trace : "trace" in result ? (result.trace ?? []) : [];
-  const models = trace.filter((s) => s.route === "nightshift" || s.route === "nvidia-direct");
+  const models = trace.filter((s) => s.route === "nightshift");
   let key = "";
   let pair = answers.map((a) => `${a.bill_a}→${a.bill_b}`).join(", ");
   if (opts.scenario) {
@@ -83,7 +85,7 @@ async function run(name: string, question: string, opts: { notes?: string[]; sce
   return result;
 }
 
-for (const sc of scenarios.filter((s) => !wanted.length || wanted.includes(s.id))) {
+for (const sc of demo ? [] : scenarios.filter((s) => !wanted.length || wanted.includes(s.id))) {
   const b = allBills.find((x) => x.bill_id === sc.bill_b)!;
   await run(sc.id, `Why did my ${NAME[sc.utility]} bill change in ${b.label}?`, { scenario: sc });
 }
@@ -107,5 +109,5 @@ const md = [
   ...rows.map((r) => `| ${r.name} | ${r.question} | ${r.kind} | ${r.pair} | ${r.key || "–"} | ${r.checked} | ${(r.ms / 1000).toFixed(1)} s | ${r.calls} | ${r.receipts} | ${r.notes || "–"} |`),
   "",
 ];
-writeFileSync("eval/answers_results.md", md.join("\n"));
+if (!demo) writeFileSync("eval/answers_results.md", md.join("\n"));
 console.log(`\nAnswer key: ${ok}/${total}. Written to eval/answers_results.md; recordings in eval/answers/.`);

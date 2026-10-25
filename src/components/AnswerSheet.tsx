@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, CircleQuestionMark, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { ArrowRight, Check, CircleQuestionMark, Info, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Chip, Chips } from "./Chip";
 import { Examples } from "./Examples";
@@ -11,7 +11,7 @@ import { BUTTON_QUIET_SMALL } from "./ui";
 import { postJson } from "@/lib/client";
 import { money } from "@/lib/format";
 import { CAUSE_NAMES, PART_NAMES, UTILITIES, VERDICTS } from "@/lib/labels";
-import type { Answer, AskResult, Bill, Cause, Mode, TraceStep } from "@/lib/types";
+import type { Answer, AskResult, Assessment, Bill, Cause, Mode, TraceStep } from "@/lib/types";
 
 export type Result = AskResult | { kind: "error"; message: string } | null;
 
@@ -160,7 +160,9 @@ function AnswerView({ answer: a, mode, bills, onOpen, nested }: { answer: Answer
       <SplitBlock answer={a} onOpen={onOpen} />
       <CausesBlock answer={a} onOpen={onOpen} />
       <RuledOutBlock answer={a} onOpen={onOpen} />
+      <SureBlock answer={a} />
       <StepsBlock answer={a} onOpen={onOpen} />
+      <TimelineBlock answer={a} />
       {a.checked && <p className="flex items-center gap-1.5 text-sm text-ink-2"><Check aria-hidden className="size-3.5 flex-none text-accent" strokeWidth={2.5} />{CHECKED[a.checked.by]}</p>}
       <Feedback answer={a} />
       {!nested && <TraceList steps={a.trace} note={mode === "preview" ? "Preview: these times are typical figures from test calls, not from this answer." : undefined} />}
@@ -311,6 +313,70 @@ function RuledOutBlock({ answer: a, onOpen }: { answer: Answer; onOpen: Open }) 
   return (
     <Block id="h-ruled" title={`Ruled out (${ruled.length})`}>
       <ul className="grid gap-3">{ruled.map((c) => <CauseItem key={c.id} cause={c} answer={a} onOpen={onOpen} quiet />)}</ul>
+    </Block>
+  );
+}
+
+const LEVEL: Record<Assessment["level"], [string, string]> = {
+  high: ["High confidence", "bg-accent-wash text-ink"],
+  medium: ["Medium confidence", "border border-line bg-surface-2 text-ink-2"],
+  low: ["Low confidence", "bg-up-wash text-up-ink"],
+};
+
+// Worked out in code from the investigation: how much is explained, and what isn't known.
+function SureBlock({ answer: a }: { answer: Answer }) {
+  const s = a.assessment;
+  if (!s) return null;
+  const [label, cls] = LEVEL[s.level];
+  return (
+    <Block id="h-sure" title="How sure we are" aside={<span className={`rounded-full px-[9px] py-0.5 text-[0.82rem] font-bold ${cls}`}>{label}</span>}>
+      <ul className="grid gap-1.5">
+        {s.reasons.map((r) => (
+          <li key={r} className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-2 text-ink-2">
+            <Check aria-hidden className="mt-1 size-3.5 text-accent" strokeWidth={2.5} />
+            {r}
+          </li>
+        ))}
+      </ul>
+      {s.limitations.length > 0 && (
+        <div className="grid gap-1.5">
+          <h4 className="text-[0.95rem] font-semibold">What this can&apos;t tell you</h4>
+          <ul className="grid gap-1.5">
+            {s.limitations.map((l) => (
+              <li key={l} className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-2 text-[0.95rem] text-muted">
+                <Info aria-hidden className="mt-1 size-3.5" />
+                {l}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Block>
+  );
+}
+
+// The back-and-forth: the orchestrator's plan and reviews, each round of
+// specialists, code sending work back, the writer and the checker.
+function TimelineBlock({ answer: a }: { answer: Answer }) {
+  if (!a.timeline?.length) return null;
+  return (
+    <Block id="h-how" title="How the agents worked it out">
+      <ol className="grid gap-3.5 border-l border-line pl-4">
+        {a.timeline.map((t, i) => (
+          <li key={i} className="relative grid gap-0.5">
+            <span aria-hidden className="absolute top-[7px] -left-[21px] size-2.5 rounded-full border-2 border-surface bg-accent" />
+            <p className="text-[0.8rem] font-semibold tracking-[0.04em] text-ink-2 uppercase">{t.actor}</p>
+            <p>{t.text}</p>
+            {t.detail && t.detail.length > 0 && (
+              <ul className="grid gap-0.5 text-[0.92rem] text-muted">
+                {t.detail.map((d, j) => (
+                  <li key={j} className="before:mr-1.5 before:content-['·']">{d}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ol>
     </Block>
   );
 }

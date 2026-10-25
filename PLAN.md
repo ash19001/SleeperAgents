@@ -110,7 +110,7 @@ Both models call tools through Nightshift (tested 25 Oct). Ultra puts its reason
 
 ### Tracing
 
-Every model call records agent, route (`nightshift` or `nvidia-direct`), model, Nightshift `receipt_id` and milliseconds. Every tool call records its evidence id. Scout emits `scout.decision`, `contract.issued`, `contract.verified` and `contract.refused` events. H-MEM's trust ledger records every note stored and recalled. All of it goes into the answer's `trace`, shown under "How this answer was made".
+Every model call records agent, route (`nightshift`; there is no direct route, since the NVIDIA key lives in Nightshift), model, Nightshift `receipt_id` and milliseconds. Every tool call records its evidence id. Scout emits `scout.decision`, `contract.issued`, `contract.verified` and `contract.refused` events. H-MEM's trust ledger records every note stored and recalled. All of it goes into the answer's `trace`, shown under "How this answer was made".
 
 ## Tech stack
 

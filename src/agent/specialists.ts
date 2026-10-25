@@ -43,8 +43,9 @@ export interface Finding {
   memory: string[];
   reasoning: string;
   specialist: SpecialistName;
-  measured_by: "agent" | "code"; // code: the agent didn't test it, so code did
+  measured_by: "agent" | "code"; // code: the agent didn't test it in this run, so code did
   overridden: boolean; // the agent's verdict disagreed with the measurement
+  claimed: Finding["verdict"] | null; // the agent's own verdict, if it gave one
 }
 
 export interface SpecialistResult {
@@ -78,6 +79,9 @@ const verdictOf = (passes: boolean | null) => (passes === true ? "supported" : p
 export async function runSpecialist(name: SpecialistName, task: string, inv: Investigation, chatFn?: ChatFn): Promise<SpecialistResult> {
   const def = SPECIALISTS[name];
   const causes = def.causes(inv.utility);
+  // testCause records a new measurement object each time, so comparing with
+  // this snapshot shows which causes the agent tested in this run.
+  const before = new Map(inv.measured);
   const run = await runAgent(
     {
       name: `specialist:${name}`,
@@ -98,7 +102,9 @@ export async function runSpecialist(name: SpecialistName, task: string, inv: Inv
   const known = new Set(inv.evidence.records.map((r) => r.id));
   const findings: Finding[] = [];
   for (const cause of causes) {
-    const byAgent = inv.measured.has(cause);
+    const byAgent = inv.measured.has(cause) && inv.measured.get(cause) !== before.get(cause);
+    // An earlier measurement stands (with any notes linked to it); code
+    // measures only what nobody has measured yet.
     const m = inv.measured.get(cause) ?? (await testCause(inv, cause));
     const claim = said.get(cause);
     const verdict = verdictOf(m.passes);
@@ -114,6 +120,7 @@ export async function runSpecialist(name: SpecialistName, task: string, inv: Inv
       specialist: name,
       measured_by: byAgent ? "agent" : "code",
       overridden: Boolean(claim && claim.verdict !== verdict),
+      claimed: claim?.verdict ?? null,
     });
   }
   return { specialist: name, findings, follow_up: run.report?.follow_up ?? null, steps: run.steps, toolCalls: run.toolCalls, error: run.error };

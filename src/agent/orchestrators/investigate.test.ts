@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { localSource } from "../../data/local.ts";
 import { issueContract } from "../../scout/contract.ts";
+import { diligentSpecialist, fakeReply } from "../fakes.ts";
 import type { ChatOptions, ChatResult } from "../llm.ts";
 import { createScout } from "../scout.ts";
 import { Trace } from "../trace.ts";
@@ -26,14 +27,16 @@ const contract = (bill_a = "A-G-202512", bill_b = "A-G-202601") =>
   );
 
 // A fake model: the orchestrator plays back scripted replies in order;
-// specialists report at once, so code settles every cause.
-function fake(orchestrator: string[]) {
+// specialists test their causes and report what was measured, unless a
+// test swaps one in with `specialist`.
+function fake(orchestrator: string[], specialist: (opts: ChatOptions) => { text: string; calls: [string, object][] } = diligentSpecialist) {
   const calls: ChatOptions[] = [];
   let n = 0;
   const fn = async (opts: ChatOptions): Promise<ChatResult> => {
     calls.push(structuredClone(opts));
-    const text = opts.agent.startsWith("orchestrator:") ? (orchestrator[n++] ?? "") : '{"findings": [], "follow_up": null}';
-    return { text, message: { role: "assistant", content: text }, toolCalls: [], route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+    if (opts.agent.startsWith("orchestrator:")) return fakeReply(orchestrator[n++] ?? "");
+    const r = specialist(opts);
+    return fakeReply(r.text, r.calls, calls.length);
   };
   return { fn, calls };
 }
@@ -122,6 +125,60 @@ describe("investigate", () => {
     const r = await investigate(contract(), "gas", { trace: new Trace(), data: localSource, chatFn: fn });
     expect(r.rounds).toBe(1);
     expect(r.reviews.at(-1)).toMatchObject({ done: true });
+  });
+});
+
+// A weather specialist that gets C6 wrong on its first run: it claims the
+// opposite of what test_cause measured. On a follow-up it agrees, unless stubborn.
+function wrongOnWeather(stubborn = false) {
+  return (opts: ChatOptions) => {
+    const r = diligentSpecialist(opts);
+    const followUp = String(opts.messages[1]?.content).startsWith("Follow-up");
+    if (opts.agent !== "specialist:weather" || !r.text || (followUp && !stubborn)) return r;
+    const report = JSON.parse(r.text);
+    for (const f of report.findings) if (f.cause === "C6") f.verdict = f.verdict === "supported" ? "ruled_out" : "supported";
+    return { text: JSON.stringify(report), calls: [] };
+  };
+}
+
+describe("the critique loop", () => {
+  it("sends a contradicted verdict back, even when Ultra is ready to close", async () => {
+    const { fn, calls } = fake([plan, close, close], wrongOnWeather());
+    const r = await investigate(contract(), "gas", { trace: new Trace(), data: localSource, chatFn: fn });
+    expect(r.rounds).toBe(2);
+    expect(r.reviews[1]).toMatchObject({ done: false, requests: [{ specialist: "weather", by: "code" }] });
+    expect(specialistCalls(calls, "weather").at(-1)!.messages[1].content).toContain("Your verdict on C6 (Weather) was ruled out, but test_cause measures");
+    // The orchestrator saw the issue in the case file before deciding.
+    expect(calls.filter((c) => c.agent === "orchestrator:gas")[1].messages[1].content).toContain("Issues found in code");
+    expect(r.findings.find((f) => f.cause === "C6")).toMatchObject({ round: 2, overridden: false, verdict: "supported" });
+    expect(r.caseFile.history("C6")).toHaveLength(2);
+    const story = r.timeline.map((t) => `${t.actor}: ${t.text} ${(t.detail ?? []).join(" / ")}`);
+    expect(story.some((t) => t.startsWith("Code check: The orchestrator was ready to close, but code found issues") && t.includes("sent back to weather"))).toBe(true);
+    expect(story.some((t) => t.includes("weather resolved C6: it now agrees with the measurement"))).toBe(true);
+  });
+
+  it("sends back causes a specialist didn't test", async () => {
+    let firstTariff = true;
+    const lazyTariff = (opts: ChatOptions) => {
+      if (opts.agent === "specialist:tariff" && firstTariff) {
+        firstTariff = false;
+        return { text: '{"findings": [], "follow_up": null}', calls: [] as [string, object][] };
+      }
+      return diligentSpecialist(opts);
+    };
+    const { fn, calls } = fake([plan, close, close], lazyTariff);
+    const r = await investigate(contract(), "gas", { trace: new Trace(), data: localSource, chatFn: fn });
+    expect(r.rounds).toBe(2);
+    expect(specialistCalls(calls, "tariff").at(-1)!.messages[1].content).toMatch(/You reported without testing C1 .*You reported without testing C2/);
+    expect(r.findings.filter((f) => f.specialist === "tariff").map((f) => f.measured_by)).toEqual(["agent", "agent"]);
+  });
+
+  it("doesn't send a specialist back twice", async () => {
+    const { fn } = fake([plan, close, close, close], wrongOnWeather(true));
+    const r = await investigate(contract(), "gas", { trace: new Trace(), data: localSource, chatFn: fn });
+    expect(r.rounds).toBe(2);
+    expect(r.findings.find((f) => f.cause === "C6")).toMatchObject({ overridden: true, verdict: "supported" });
+    expect(r.timeline.flatMap((t) => t.detail ?? [])).toContain("weather still disagrees on C6; the measurement stands");
   });
 });
 

@@ -5,6 +5,9 @@
 // runs the specialists it asked for in parallel and writes their findings
 // to the case file. Step 1 always sends every specialist; at most two
 // follow-up rounds come after. Code, not Ultra, decides every verdict and £.
+// Code also checks each specialist's work: a verdict its own measurement
+// contradicts, or a cause it never tested, goes back to that specialist even
+// if Ultra was ready to close. The timeline records the back-and-forth.
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -13,8 +16,8 @@ import { z } from "zod";
 import type { PartId } from "../../billmodel/decompose.ts";
 import type { DataSource, EvidenceRecord, UBill } from "../../data/types.ts";
 import { CAUSE_NAMES, PART_NAMES } from "../../lib/labels.ts";
-import type { Utility } from "../../lib/types.ts";
-import { CaseFile, type CaseFinding, type Review } from "../../memory/casefile.ts";
+import type { TimelineEntry, Utility } from "../../lib/types.ts";
+import { CaseFile, type CaseFinding, type Issue, type Review } from "../../memory/casefile.ts";
 import type { ExecutionContract } from "../../scout/types.ts";
 import type { CauseId } from "../../billmodel/causes.ts";
 import { openInvestigation, pairSplit, type MeasuredCause, type NotesMemory } from "../investigation.ts";
@@ -54,6 +57,7 @@ export interface InvestigationResult {
   evidence: EvidenceRecord[];
   caseFile: CaseFile;
   markovian: { status: string; steps: number; tokensSaved: number };
+  timeline: TimelineEntry[];
 }
 
 const gbp = (x: number) => `${x < 0 ? "−" : "+"}£${Math.abs(x).toFixed(2)}`;
@@ -69,6 +73,18 @@ function taskFor(file: CaseFile, name: SpecialistName, task: string | undefined,
   if (!followUp) return task || "Check your causes for why this bill changed.";
   const mine = file.findings().filter((f) => f.specialist === name);
   return `Follow-up from the orchestrator: ${task}\nYour findings so far: ${mine.map((f) => `${f.cause} ${f.verdict} (${gbp(f.effect_gbp)})`).join("; ") || "none"}.`;
+}
+
+const ULTRA = "Orchestrator (Nemotron Ultra)";
+const LIGHTNING = "Specialists (Nemotron Lightning)";
+const CHECK = "Code check";
+
+// The task code sends back for an issue it found.
+function issueTask(i: Issue, file: CaseFile): string {
+  const f = file.findings().find((x) => x.cause === i.cause)!;
+  return i.kind === "overruled"
+    ? `Your verdict on ${i.cause} (${CAUSE_NAMES[i.cause]}) was ${f.claimed?.replace("_", " ")}, but test_cause measures ${f.value ?? "no value"} against "${f.threshold}", which makes it ${f.verdict.replace("_", " ")}. Run test_cause for ${i.cause} again, then agree or explain what the measurement misses.`
+    : `You reported without testing ${i.cause} (${CAUSE_NAMES[i.cause]}). Run test_cause for ${i.cause} and give your verdict.`;
 }
 
 // The state Markovian carries from one step to the next.
@@ -105,6 +121,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
 
   const system = systemPrompt(utility, team);
   const log: string[] = [];
+  const timeline: TimelineEntry[] = [];
   const followedUp = new Set<SpecialistName>(); // each specialist gets at most one follow-up
   let rounds = 0;
 
@@ -151,23 +168,61 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
         const name = r.specialist.toLowerCase().trim() as SpecialistName;
         if (team.includes(name) && !asked.has(name) && (n === 0 || !followedUp.has(name))) asked.set(name, r.task);
       }
-      // Step 0 sends the whole team; a follow-up step sends whoever Ultra asked.
-      const tasks = n === 0 ? team.map((s) => ({ specialist: s, task: asked.get(s) ?? "" })) : review.done || last ? [] : [...asked].map(([specialist, task]) => ({ specialist, task }));
+      // Step 0 sends the whole team; a follow-up step sends whoever Ultra
+      // asked, plus any specialist code found an unresolved issue with.
+      type Task = { specialist: SpecialistName; task: string; by: "agent" | "code" };
+      let tasks: Task[] = [];
+      let sentBack: Issue[] = [];
+      if (n === 0) tasks = team.map((s) => ({ specialist: s, task: asked.get(s) ?? "", by: review.by }));
+      else if (!last) {
+        tasks = review.done ? [] : [...asked].map(([specialist, task]) => ({ specialist, task, by: review.by }));
+        sentBack = file.issues().filter((i) => team.includes(i.specialist as SpecialistName) && !followedUp.has(i.specialist as SpecialistName) && !tasks.some((t) => t.specialist === i.specialist));
+        const bySpecialist = new Map<SpecialistName, Issue[]>();
+        for (const i of sentBack) bySpecialist.set(i.specialist as SpecialistName, [...(bySpecialist.get(i.specialist as SpecialistName) ?? []), i]);
+        for (const [specialist, issues] of bySpecialist) tasks.push({ specialist, task: issues.map((i) => issueTask(i, file)).join(" "), by: "code" });
+      }
       const closing = n > 0 && tasks.length === 0;
       await file.recordReview({ ...review, done: closing, requests: tasks }, deepModel());
+
+      const ultraAsked = tasks.filter((t) => t.by === "agent");
+      const codeAsked = tasks.filter((t) => t.by === "code" && n > 0);
+      if (n === 0) {
+        timeline.push({ actor: review.by === "agent" ? ULTRA : CHECK, text: review.by === "agent" ? `Planned the investigation: a task for each of ${tasks.length} specialists.` : "The orchestrator's plan was unusable, so code sent every specialist its default task.", detail: tasks.map((t) => `${t.specialist}: ${t.task || "check your causes"}`) });
+      } else {
+        if (review.by === "agent" && (closing || ultraAsked.length || !codeAsked.length)) {
+          timeline.push({ actor: ULTRA, text: closing ? `Closed the case. ${review.note}`.trim() : review.note || "Asked for follow-ups.", detail: ultraAsked.map((t) => `asked ${t.specialist}: ${t.task}`) });
+        }
+        if (codeAsked.length) {
+          step(`Sent back to ${codeAsked.map((t) => t.specialist).join(", ")}: issues code found in their work`, "code", 0, { issues: sentBack.map((i) => i.text) });
+          timeline.push({ actor: CHECK, text: review.done ? "The orchestrator was ready to close, but code found issues in the specialists' work and sent them back." : "Code also found issues in the specialists' work and sent them back.", detail: sentBack.map((i) => `${i.text}: sent back to ${i.specialist}`) });
+        }
+      }
       if (closing) {
         step(review.by === "agent" ? `Closed the case: ${review.note || "every part accounted for"}` : "Closed the case (code: no usable review)", "code", 0, { round: rounds });
+        if (review.by !== "agent") timeline.push({ actor: CHECK, text: "The orchestrator's review was unusable, so code closed the case." });
         return { content: `${review.note}\n[TASK_COMPLETE]` };
       }
 
       rounds++;
       if (n > 0) tasks.forEach((t) => followedUp.add(t.specialist));
       step(`Round ${rounds}: ${tasks.map((t) => t.specialist).join(", ")}`, "code", 0, { tasks, by: review.by });
+      const issuesBefore = file.issues();
       const results = await Promise.all(tasks.map((t) => runSpecialist(t.specialist, taskFor(file, t.specialist, t.task, n > 0), inv, chatFn)));
       for (const r of results) {
-        for (const f of r.findings) await file.recordFinding(f, rounds);
+        // A follow-up usually re-tests one cause: keep the earlier findings
+        // for causes the agent neither re-tested nor gave a verdict on.
+        for (const f of r.findings) if (n === 0 || f.measured_by === "agent" || f.claimed !== null) await file.recordFinding(f, rounds);
         await file.recordFollowUp(r.specialist, r.follow_up, rounds);
       }
+      const now = file.issues();
+      const detail = [
+        ...results.filter((r) => r.follow_up).map((r) => `${r.specialist} asks: ${r.follow_up}`),
+        ...(n === 0
+          ? now.map((i) => `${CHECK}: ${i.text}`)
+          : issuesBefore.filter((i) => tasks.some((t) => t.specialist === i.specialist)).map((i) => (now.some((x) => x.cause === i.cause && x.kind === i.kind) ? `${i.specialist} still disagrees on ${i.cause}; the measurement stands` : `${i.specialist} resolved ${i.cause}: it now agrees with the measurement`))),
+      ];
+      const supported = file.findings().filter((f) => f.verdict === "supported").map((f) => CAUSE_NAMES[f.cause].toLowerCase());
+      timeline.push({ actor: LIGHTNING, text: `Round ${rounds}: ${tasks.map((t) => t.specialist).join(", ")} reported back.${supported.length ? ` Supported so far: ${supported.join(", ")}.` : ""}`, detail });
       log.push(`round ${rounds} asked ${tasks.map((t) => t.specialist).join(", ")}`);
       return { content: `${review.note}\n[STATE_CHECKPOINT]\n${carryState(file, log)}` };
     },
@@ -192,5 +247,6 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
     evidence: inv.evidence.records,
     caseFile: file,
     markovian: { status: run.status, steps: run.chunks.length, tokensSaved: run.totalTokensSaved },
+    timeline,
   };
 }

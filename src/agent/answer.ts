@@ -11,8 +11,9 @@ import { z } from "zod";
 import type { CauseId } from "../billmodel/causes.ts";
 import type { PartId } from "../billmodel/decompose.ts";
 import { CAUSE_NAMES } from "../lib/labels.ts";
-import type { Answer, Note } from "../lib/types.ts";
+import type { Answer, Note, TimelineEntry } from "../lib/types.ts";
 import { PART_CAUSES } from "../memory/casefile.ts";
+import { assess } from "./confidence.ts";
 import { buildFacts, causesTable, causeStory, components, nextSteps, type AnswerFact, type FactsTable } from "./facts.ts";
 import { chat, deepModel, type Message } from "./llm.ts";
 import { parseReport, type ChatFn } from "./loop.ts";
@@ -98,6 +99,9 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     { role: "user", content: writerBrief(question, r, table, notes) },
   ];
   const problems: string[][] = [];
+  const timeline: TimelineEntry[] = [];
+  const WRITER_NAME = "Writer (Nemotron Ultra)";
+  const CHECKER = "Checker (code)";
   let text = "";
   let by: Checked["by"] = "template";
   for (const attempt of ["writer", "rewrite"] as const) {
@@ -106,14 +110,17 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
       const res = await chatFn({ agent: "writer", label: attempt === "writer" ? "Write the answer" : "Rewrite the answer", model: deepModel(), messages, maxTokens: 1200, trace: ctx.trace });
       const parsed = parseReport(res.text, Written);
       messages.push({ role: "assistant", content: res.text });
+      timeline.push({ actor: WRITER_NAME, text: attempt === "writer" ? "Wrote the answer, using only the facts table for figures." : "Rewrote the answer to fix the checker's problems." });
       if (!parsed.ok) {
         problems.push([`The reply wasn't the JSON asked for: ${parsed.error}`]);
+        timeline.push({ actor: CHECKER, text: "The draft wasn't in the required format, so the writer was asked again." });
         messages.push({ role: "user", content: `That wasn't usable: ${parsed.error}. Reply with only the JSON object.` });
         continue;
       }
       draft = parsed.value.answer_markdown.trim();
     } catch (err) {
       problems.push([`The writer failed: ${(err as Error).message.slice(0, 120)}`]);
+      timeline.push({ actor: CHECKER, text: "The writer couldn't be reached." });
       break;
     }
     const started = performance.now();
@@ -121,11 +128,13 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     const ms = Math.round(performance.now() - started);
     if (!found.length) {
       step(`Checked the answer: passed${attempt === "rewrite" ? " on the rewrite" : ""}`, ms);
+      timeline.push({ actor: CHECKER, text: "Passed: the parts add up to the penny, every figure is a measurement, and every reason cites its evidence." });
       text = draft;
       by = attempt;
       break;
     }
     problems.push(found);
+    timeline.push({ actor: CHECKER, text: `Found ${found.length} problem${found.length === 1 ? "" : "s"}${attempt === "writer" ? " and sent the draft back for one rewrite" : " in the rewrite"}.`, detail: found });
     step(`Checker found ${found.length} problem${found.length === 1 ? "" : "s"}${attempt === "writer" ? "; asked for a rewrite" : ""}`, ms, { problems: found });
     messages.push({ role: "user", content: `The checker found these problems:\n${found.map((p) => `- ${p}`).join("\n")}\nRewrite the answer to fix them. Reply with only the JSON object.` });
   }
@@ -133,6 +142,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     text = templateAnswer(r, table);
     const left = inspect(text);
     step(left.length ? `Used the template answer (checker: ${left.join(" ")})` : "Used the template answer: checked, passed", 0);
+    timeline.push({ actor: CHECKER, text: "Used the plain version built from the measurements instead, and checked it." });
   }
 
   return {
@@ -152,5 +162,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     memory: notes,
     trace: ctx.trace.steps,
     checked: { by, problems },
+    assessment: assess(r),
+    timeline: [...r.timeline, ...timeline],
   };
 }

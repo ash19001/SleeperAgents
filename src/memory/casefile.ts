@@ -34,10 +34,20 @@ export interface CaseFinding extends Finding {
 export interface Review {
   round: number;
   done: boolean;
-  requests: { specialist: string; task: string }[];
+  requests: { specialist: string; task: string; by?: "agent" | "code" }[]; // code: sent back by the issue check
   note: string;
   by: "agent" | "code"; // code: Ultra's reply was unusable, so code decided
 }
+
+// A problem code found in a specialist's work, for the orchestrator to send back.
+export interface Issue {
+  specialist: string;
+  cause: CauseId;
+  kind: "overruled" | "untested";
+  text: string;
+}
+
+const VERDICT_WORDS: Record<string, string> = { supported: "supported", ruled_out: "ruled out", inconclusive: "inconclusive" };
 
 // Parts under £1 don't need explaining.
 const MATERIAL_GBP = 1;
@@ -127,6 +137,19 @@ export class CaseFile {
     return this.wm.view("facts").about(this.id).filter((f) => f.predicate === "review").map((f) => f.value as Review);
   }
 
+  // Findings where the agent's own verdict disagreed with its measurement, or
+  // where it never tested a cause and code had to.
+  issues(): Issue[] {
+    return this.findings().flatMap((f): Issue[] => {
+      const name = `${f.cause} (${CAUSE_NAMES[f.cause]})`;
+      if (f.overridden && f.claimed) {
+        return [{ specialist: f.specialist, cause: f.cause, kind: "overruled", text: `${f.specialist} said ${name} was ${VERDICT_WORDS[f.claimed]}, but its measurement says ${VERDICT_WORDS[f.verdict]} (${f.value ?? "no value"} against ${f.threshold})` }];
+      }
+      if (f.measured_by === "code") return [{ specialist: f.specialist, cause: f.cause, kind: "untested", text: `${f.specialist} didn't test ${name} itself; code measured it as ${VERDICT_WORDS[f.verdict]}` }];
+      return [];
+    });
+  }
+
   openFollowUps(): { specialist: string; text: string; round: number }[] {
     const attrs = this.entity(this.id)!.attrs;
     return Object.entries(attrs)
@@ -180,6 +203,8 @@ export class CaseFile {
     ];
     const open = this.openFollowUps();
     if (open.length) lines.push("", "Open questions from specialists:", ...open.map((f) => `- ${f.specialist} (round ${f.round}): ${f.text}`));
+    const issues = this.issues();
+    if (issues.length) lines.push("", "Issues found in code (send each back to its specialist, unless it has had its follow-up):", ...issues.map((i) => `- ${i.text}.`));
     const asked = this.reviews().filter((v) => v.round > 1 && v.requests.length);
     if (asked.length) lines.push("", "Follow-ups already asked:", ...asked.flatMap((v) => v.requests.map((q) => `- ${q.specialist} (review ${v.round}): ${q.task}`)));
     if (findings.length) {

@@ -36,7 +36,6 @@ export const VERDICTS: Record<Verdict, string> = {
 
 export const ROUTES: Record<string, string> = {
   nightshift: "via Meterless Nightshift",
-  "nvidia-direct": "via NVIDIA direct (fallback)",
   zetaris: "Zetaris, read-only SQL",
   "h-mem": "Meterless H-MEM",
   "local-sample": "local SAMPLE file (Zetaris once registered)",

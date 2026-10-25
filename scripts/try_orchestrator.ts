@@ -48,7 +48,7 @@ for (const sc of chosen) {
   const started = Date.now();
   try {
     const r = await investigate(decision.executionContract!, sc.utility, { trace, data: localSource, memory });
-    const models = trace.steps.filter((s) => s.route === "nightshift" || s.route === "nvidia-direct");
+    const models = trace.steps.filter((s) => s.route === "nightshift");
     const ultra = models.filter((s) => s.agent?.startsWith("orchestrator:"));
     console.log(`\n${sc.id} (${a.label} → ${b.label}, ${sc.utility}): ${Date.now() - started} ms, ${r.rounds} round(s), Markovian ${r.markovian.steps} steps (${r.markovian.status}), ${models.length} model calls (${ultra.length} Ultra), ${models.filter((s) => s.receipt).length} receipts`);
     for (const v of r.reviews) console.log(`   review ${v.round} [${v.by}] ${v.done ? "done" : `asks ${v.requests.map((q) => `${q.specialist}: "${q.task.slice(0, 70)}"`).join("; ")}`}  — ${v.note.slice(0, 120)}`);

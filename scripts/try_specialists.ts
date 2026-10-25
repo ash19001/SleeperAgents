@@ -37,7 +37,7 @@ for (const sc of chosen) {
   const started = Date.now();
   const results = await Promise.all(specialistsFor(sc.utility).map((s) => runSpecialist(s, "Check your causes for why this bill changed.", inv)));
   const ms = Date.now() - started;
-  const modelCalls = trace.steps.filter((s) => s.route === "nightshift" || s.route === "nvidia-direct").length;
+  const modelCalls = trace.steps.filter((s) => s.route === "nightshift").length;
   calls += modelCalls;
   console.log(`\n${sc.id} (${a.label} → ${b.label}, ${sc.utility}): ${ms} ms, ${modelCalls} model calls, ${trace.steps.filter((s) => s.step === "tool").length} tool calls, ${inv.evidence.records.length} evidence`);
   for (const r of results) {

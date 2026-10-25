@@ -83,6 +83,21 @@ export interface Note {
   created: string;
 }
 
+// One step in how the agents worked a case out, for the page.
+export interface TimelineEntry {
+  actor: string; // "Orchestrator (Nemotron Ultra)", "Specialists (Nemotron Lightning)", "Code check", …
+  text: string;
+  detail?: string[];
+}
+
+// How sure an answer is and what it can't tell you, worked out in code.
+export interface Assessment {
+  level: "high" | "medium" | "low";
+  explained_pct: number; // share of the bill's movement that supported causes explain
+  reasons: string[];
+  limitations: string[];
+}
+
 export interface Answer {
   question: string;
   utility: Utility;
@@ -99,8 +114,11 @@ export interface Answer {
   evidence: Evidence[];
   memory: Note[];
   trace: TraceStep[];
-  // Live answers: who wrote the text that passed the checker.
+  // Live answers: who wrote the text that passed the checker, how sure the
+  // answer is, and how the agents worked it out.
   checked?: { by: "writer" | "rewrite" | "template"; problems: string[][] };
+  assessment?: Assessment;
+  timeline?: TimelineEntry[];
 }
 
 // One utility's part of a triaged question: its bills, its signed Scout

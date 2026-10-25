@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { localSource } from "../data/local.ts";
 import { HouseholdMemory } from "../memory/hmem.ts";
 import type { Intake } from "./intake.ts";
+import { diligentSpecialist, fakeReply } from "./fakes.ts";
 import type { ChatOptions, ChatResult } from "./llm.ts";
 import { answerQuestion } from "./pipeline.ts";
 import { createScout } from "./scout.ts";
@@ -11,19 +12,18 @@ const { rows: bills } = await localSource.bills();
 let n = 0;
 const user = () => ({ id: `pipeline-${n++}`, role: "household" });
 
-// Orchestrators plan then close; specialists report at once; the writer and
-// combiner reply with nothing, so the checked templates are used.
+// Orchestrators plan then close; specialists test their causes and report;
+// the writer and combiner reply with nothing, so the checked templates are used.
 function fake() {
   const seen = new Map<string, number>();
   return async (opts: ChatOptions): Promise<ChatResult> => {
     const k = (seen.get(opts.agent) ?? 0) + 1;
     seen.set(opts.agent, k);
-    const text = opts.agent.startsWith("orchestrator:")
-      ? JSON.stringify({ done: k > 1, requests: [], note: "" })
-      : opts.agent.startsWith("specialist:")
-        ? '{"findings": [], "follow_up": null}'
-        : "";
-    return { text, message: { role: "assistant", content: text }, toolCalls: [], route: "nightshift", model: "fake", receipt: null, cached: false, ms: 1 };
+    if (opts.agent.startsWith("specialist:")) {
+      const r = diligentSpecialist(opts);
+      return fakeReply(r.text, r.calls, k);
+    }
+    return fakeReply(opts.agent.startsWith("orchestrator:") ? JSON.stringify({ done: k > 1, requests: [], note: "" }) : "");
   };
 }
 const intake = (requests: Intake["requests"]) => async () => ({ requests, unclear: null }) as Intake;
