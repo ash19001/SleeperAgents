@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "note": "Why My Bill intent registry. Each bill.explain intent routes to one utility orchestrator; GENERAL never routes to tools.",
+  "intents": [
+    {
+      "id": "GENERAL",
+      "category": "general",
+      "description": "Safe fallback for greetings and questions that are not about a household bill. Replies conversationally and never routes to tools.",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": [],
+      "riskClass": "low",
+      "surfaces": ["web", "api", "chat"],
+      "roles": ["*"],
+      "examples": ["hello", "what can you help me with?", "thanks, that's useful"],
+      "version": 1
+    },
+    {
+      "id": "bill.explain.electricity",
+      "category": "bill",
+      "description": "Explain why a household electricity bill went up or down between two bills",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+          "direction": { "enum": ["up", "down", "change"] }
+        }
+      },
+      "capabilities": ["bills.read", "reads.read", "tariffs.read", "weather.read", "memory.recall", "memory.write", "casefile.write"],
+      "riskClass": "low",
+      "surfaces": ["web", "api", "chat"],
+      "roles": ["*"],
+      "examples": [
+        "Why was my electricity bill lower in June?",
+        "why did my power bill jump in April",
+        "what changed on my electric bill this month?"
+      ],
+      "version": 1
+    },
+    {
+      "id": "bill.explain.gas",
+      "category": "bill",
+      "description": "Explain why a household gas bill went up or down between two bills",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+          "direction": { "enum": ["up", "down", "change"] }
+        }
+      },
+      "capabilities": ["bills.read", "reads.read", "tariffs.read", "weather.read", "memory.recall", "memory.write", "casefile.write"],
+      "riskClass": "low",
+      "surfaces": ["web", "api", "chat"],
+      "roles": ["*"],
+      "examples": [
+        "Why did my gas bill go up in January?",
+        "my boiler bill was huge last month, why?",
+        "why is the gas so expensive this winter?"
+      ],
+      "version": 1
+    },
+    {
+      "id": "bill.explain.water",
+      "category": "bill",
+      "description": "Explain why a household water and sewerage bill went up or down between two bills",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+          "direction": { "enum": ["up", "down", "change"] }
+        }
+      },
+      "capabilities": ["bills.read", "reads.read", "water_charges.read", "weather.read", "memory.recall", "memory.write", "casefile.write"],
+      "riskClass": "low",
+      "surfaces": ["web", "api", "chat"],
+      "roles": ["*"],
+      "examples": [
+        "Why did my water bill go up in June and July?",
+        "is there a leak? my water bill doubled",
+        "why is my sewerage charge higher?"
+      ],
+      "version": 1
+    }
+  ]
+}

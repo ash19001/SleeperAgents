@@ -1,0 +1,191 @@
+{
+  "note": "Stage-1 trigger words and scoring config for Why My Bill. Config, not code, as Scout asks. A phrase listed under several intents splits its weight between them and gives no intent its own span.",
+  "weights": {
+    "lexical": 0.4,
+    "semantic": 0.35,
+    "contextual": 0.2,
+    "recency": 0.05
+  },
+  "bands": {
+    "high": 0.8,
+    "medium": 0.55,
+    "low": 0.4
+  },
+  "tieWindow": 0.05,
+  "secondaryFloor": 0.55,
+  "lexicalSaturation": 1,
+  "triggers": {
+    "bill.explain.electricity": [
+      {
+        "phrase": "electricity",
+        "weight": 1
+      },
+      {
+        "phrase": "electric",
+        "weight": 1
+      },
+      {
+        "phrase": "power bill",
+        "weight": 1
+      },
+      {
+        "phrase": "power",
+        "weight": 0.6
+      },
+      {
+        "phrase": "heat pump",
+        "weight": 0.5
+      },
+      {
+        "phrase": "ev charging",
+        "weight": 0.5
+      },
+      {
+        "phrase": "solar",
+        "weight": 0.4
+      },
+      {
+        "phrase": "economy 7",
+        "weight": 0.8
+      },
+      {
+        "phrase": "heating",
+        "weight": 0.2
+      },
+      {
+        "phrase": "energy",
+        "weight": 1
+      },
+      {
+        "phrase": "dual fuel",
+        "weight": 1
+      },
+      {
+        "phrase": "kwh",
+        "weight": 0.6
+      },
+      {
+        "phrase": "bill",
+        "weight": 1.35
+      },
+      {
+        "phrase": "bills",
+        "weight": 1.35
+      }
+    ],
+    "bill.explain.gas": [
+      {
+        "phrase": "gas",
+        "weight": 1
+      },
+      {
+        "phrase": "boiler",
+        "weight": 0.7
+      },
+      {
+        "phrase": "heating",
+        "weight": 0.4
+      },
+      {
+        "phrase": "energy",
+        "weight": 1
+      },
+      {
+        "phrase": "dual fuel",
+        "weight": 1
+      },
+      {
+        "phrase": "kwh",
+        "weight": 0.6
+      },
+      {
+        "phrase": "bill",
+        "weight": 1.35
+      },
+      {
+        "phrase": "bills",
+        "weight": 1.35
+      }
+    ],
+    "bill.explain.water": [
+      {
+        "phrase": "water",
+        "weight": 1
+      },
+      {
+        "phrase": "sewerage",
+        "weight": 0.9
+      },
+      {
+        "phrase": "sewage",
+        "weight": 0.9
+      },
+      {
+        "phrase": "united utilities",
+        "weight": 0.9
+      },
+      {
+        "phrase": "leak",
+        "weight": 0.7
+      },
+      {
+        "phrase": "leaking",
+        "weight": 0.7
+      },
+      {
+        "phrase": "cubic metres",
+        "weight": 0.6
+      },
+      {
+        "phrase": "m3",
+        "weight": 0.6
+      },
+      {
+        "phrase": "m³",
+        "weight": 0.6
+      },
+      {
+        "phrase": "tap",
+        "weight": 0.3
+      },
+      {
+        "phrase": "shower",
+        "weight": 0.3
+      },
+      {
+        "phrase": "bill",
+        "weight": 1.35
+      },
+      {
+        "phrase": "bills",
+        "weight": 1.35
+      }
+    ],
+    "GENERAL": [
+      {
+        "phrase": "hello",
+        "weight": 1
+      },
+      {
+        "phrase": "hi",
+        "weight": 0.8
+      },
+      {
+        "phrase": "thanks",
+        "weight": 0.8
+      },
+      {
+        "phrase": "thank you",
+        "weight": 0.8
+      },
+      {
+        "phrase": "what can you do",
+        "weight": 1
+      },
+      {
+        "phrase": "help me with",
+        "weight": 0.6
+      }
+    ]
+  }
+}
