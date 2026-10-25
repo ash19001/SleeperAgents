@@ -37,7 +37,14 @@ export interface ChatOptions {
   timeoutMs?: number;
   trace?: Trace;
   cache?: boolean; // allow Nightshift's response cache; only for calls whose answer depends on the user message alone
+  thinking?: boolean; // let the model reason before answering; off by default (see below)
 }
+
+// Both Nemotron models reason before they answer unless told not to, and the
+// reasoning counts against max_tokens: Lightning spends about 500 tokens of it
+// on a one-line JSON reply, so a small limit leaves the answer empty.
+// `chat_template_kwargs.enable_thinking: false` turns it off, through
+// Nightshift and direct (tested 25 Oct 2026).
 
 export interface ChatResult {
   text: string; // the reply with any reasoning before </think> removed
@@ -142,7 +149,8 @@ async function send(opts: ChatOptions, fresh: boolean) {
     model: opts.model,
     messages: fresh ? withRequestTag(opts.messages, randomUUID().slice(0, 8)) : opts.messages,
     ...(opts.tools?.length ? { tools: opts.tools, tool_choice: "auto" } : {}),
-    max_tokens: opts.maxTokens ?? 2048,
+    ...(opts.thinking ? {} : { chat_template_kwargs: { enable_thinking: false } }),
+    max_tokens: opts.maxTokens ?? (opts.thinking ? 4096 : 1024),
   };
   const timeoutMs = opts.timeoutMs ?? 120_000;
   let route = nightshift();
@@ -157,6 +165,25 @@ async function send(opts: ChatOptions, fresh: boolean) {
 
 export async function chat(opts: ChatOptions): Promise<ChatResult> {
   const started = Date.now();
+  try {
+    return await attempt(opts, started);
+  } catch (err) {
+    // Failed calls are traced too, so a fallback further up can't hide them.
+    opts.trace?.add({
+      step: opts.agent,
+      agent: opts.agent,
+      label: `${opts.label} (failed)`,
+      route: err instanceof LlmError ? err.route : "nightshift",
+      model: opts.model,
+      receipt: null,
+      ms: Date.now() - started,
+      detail: { error: (err as Error).message.slice(0, 200) },
+    });
+    throw err;
+  }
+}
+
+async function attempt(opts: ChatOptions, started: number): Promise<ChatResult> {
   let { route, data } = await send(opts, !opts.cache);
   let cached = data.meterless?.from_cache === true;
   let message: Message = data.choices?.[0]?.message ?? { role: "assistant", content: "" };
