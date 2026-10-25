@@ -34,6 +34,19 @@ export function resolvePair(bills: Bill[], utility: Utility, period: string | nu
   return { ok: true, bill_a: mine[index - 1], bill_b: mine[index] };
 }
 
+const MONTH_RE = /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/i;
+const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// The keyword fallback's month: the first month named in the text, as YYYY-MM
+// in the bills' range. Used only when the intake agent is unavailable.
+export function periodFromText(text: string, bills: Bill[]): string | null {
+  const m = text.match(MONTH_RE);
+  if (!m) return null;
+  const mm = String(MONTH_KEYS.indexOf(m[1].slice(0, 3).toLowerCase()) + 1).padStart(2, "0");
+  const all = Object.values(billMonths(bills)).flat();
+  return all.filter((p) => p.endsWith(`-${mm}`)).sort().at(-1) ?? null;
+}
+
 // The YYYY-MM months each utility has bills for, for the intake agent.
 export function billMonths(bills: Bill[]): Record<Utility, string[]> {
   const months = (u: Utility) => {

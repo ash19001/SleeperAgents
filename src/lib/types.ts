@@ -100,7 +100,45 @@ export interface Answer {
   trace: TraceStep[];
 }
 
+// One utility's part of a triaged question: its bills, its signed Scout
+// contract, and what its orchestrator did with it.
+export interface TriageRequest {
+  utility: Utility;
+  period: string | null;
+  direction: "up" | "down" | "change";
+  bill_a: string;
+  bill_b: string;
+  contract: {
+    contractId: string;
+    intent: string;
+    confidence: number;
+    band: string;
+    risk: string;
+    capabilities: string[];
+    model: string;
+    expiresAt: string;
+    signature: string;
+  };
+  orchestrator: { status: "placeholder" | "refused"; reason?: string; model?: string; ms: number };
+}
+
+export interface ClarifyOption {
+  label: string;
+  utility?: Utility;
+}
+
 export type AskResult =
   | { kind: "answer"; answer: Answer }
-  | { kind: "clarify"; message: string }
-  | { kind: "no_preview"; bill_id: string; utility: Utility };
+  | { kind: "clarify"; message: string; options?: ClarifyOption[]; trace?: TraceStep[] }
+  | { kind: "no_preview"; bill_id: string; utility: Utility }
+  | { kind: "blocked"; reason: string; trace?: TraceStep[] }
+  | { kind: "general"; message: string; trace?: TraceStep[] }
+  | {
+      kind: "triage";
+      question: string;
+      source: "intake" | "keywords"; // who read the question: the intake agent, or Scout's keywords as fallback
+      requests: TriageRequest[];
+      redactions: string[];
+      notes: string[];
+      trace: TraceStep[];
+    };
