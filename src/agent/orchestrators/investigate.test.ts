@@ -109,6 +109,20 @@ describe("investigate", () => {
     const review = calls.filter((c) => c.agent === "orchestrator:gas")[2].messages[1].content;
     expect(review).toContain("Already had their one follow-up: usage.");
     expect(review).toContain("Follow-ups already asked:\n- usage (review 2): Look for a household note on the heating.");
+    // Ultra asked for usage again; the timeline says why it closed instead of quoting the request.
+    expect(r.timeline.at(-1)?.text).toBe("Wanted more from usage, who had already had their one follow-up, so the case closed.");
+  });
+
+  it("keeps who measured a cause when a follow-up only restates it", async () => {
+    // On its follow-up, usage restates its verdicts without testing again.
+    const restating = (opts: ChatOptions) =>
+      opts.agent === "specialist:usage" && String(opts.messages[1]?.content).startsWith("Follow-up")
+        ? { text: JSON.stringify({ findings: [{ cause: "C7", verdict: "ruled_out", evidence: [], memory: [], reasoning: "No note found." }, { cause: "C9", verdict: "ruled_out", evidence: [], memory: [], reasoning: "No switch." }], follow_up: null }), calls: [] as [string, object][] }
+        : diligentSpecialist(opts);
+    const { fn } = fake([plan, askUsage, close], restating);
+    const r = await investigate(contract(), "gas", { trace: new Trace(), data: localSource, chatFn: fn });
+    expect(r.findings.find((f) => f.cause === "C7")).toMatchObject({ round: 2, measured_by: "agent", reasoning: "No note found." });
+    expect(r.caseFile.issues()).toEqual([]);
   });
 
   it("counts a part as accounted for once all its causes are ruled out", async () => {

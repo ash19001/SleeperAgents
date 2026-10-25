@@ -5,7 +5,9 @@ import type { Bill, Utility } from "../lib/types.ts";
 
 export type PairResult =
   | { ok: true; bill_a: Bill; bill_b: Bill }
-  | { ok: false; reason: "no-bill" | "first-bill"; utility: Utility; period: string | null };
+  | { ok: false; reason: "no-bill" | "first-bill"; utility: Utility; period: string | null }
+  // A month after the latest bill: the household can add the missing bill.
+  | { ok: false; reason: "missing"; utility: Utility; period: string; latest: Bill };
 
 const byStart = (a: Bill, b: Bill) => a.period_start.localeCompare(b.period_start);
 
@@ -16,14 +18,17 @@ function coversMonth(bill: Bill, period: string): boolean {
   return bill.months.includes(month) && bill.period_start <= last && bill.period_end >= first;
 }
 
-// If no bill covers the month asked for, the same month in another year is
-// almost always what was meant ("April" with bills from Oct 2025 to Sep 2026),
-// so try that, latest first.
+// A month after the latest bill is missing: the household can add it. If no
+// bill covers an earlier month, the same month in another year is almost
+// always what was meant ("April" with bills from Oct 2025 to Sep 2026), so
+// try that, latest first.
 export function resolvePair(bills: Bill[], utility: Utility, period: string | null): PairResult {
   const mine = bills.filter((b) => b.utility === utility).sort(byStart);
   let index = mine.length - 1;
   if (period) {
     index = mine.findIndex((b) => coversMonth(b, period));
+    const latest = mine.at(-1);
+    if (index < 0 && latest && `${period}-01` > latest.period_end) return { ok: false, reason: "missing", utility, period, latest };
     if (index < 0) {
       const month = Number(period.slice(5));
       index = mine.findLastIndex((b) => b.months.includes(month));

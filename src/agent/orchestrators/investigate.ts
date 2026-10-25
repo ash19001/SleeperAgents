@@ -75,6 +75,7 @@ function taskFor(file: CaseFile, name: SpecialistName, task: string | undefined,
   return `Follow-up from the orchestrator: ${task}\nYour findings so far: ${mine.map((f) => `${f.cause} ${f.verdict} (${gbp(f.effect_gbp)})`).join("; ") || "none"}.`;
 }
 
+const clip = (s: string, n = 160) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 const ULTRA = "Orchestrator (Nemotron Ultra)";
 const LIGHTNING = "Specialists (Nemotron Lightning)";
 const CHECK = "Code check";
@@ -164,9 +165,12 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
       const last = n === MAX_FOLLOW_UPS + 1;
       const review = await decide(n, carryover, last);
       const asked = new Map<SpecialistName, string>();
+      const refused = new Set<SpecialistName>(); // asked again after their one follow-up
       for (const r of review.requests) {
         const name = r.specialist.toLowerCase().trim() as SpecialistName;
-        if (team.includes(name) && !asked.has(name) && (n === 0 || !followedUp.has(name))) asked.set(name, r.task);
+        if (!team.includes(name) || asked.has(name)) continue;
+        if (n > 0 && followedUp.has(name)) refused.add(name);
+        else asked.set(name, r.task);
       }
       // Step 0 sends the whole team; a follow-up step sends whoever Ultra
       // asked, plus any specialist code found an unresolved issue with.
@@ -187,10 +191,17 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
       const ultraAsked = tasks.filter((t) => t.by === "agent");
       const codeAsked = tasks.filter((t) => t.by === "code" && n > 0);
       if (n === 0) {
-        timeline.push({ actor: review.by === "agent" ? ULTRA : CHECK, text: review.by === "agent" ? `Planned the investigation: a task for each of ${tasks.length} specialists.` : "The orchestrator's plan was unusable, so code sent every specialist its default task.", detail: tasks.map((t) => `${t.specialist}: ${t.task || "check your causes"}`) });
+        timeline.push({ actor: review.by === "agent" ? ULTRA : CHECK, text: review.by === "agent" ? `Planned the investigation: a task for each of ${tasks.length} specialists.` : "The orchestrator's plan was unusable, so code sent every specialist its default task.", detail: tasks.map((t) => `${t.specialist}: ${clip(t.task || "check your causes")}`) });
       } else {
         if (review.by === "agent" && (closing || ultraAsked.length || !codeAsked.length)) {
-          timeline.push({ actor: ULTRA, text: closing ? `Closed the case. ${review.note}`.trim() : review.note || "Asked for follow-ups.", detail: ultraAsked.map((t) => `asked ${t.specialist}: ${t.task}`) });
+          // Ultra's note may ask for work a specialist can't be given (one
+          // follow-up each); then say so rather than quote it.
+          const text = closing
+            ? refused.size && !review.done
+              ? `Wanted more from ${[...refused].join(" and ")}, who had already had their one follow-up, so the case closed.`
+              : `Closed the case. ${review.note}`.trim()
+            : review.note || "Asked for follow-ups.";
+          timeline.push({ actor: ULTRA, text, detail: ultraAsked.map((t) => `asked ${t.specialist}: ${clip(t.task)}`) });
         }
         if (codeAsked.length) {
           step(`Sent back to ${codeAsked.map((t) => t.specialist).join(", ")}: issues code found in their work`, "code", 0, { issues: sentBack.map((i) => i.text) });
@@ -210,8 +221,13 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
       const results = await Promise.all(tasks.map((t) => runSpecialist(t.specialist, taskFor(file, t.specialist, t.task, n > 0), inv, chatFn)));
       for (const r of results) {
         // A follow-up usually re-tests one cause: keep the earlier findings
-        // for causes the agent neither re-tested nor gave a verdict on.
-        for (const f of r.findings) if (n === 0 || f.measured_by === "agent" || f.claimed !== null) await file.recordFinding(f, rounds);
+        // for causes the agent neither re-tested nor gave a verdict on, and a
+        // restated verdict keeps who measured it (the measurement is the same).
+        for (const f of r.findings) {
+          if (n > 0 && f.measured_by === "code" && f.claimed === null) continue;
+          const earlier = n > 0 && f.measured_by === "code" ? file.findings().find((x) => x.cause === f.cause) : undefined;
+          await file.recordFinding(earlier ? { ...f, measured_by: earlier.measured_by } : f, rounds);
+        }
         await file.recordFollowUp(r.specialist, r.follow_up, rounds);
       }
       const now = file.issues();

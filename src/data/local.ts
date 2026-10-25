@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Utility } from "../lib/types.ts";
+import { feedRecords } from "./feeds.ts";
 import type { DataSource, EvidenceRecord, MeterRead, Read, TariffRate, UBill, WeatherDay } from "./types.ts";
 
 const FILES = {
@@ -53,7 +54,8 @@ interface RawWaterBill {
   totalPounds: number;
 }
 
-const json = <T>(path: string) => JSON.parse(readFileSync(resolve(path), "utf8")).records as T[];
+// The supplier files come through their feeds, so bills the household added are included.
+const feed = <T>(name: Parameters<typeof feedRecords>[0]) => feedRecords(name) as T[];
 const csv = (path: string) => {
   const [head, ...lines] = readFileSync(resolve(path), "utf8").trim().split("\n");
   const keys = head.split(",");
@@ -78,9 +80,14 @@ export function label(from: string, to: string, twoMonthly: boolean): { label: s
 
 let cache: { bills: UBill[]; reads: MeterRead[]; tariffs: TariffRate[]; weather: WeatherDay[] } | null = null;
 
+// After the household adds a bill, read the files again.
+export function resetLocalCache(): void {
+  cache = null;
+}
+
 function load() {
   if (cache) return cache;
-  const reads: MeterRead[] = json<RawRead>(FILES.reads).map((r) => ({
+  const reads: MeterRead[] = feed<RawRead>("supplier-a-reads").map((r) => ({
     utility: r.fuel === "GAS" ? "gas" : "electricity",
     read_date: r.read_date,
     register: r.register_kwh,
@@ -90,7 +97,7 @@ function load() {
   const registerOn = (utility: Utility, day: string) => reads.find((r) => r.utility === utility && r.read_date === day)?.register;
   const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 
-  const energy: UBill[] = json<RawEnergyBill>(FILES.energy).map((b) => {
+  const energy: UBill[] = feed<RawEnergyBill>("supplier-a-bills").map((b) => {
     const utility: Utility = b.fuel === "GAS" ? "gas" : "electricity";
     const start = registerOn(utility, dayBefore(b.period_from));
     const end = registerOn(utility, b.period_to);
@@ -116,7 +123,7 @@ function load() {
     };
   });
 
-  const water: UBill[] = json<RawWaterBill>(FILES.water).map((b) => {
+  const water: UBill[] = feed<RawWaterBill>("waterco-bills").map((b) => {
     const days = Math.round((Date.parse(b.to) - Date.parse(b.from)) / 86_400_000) + 1;
     const standing = round2(b.waterStandingPounds + b.sewerageStandingPounds);
     return {
@@ -140,7 +147,7 @@ function load() {
     };
   });
   // Water has no separate readings file: its bills carry actual register readings.
-  for (const b of json<RawWaterBill>(FILES.water)) reads.push({ utility: "water", read_date: b.to, register: b.currentReadingLitres / 1000, unit: "m³", source: "BILL" });
+  for (const b of feed<RawWaterBill>("waterco-bills")) reads.push({ utility: "water", read_date: b.to, register: b.currentReadingLitres / 1000, unit: "m³", source: "BILL" });
 
   const tariffs: TariffRate[] = csv(FILES.tariffs).map((t) => ({
     utility: t.fuel as Utility,

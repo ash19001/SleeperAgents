@@ -7,19 +7,20 @@ import { Examples } from "./Examples";
 import { LiveProgress } from "./LiveProgress";
 import { TraceList } from "./TraceList";
 import { TriageCard } from "./TriageCard";
-import { BUTTON_QUIET_SMALL } from "./ui";
+import { BUTTON, BUTTON_QUIET_SMALL } from "./ui";
 import { postJson } from "@/lib/client";
 import { money } from "@/lib/format";
 import { CAUSE_NAMES, PART_NAMES, UTILITIES, VERDICTS } from "@/lib/labels";
-import type { Answer, AskResult, Assessment, Bill, Cause, Mode, TraceStep } from "@/lib/types";
+import type { Answer, AskResult, Assessment, Bill, Cause, Mode, TraceStep, Utility } from "@/lib/types";
 
 export type Result = AskResult | { kind: "error"; message: string } | null;
 
 type Open = (ref: string) => void;
 
-export function AnswerContent({ result, busy, progress, mode, bills, examples, lastQuestion, onAsk, onOpen }: {
+export function AnswerContent({ result, busy, progress, mode, bills, examples, lastQuestion, onAsk, onOpen, onAddBill }: {
   result: Result;
   busy: boolean;
+  onAddBill?: (missing: { utility: Utility; period: string | null }) => void;
   progress?: TraceStep[];
   mode: Mode;
   bills: Bill[];
@@ -49,6 +50,23 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
       return <AnswersView key={`${result.question}|${result.answers.map((a) => a.bill_b).join()}`} result={result} mode={mode} bills={bills} onOpen={onOpen} />;
     case "clarify": {
       const opts = result.options ?? [];
+      const missing = result.missing;
+      if (missing) {
+        const month = new Date(`${missing.period}-01T00:00:00Z`).toLocaleString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+        return (
+          <>
+            <Message title="That bill isn't here yet" text={result.message} />
+            {onAddBill && (
+              <div>
+                <button type="button" className={BUTTON} onClick={() => onAddBill(missing)}>
+                  Add the {month} {UTILITIES[missing.utility].name.toLowerCase()} bill
+                </button>
+              </div>
+            )}
+            {result.trace && <TraceList steps={result.trace} />}
+          </>
+        );
+      }
       return (
         <>
           <Message title="Which bill do you mean?" text={result.message} examples={opts.length ? undefined : examples} onAsk={onAsk} />

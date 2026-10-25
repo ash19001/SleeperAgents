@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { AddBillForm } from "./AddBillForm";
 import { AnswerContent, type Result } from "./AnswerSheet";
 import { BillsCard } from "./BillsCard";
 import { EvidenceDrawer, type DrawerTarget } from "./EvidenceDrawer";
@@ -24,6 +25,8 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   const [utility, setUtility] = useState<Utility>(first?.utility ?? "gas");
   const [result, setResult] = useState<Result>(initialResult);
   const [busy, setBusy] = useState(false);
+  const [billList, setBillList] = useState(bills);
+  const [adding, setAdding] = useState<{ utility: Utility; period: string | null } | null>(null);
   const [progress, setProgress] = useState<TraceStep[]>([]);
   const [question, setQuestion] = useState(first?.question ?? "");
   const [lastQuestion, setLastQuestion] = useState(first?.question ?? "");
@@ -90,6 +93,18 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     return result;
   }
 
+  // After the household adds a missing bill: show it, then ask again (the
+  // question that found it missing, or why the new bill changed).
+  async function billSaved(billId: string, period: string | null) {
+    const res = await fetch("/api/bills");
+    const fresh = ((await res.json()) as { bills: Bill[] }).bills ?? billList;
+    setBillList(fresh);
+    setAdding(null);
+    const bill = fresh.find((b) => b.bill_id === billId);
+    if (bill) setUtility(bill.utility);
+    await ask(period && lastQuestion ? lastQuestion : bill ? `Why did my ${bill.utility} bill change in ${bill.label}?` : lastQuestion);
+  }
+
   async function addNote(text: string) {
     const { note } = await postJson<{ note: Note }>("/api/note", { text });
     setNotes((all) => [...all, note]);
@@ -104,7 +119,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <BillsCard
             household={household}
-            bills={bills}
+            bills={billList}
             utility={utility}
             onUtility={setUtility}
             selected={selected}
@@ -114,6 +129,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
             onAsk={ask}
             examples={examples}
             busy={busy}
+            onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
           />
         </div>
         <section
@@ -122,17 +138,22 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           aria-busy={busy}
           className={`grid min-w-0 scroll-mt-4 gap-6 rounded-xl border border-line bg-surface px-[18px] py-[22px] shadow-sheet transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"} sm:px-8 sm:pt-7 sm:pb-[30px] lg:col-start-2 lg:row-span-2 lg:row-start-1`}
         >
+          {adding ? (
+            <AddBillForm key={`${adding.utility}|${adding.period}`} utility={adding.utility} period={adding.period} onSaved={(id) => billSaved(id, adding.period)} onCancel={() => setAdding(null)} />
+          ) : (
           <AnswerContent
             result={result}
             busy={busy}
             progress={progress}
             mode={mode}
-            bills={bills}
+            bills={billList}
+            onAddBill={mode === "live" ? setAdding : undefined}
             examples={examples}
             onAsk={ask}
             lastQuestion={lastQuestion}
             onOpen={(ref, answer) => setDrawer({ ref, answer })}
           />
+          )}
         </section>
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
           <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />

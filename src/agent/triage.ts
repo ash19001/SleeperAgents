@@ -58,6 +58,8 @@ function direction(text: string): "up" | "down" | "change" {
   return "change";
 }
 
+const monthName = (period: string) => new Date(`${period}-01T00:00:00Z`).toLocaleString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+
 const options = (utilities: Utility[]): ClarifyOption[] => utilities.map((u) => ({ label: NAME[u], utility: u }));
 
 export async function triage(question: string, opts: TriageOptions): Promise<AskResult> {
@@ -122,10 +124,16 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
 
     // 3 to 5. Per utility: bill pair, signed contract, orchestrator.
     const notes: string[] = [];
+    let missing: { utility: Utility; period: string } | undefined;
     const outcomes = await Promise.all(
       requests.map(async (r): Promise<TriageRequest | AskResult | null> => {
         const pair = resolvePair(opts.bills, r.utility, r.period);
         if (!pair.ok) {
+          if (pair.reason === "missing") {
+            missing ??= { utility: pair.utility, period: pair.period };
+            notes.push(`There's no ${r.utility} bill for ${monthName(pair.period)} yet: the latest is ${pair.latest.label}. Add it and I'll explain it.`);
+            return null;
+          }
           notes.push(
             pair.reason === "first-bill"
               ? `That's the first ${r.utility} bill on record, so there's no earlier bill to compare it with.`
@@ -179,7 +187,7 @@ export async function triage(question: string, opts: TriageOptions): Promise<Ask
     const stopper = outcomes.find((o): o is AskResult => o !== null && "kind" in o);
     if (stopper) return stopper.kind === "clarify" || stopper.kind === "blocked" ? { ...stopper, trace: trace.steps } : stopper;
     const done = outcomes.filter((o): o is TriageRequest => o !== null);
-    if (!done.length) return { kind: "clarify", message: notes.join(" ") || "I couldn't find that bill.", options: [], trace: trace.steps };
+    if (!done.length) return { kind: "clarify", message: notes.join(" ") || "I couldn't find that bill.", options: [], missing, trace: trace.steps };
     return { kind: "triage", question, source, requests: done, redactions: hidden, notes, trace: trace.steps };
   } finally {
     stop();

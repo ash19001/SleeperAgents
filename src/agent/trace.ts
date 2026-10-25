@@ -15,6 +15,7 @@ export class Trace {
   }
 
   add(step: TraceStep): TraceStep {
+    step.at ??= Date.now();
     this.steps.push(step);
     this.onStep?.(step);
     return step;

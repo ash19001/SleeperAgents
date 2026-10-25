@@ -7,11 +7,15 @@
 
 import { answerQuestion } from "@/agent/pipeline";
 import { dataSource } from "@/data";
+import { addBill as storeBill, nextBillDraft, type BillInput } from "@/data/added";
+import { feedRecords } from "@/data/feeds";
+import { resetLocalCache } from "@/data/local";
+import { refreshFeeds } from "@/data/zetaris";
 import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
 import * as preview from "./preview";
 import { loadReplay, recordedQuestions, saveReplay } from "./replay";
-import type { AskResult, Bill, Household, Note, TraceStep } from "./types";
+import type { AskResult, Bill, Household, Note, TraceStep, Utility } from "./types";
 
 const live = () => getMode() === "live";
 
@@ -54,7 +58,13 @@ export async function ask(question: string, onStep?: (step: TraceStep) => void):
       message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question.${recorded.length ? ` Recorded: ${recorded.map((q) => `“${q}”`).join(", ")}.` : ""}`,
     };
   }
-  const result = await answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep });
+  // Every agent step goes to the server log too: who, what, which model, the Nightshift receipt.
+  const log = (s: TraceStep) => {
+    console.log(`[why-my-bill] ${s.agent ?? s.step} | ${s.label ?? s.step} | ${s.model ?? s.route}${s.receipt ? ` | receipt ${s.receipt}` : ""} | ${Math.round(s.ms)} ms`);
+    onStep?.(s);
+  };
+  console.log(`[why-my-bill] question: ${question}`);
+  const result = await answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep: log });
   saveReplay(question, notes, result);
   return result;
 }
@@ -67,4 +77,20 @@ export async function saveFeedback(input: { question: string; bill_a?: string; b
   const cited = memory.notes().filter((n) => input.memory?.includes(n.id));
   const updated = memory.feedback({ bill_a: input.bill_a, bill_b: input.bill_b, memory: cited }, input.rating === "helpful");
   return { stored: true, updated };
+}
+
+// A missing bill the household adds (live mode): what the form starts with,
+// and saving it into the supplier feed, then refreshing Zetaris's copy so the
+// agents see it straight away.
+export function billDraft(utility: Utility) {
+  return nextBillDraft(utility, feedRecords);
+}
+
+export async function addBill(input: BillInput): Promise<{ bill_id: string; zetaris: "refreshed" | "not used" }> {
+  if (!live()) throw new Error("Bills can be added in live mode only.");
+  const { bill_id, feeds } = storeBill(input, feedRecords);
+  resetLocalCache();
+  const source = await dataSource();
+  if (source.name === "zetaris") await refreshFeeds(feeds);
+  return { bill_id, zetaris: source.name === "zetaris" ? "refreshed" : "not used" };
 }

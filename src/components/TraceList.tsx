@@ -7,12 +7,15 @@ import type { TraceStep } from "@/lib/types";
 export function TraceList({ steps, open = false, note }: { steps: TraceStep[]; open?: boolean; note?: string }) {
   if (!steps.length) return null;
   const total = steps.reduce((t, s) => t + s.ms, 0);
+  // Steps run in parallel, so the elapsed time comes from when they started and ended.
+  const timed = steps.filter((s) => s.at);
+  const elapsed = timed.length ? Math.max(...timed.map((s) => s.at!)) - Math.min(...timed.map((s) => s.at! - s.ms)) : null;
   return (
     <details open={open} className="group border-t border-line pt-4">
       <summary className="flex cursor-pointer list-none flex-wrap justify-between gap-x-3 gap-y-1 [&::-webkit-details-marker]:hidden">
         <span className="eyebrow before:content-['+_'] group-open:before:content-['−_']">How this answer was made</span>
         <span className="text-sm text-muted">
-          {steps.length} steps{steps.some((s) => s.agent?.startsWith("specialist:")) ? `, ${fmtMs(Math.round(total))} of work, much of it in parallel` : `, ${fmtMs(Math.round(total))}`}
+          {steps.length} steps, {elapsed !== null ? `answered in ${fmtMs(Math.round(elapsed))}` : fmtMs(Math.round(total))}
         </span>
       </summary>
       <ol className="mt-3.5 grid list-decimal gap-2.5 pl-6">

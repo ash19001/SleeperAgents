@@ -33,6 +33,26 @@ export async function runSql(sql: string, limit = 5000): Promise<Row[]> {
   return body.data.map((row) => Object.fromEntries(body.headers.map((h, i) => [h, row[i]])));
 }
 
+// Re-reads a supplier feed after the household adds a bill: Zetaris drops
+// its cached copy and caches a fresh one from the feed. Only these two
+// statements, on these tables, are ever sent outside runSql.
+const FEED_TABLES = { "supplier-a-bills": "supplier_a_bills", "supplier-a-reads": "supplier_a_reads", "waterco-bills": "waterco_bills" } as const;
+
+export async function refreshFeeds(feeds: (keyof typeof FEED_TABLES)[]): Promise<void> {
+  const base = (process.env.ZETARIS_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+  for (const table of feeds.map((f) => FEED_TABLES[f])) {
+    for (const sql of [`UNCACHE TABLE whybill_src.${table}`, `CACHE TABLE whybill_src.${table}`]) {
+      const res = await fetch(`${base}/api/proxy/sql-editor/sqls/run-query`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.ZETARIS_API_KEY ?? ""}`, "X-Org-ID": String(process.env.ZETARIS_ORG_ID ?? ""), "X-Request-ID": randomUUID(), "Content-Type": "application/json" },
+        body: JSON.stringify({ sql, limit: 1 }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) throw new Error(`Zetaris refresh failed (${sql}): ${res.status} ${(await res.text()).slice(0, 200)}`);
+    }
+  }
+}
+
 // Zetaris returns every value as a string.
 const num = (v: string | null | undefined) => (v === null || v === undefined || v === "" ? 0 : Number(v));
 const str = (v: string | null | undefined) => v ?? "";

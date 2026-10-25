@@ -4,14 +4,14 @@ import { MapPin } from "lucide-react";
 import type { KeyboardEvent } from "react";
 import { BillsChart } from "./BillsChart";
 import { Examples } from "./Examples";
-import { BUTTON } from "./ui";
+import { BUTTON, BUTTON_QUIET_SMALL } from "./ui";
 import { fmtDate } from "@/lib/format";
 import { UTILITIES } from "@/lib/labels";
 import type { Bill, Household, Utility } from "@/lib/types";
 
 const ORDER: Utility[] = ["electricity", "gas", "water"];
 
-export function BillsCard({ household, bills, utility, onUtility, selected, previewIds, question, onQuestion, onAsk, examples, busy }: {
+export function BillsCard({ household, bills, utility, onUtility, selected, previewIds, question, onQuestion, onAsk, examples, busy, onAddBill }: {
   household: Household;
   bills: Bill[];
   utility: Utility;
@@ -23,6 +23,7 @@ export function BillsCard({ household, bills, utility, onUtility, selected, prev
   onAsk: (question: string) => void;
   examples: string[];
   busy: boolean;
+  onAddBill?: () => void; // live mode: add the next bill for this utility
 }) {
   const shown = bills.filter((b) => b.utility === utility);
 
@@ -83,7 +84,14 @@ export function BillsCard({ household, bills, utility, onUtility, selected, prev
           onPick={(bill) => onAsk(`Why did my ${UTILITIES[bill.utility].name.toLowerCase()} bill change in ${bill.label}?`)}
         />
       </div>
-      <p className="text-sm text-muted">Tap a bar to ask why that bill changed.</p>
+      <p className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted">
+        Tap a bar to ask why that bill changed.
+        {onAddBill && (
+          <button type="button" className={BUTTON_QUIET_SMALL} onClick={onAddBill}>
+            Add a bill
+          </button>
+        )}
+      </p>
 
       <form
         autoComplete="off"

@@ -74,6 +74,7 @@ export interface TraceStep {
   model: string | null;
   receipt?: string | null;
   ms: number;
+  at?: number; // when the step finished (epoch ms), for the elapsed time
   detail?: Record<string, unknown>;
 }
 
@@ -159,7 +160,7 @@ export type AskResult =
       notes: string[]; // utilities that couldn't be answered, and why
       trace: TraceStep[];
     }
-  | { kind: "clarify"; message: string; options?: ClarifyOption[]; trace?: TraceStep[] }
+  | { kind: "clarify"; message: string; options?: ClarifyOption[]; missing?: { utility: Utility; period: string }; trace?: TraceStep[] }
   | { kind: "no_preview"; bill_id: string; utility: Utility }
   | { kind: "blocked"; reason: string; trace?: TraceStep[] }
   | { kind: "general"; message: string; trace?: TraceStep[] }
