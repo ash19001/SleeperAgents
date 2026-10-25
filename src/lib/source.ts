@@ -9,7 +9,7 @@ import { answerQuestion } from "@/agent/pipeline";
 import { dataSource } from "@/data";
 import { addBill as storeBill, nextBillDraft, type BillInput } from "@/data/added";
 import { feedRecords } from "@/data/feeds";
-import { resetLocalCache } from "@/data/local";
+import { localSource, resetLocalCache } from "@/data/local";
 import { refreshFeeds } from "@/data/zetaris";
 import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
@@ -28,9 +28,12 @@ export async function getHousehold(): Promise<Household> {
 }
 
 // Live and replay show the bills the agents read; preview has its own set.
+// Replay never touches Zetaris: it reads the same SAMPLE files locally
+// (npm run zetaris:check shows they match).
 export async function getBills(): Promise<Bill[]> {
-  if (getMode() === "preview") return preview.previewBills();
-  const { rows } = await (await dataSource()).bills();
+  const mode = getMode();
+  if (mode === "preview") return preview.previewBills();
+  const { rows } = await (mode === "live" ? await dataSource() : localSource).bills();
   return rows.map(({ utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp }) => ({
     utility, bill_id, label, months, period_start, period_end, days, units_billed, unit, read_type, adjustments_gbp, total_gbp,
   }));

@@ -1,6 +1,24 @@
 # Evaluation results
 
-SAMPLE household data throughout. Details: `eval/triage_results.md` and `eval/scout_harness_report.md`.
+SAMPLE household data throughout. Details: `eval/answers/` (recorded answers), `eval/triage_results.md` and `eval/scout_harness_report.md`.
+
+## Whole answers (25 Oct 2026)
+
+`npm run eval:answers` asks the whole pipeline (guard, intake, Scout contracts, orchestrators, specialists, writer, checker) about each of the 11 answer-key scenarios in `eval/scenarios.json`, the way the page does when a bar is tapped, plus the page's four example questions, April electricity with the heat pump note, and "Why did my energy bills change in April?". It scores the supported and ruled-out causes against the key.
+
+| Run | Data | Answer key | Planted causes found | Wrongly supported | Checker | Model calls |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Local SAMPLE files | 58 of 58 | 19 of 19 | 0 of 34 | 18 of 18 answers passed on the first draft | All through Nightshift with receipts; 32 to 64 s a utility |
+| 2 | Through Zetaris | 58 of 58 | 19 of 19 | 0 of 34 | 18 of 18 passed on the first draft | NVIDIA rate-limited the key: 80 calls failed with 429, so specialists often fell back to code settling their causes; 64 to 207 s a utility |
+
+The 58 checks are the key's 53 (19 causes that must be found, 34 that must be ruled out) plus the April electricity pair again with the heat pump note, where the answer also cites the note. The control pair, where nothing should be found, had nothing supported in both runs. Every bill pair splits to the penny (`npm test`, bill model tests).
+
+Reading the run-1 answers found two faults the checker can't see, both fixed before run 2:
+
+- December gas said November's estimate was too high; it was too low. The writer now gets a plain line per cause saying which way it went, and must stick to it.
+- November gas (one earlier bill, so no weather fit) claimed use rose 54% beyond the weather. With no fit, use-based causes are now "not enough data", and the answer says that part can't be explained yet.
+
+Not changed: April–May water flags a possible leak (use up 17% beyond a trusted weather fit, from the sample's garden watering on dry warm days). The key doesn't cover it; it may be a false alarm, and the answer calls a leak a pattern to check, not a fault.
 
 ## Triage (25 Oct 2026)
 

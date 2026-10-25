@@ -110,4 +110,4 @@ const md = [
   "",
 ];
 if (!demo) writeFileSync("eval/answers_results.md", md.join("\n"));
-console.log(`\nAnswer key: ${ok}/${total}. Written to eval/answers_results.md; recordings in eval/answers/.`);
+console.log(`\nAnswer key: ${ok}/${total}.${demo ? "" : " Written to eval/answers_results.md."} Recordings in eval/answers/.`);
