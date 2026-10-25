@@ -1,374 +1,345 @@
 # Why My Bill — Build Plan
 
-24 Oct 2026
-
-A step-by-step plan, from creating accounts to submitting, for an agent that tells UK homeowners why any utility bill went up or down. It is written for two readers: you, and the Claude Code session you hand it to. Save it in the repo as `PLAN.md`.
+Version 2, Sun 25 Oct 2026. Replaces the 24 Oct plan: the agent is now multi-agent (triage, orchestrators, specialists), the web app is Next.js, and every sponsor technology has a named job. Written for two readers: the owner, and the Claude Code session working from it.
 
 ## How to use this plan
 
-Work through the phases in order; each one ends with a "Done when" check, and nothing moves on until that check passes. Steps marked **(you)** need a human: an account, a key, a download or a decision. Steps marked **(Claude Code)** are for the coding session.
+Work through the phases in order. Each ends with a "Done when" check, and nothing moves on until it passes. **(you)** marks a step that needs a human: an account, a key, a download or a decision. Everything else is for Claude Code.
 
-**To start a Claude Code session,** put this file in the repo root as `PLAN.md` and open with: *"Read PLAN.md in full, then tell me which phase we are on and the next three steps."*
+**To start a session:** "Read PLAN.md in full, then tell me which phase we are on and the next three steps."
 
 **Rules for Claude Code:**
 
 1. Read `PLAN.md` at the start of every session. Work on the current phase only and tick its boxes as steps pass.
-2. At a **(you)** step, stop and ask. Never create accounts, generate keys or paste secrets yourself.
+2. At a **(you)** step, stop and ask. Never create accounts, generate keys or paste secrets.
 3. Secrets live only in `.env.local` (gitignored). Never print, log or commit them.
-4. Zetaris: the agent's queries are read-only, one SQL statement per call. Show a dry run and wait for a yes before creating or dropping anything.
-5. Arithmetic is done in code, never by the model. The model receives a table of facts and writes with placeholders such as `{F3}`; code fills in the numbers.
-6. Log the route and model of every LLM call. Never hide a fallback.
-7. Label sample data as SAMPLE in file names, the UI and the README.
-8. Do not copy code from other hackathon entries. Meterless engines are vendored unchanged and declared as pre-existing.
-9. Keep sessions small (Claude Pro has usage limits): finish one step, run its check, commit, and append a two-line summary to `PROGRESS.md`.
-10. Prefer the Node standard library; add a dependency only when it saves real time.
+4. Zetaris: the app's queries are read-only, one SQL statement per call. Show a dry run and wait for a yes before creating or dropping anything.
+5. Arithmetic is done in code, never by a model. Agents get every number from a tool and write with placeholders such as `{F3}`; code fills them in.
+6. Log the agent, route, model, Nightshift receipt and time of every model call. Never hide a fallback.
+7. Name Nemotron models explicitly. Nightshift's `meterless/*` modes route to an on-device Llama on this machine.
+8. Label sample data as SAMPLE in file names, the UI and the README.
+9. Don't copy code from other hackathon entries. Vendored Meterless engines stay unchanged and are declared.
+10. Keep steps small: finish one, run its check, commit, push, and add a two-line entry to `PROGRESS.md`. Commit and push without asking; never force-push.
+11. Dependencies: the Next.js stack plus `zod` and `vitest`. Add anything else only when it saves real time.
 
 ## Project brief
 
-**Why My Bill** (working name) answers one question for UK homeowners: *"Why did my electricity, gas or water bill go up, or down?"* It splits the change into exact £ parts, tests each likely cause against the household's bills and public data, says which causes it ruled out, and tells the owner what to do next. Every number in the answer is traced to the query that produced it.
+**Why My Bill** answers one question for UK households: *"Why did my electricity, gas or water bill go up, or down?"* A team of AI agents investigates each bill: it splits the change into exact £ parts, tests each likely cause against the bills and public data, says which causes it ruled out, and says what to do next. Every number traces to the query that produced it.
 
 | Item | Detail |
 | --- | --- |
-| Event | GenAI Works Open Agent Hackathon 2026, fully online |
-| Track | 02 — The Agent That Can Explain Why (investigate across data sources, connect findings, give evidence-backed answers) |
-| Deadline | 27 Oct 2026, 23:45 UTC (= 23:45 UK time). Target: submit Monday 26 Oct evening |
-| Team | Solo, with Claude Pro (usage limits apply) |
-| Working time | Saturday 24 setup only; Sunday 25 and Monday 26 full days; Tuesday 27 buffer |
-| Required stack | Zetaris (data), Meterless Nightshift + an engine (H-MEM), NVIDIA Nemotron (models), Cursor (optional, sponsor's build tool) |
+| Event | GenAI Works Open Agent Hackathon 2026, online |
+| Track | 02, The Agent That Can Explain Why |
+| Deadline | Tue 27 Oct 2026, 23:45 UTC (23:45 UK time), hard. Target: submit Mon 26 Oct by 22:00 |
+| Judging (100) | Impact 30, Technical 20, Innovation 15, Demo 15, Product and UX 10, Sponsor tech 10 |
 | Prizes | Track 02: $1,600 / $1,200 / $900. Separate prize for best use of Nemotron |
+| Repo | github.com/ash19001/SleeperAgents (public) |
+| Household | SAMPLE, postcode district M1, Manchester: Octopus price region G (North West England), United Utilities for water |
 
-**Scoring (100 points).** Impact 30 is on the official page. Entrants report the rest as Technical execution 20, Innovation 15, Demo 15, Product and UX 10, Sponsor tech 10.
+**Rules that shape the build (event sections 05 and 06):**
 
-**Scope for the demo.** Electricity and gas in depth; water if Monday morning allows. Bills that went up and bills that went down. Broadband and council tax are out of scope because they are not usage-based; they go on a roadmap slide.
+- 5.1 Every submission must integrate **Zetaris and Meterless**. Cursor is optional.
+- 5.2 Use NVIDIA technology wherever it contributes.
+- 5.3 Any language, framework, model or cloud is allowed, including closed-source APIs.
+- 5.4 Pre-existing open-source libraries are fine. Pre-existing product code must be declared in the submission form.
+- 5.5 Generated code is allowed; we own and answer for the result.
+- 6.1 Demo video, 1 to 4 minutes: the main workflow, how the agent solves the challenge, key features, and how Zetaris and Meterless are integrated.
+- 6.2 Slide deck: problem and target users, solution, agent workflow or architecture, tech stack, how Zetaris and Meterless were used, what was unique about that use, product visuals, future enhancements.
+- 6.3 GitHub repo with all source code and a README covering setup, usage and dependencies.
+- 6.4 A clear explanation of how Zetaris and Meterless were integrated, how Cursor was used (if it was), where NVIDIA contributes, and what was unique about the sponsor use.
+- No live URL is required, so hosting is optional.
 
-**What sets it apart.** One existing Track 02 entry (Kilowhy) explains electricity bills for small businesses on half-hourly tariffs. Why My Bill is for households, covers several utilities through one bill model, explains drops as well as rises, and uses household memory ("we installed a heat pump in March") to explain usage changes.
+**What sets it apart.** Kilowhy, an existing Track 02 entry, explains half-hourly electricity bills for small businesses. Why My Bill is for households, covers electricity, gas and water, explains drops as well as rises, investigates with a team of agents rather than one prompt, and uses household memory ("we installed a heat pump in March") to explain changes in use.
 
-## Architecture and repo layout
+## What each sponsor does
 
-One Node/TypeScript server runs on your machine (not in Docker, so it can reach Nightshift on loopback). It reads all data through Zetaris, calls Nemotron through Nightshift, and keeps household memory in H-MEM.
+| Sponsor | Part | Job in Why My Bill |
+| --- | --- | --- |
+| **Zetaris** | Data platform (local, Docker) | One SQL layer over every source: three bill files in different formats, meter reads, Octopus tariffs, Open-Meteo weather, water charges. Views in database `whybill` put them in one shape. Every specialist tool is a read-only Zetaris query, and each query becomes an evidence record (E#) with a SHA-256 of its rows. |
+| **NVIDIA** | Nemotron models | Nemotron 3.5 Lightning 30B for fast steps, Nemotron 3 Ultra 550B for reasoning and writing (see the model table). |
+| **Meterless** | Nightshift (desktop app) | Gateway for every model call. Each reply carries a compute receipt naming the model, which goes in the answer's trace. |
+| | Scout Intent (spec; we implement it) | Guard, routing and signed execution contracts. No orchestrator acts without a valid contract. |
+| | H-MEM (engine) | Household notes, saved findings, feedback, and an audit trail of what was stored and recalled. |
+| | World Model (engine) | The case file: specialists write findings to it, orchestrators read it to review. |
+| | Markovian (engine) | Keeps the orchestrator's context bounded across review rounds. Last in line; first to drop. |
+| **Cursor** | Editor (optional) | One UI tweak built in Cursor on Monday, with its prompts in `docs/cursor-log.md`. |
+
+## Agent architecture
 
 ```text
- Web page (web/index.html)  --question-->  server (src/server.ts)  --answer + evidence-->  Web page
-                                                |
-                                          src/agent.ts
-        +----------------+-----------------+----------------+-----------------+
-        |                |                 |                |                 |
-  src/data.ts     src/decompose.ts   src/causes/*.ts   src/llm.ts        src/memory.ts
-  read-only SQL   exact £ split      cause tests       fast + deep lane  H-MEM notes,
-  -> evidence                        (SQL + rules)     route logged      findings, feedback
-        |                                                   |
-     Zetaris  (UI :3000, REST :8888)              Meterless Nightshift :8088/v1
-        |                                                   |
-  SAMPLE bills (CSV, 3 suppliers)                  NVIDIA Nemotron (cloud or local)
-  Octopus tariff rates (REST or CSV)               fallback: NVIDIA API direct, labelled
-  Open-Meteo weather (REST or CSV)
-  Water charges (CSV)
+POST /api/ask  "Why did my energy bills go up in January?"
+ │
+ ├─ 1. Scout Guard (code, ~1 ms) on the raw text
+ │      injection patterns, SQL keywords, personal details (redacted) → block or continue
+ ├─ 2. Intake agent (Lightning, ~2 s)
+ │      raw text → fixed-format requests, each utility ∈ {electricity, gas, water}:
+ │      [{gas, 2026-01, up}, {electricity, 2026-01, up}]   or   {unclear: question + options}
+ ├─ 3. Code: each request → a bill pair (Dec 2025 → Jan 2026)
+ ├─ 4. Scout decide(), once per request
+ │      Sense (keyword cross-check of the raw text) → Route (read-only capabilities)
+ │      → Recommend (Nemotron model) → signed contract, valid 5 minutes
+ ├─ 5. Utility orchestrators (Ultra), in parallel, one per contract
+ │      verify contract → split the £ change (tool) → send each £ part to specialists
+ │      → review reports in the case file → up to 2 follow-up rounds → stop when every £
+ │        is explained or ruled out
+ │        Specialists (Lightning, read-only tools, in parallel):
+ │          Tariff (C1, C2) · Billing (C3, C4, C5) · Weather (C6) · Usage (C7, C9, notes) · Leak (C8, water)
+ ├─ 6. Combiner (Ultra), only when there are two or more utilities: merges answers and finds
+ │      causes that span utilities (gas down + electricity up → heat pump)
+ ├─ 7. Writer (Ultra): 3 to 6 sentences with {F#} placeholders and [E#] / [M#] citations
+ └─ 8. Checker (code): numbers, citations, verdicts. One rewrite, then a plain template answer
 ```
+
+**Why the intake agent runs before Scout:** Scout's own classifier is keyword rules. "Energy" matches electricity and gas equally on the same word, which its rules treat as a tie and answer with "Which bill do you mean?". The intake agent understands the wording and splits it; Scout then checks, scopes and signs. Scout's spec allows a pluggable "Stage 2" scorer that is never a hard dependency: the intake agent fills that role. If Nemotron is down, Scout's keyword rules run alone, and "energy" falls back to a clarifying question.
+
+**Why the guard runs first:** the intake agent reads the raw text, so a crafted question could try to steer it. Blocking tricks first, and accepting only fixed choices from the intake agent, means a misled intake agent can only pick valid options. Scout's keyword cross-check flags a request where the intake agent's utility contradicts a utility named in the text.
+
+**When it still asks "Which bill?":** only when the question is unclear, such as "Why is my bill so high?" with no utility. The reply offers electricity, gas and water as options.
+
+### Nemotron model per part
+
+| Part | Model | Why |
+| --- | --- | --- |
+| Intake | `nvidia/nemotron-3.5-lightning-30b-a3b` | Fast parsing into a fixed format |
+| Specialists | `nvidia/nemotron-3.5-lightning-30b-a3b` | A few tool calls each, run in parallel |
+| Orchestrators | `nvidia/nemotron-3-ultra-550b-a55b` | Planning, reviewing evidence, deciding follow-ups |
+| Combiner, writer | `nvidia/nemotron-3-ultra-550b-a55b` | Cross-utility reasoning and careful wording |
+| Checker | Code | Numbers must be exact |
+
+Both models call tools through Nightshift (tested 25 Oct). Ultra puts its reasoning before `</think>` in the reply text; `llm.ts` strips it. Expect 30 to 45 s per question, so the page streams progress. Not available on this NVIDIA account: Nemotron 3 Super 120B and the older Llama-Nemotron models.
+
+### Tracing
+
+Every model call records agent, route (`nightshift` or `nvidia-direct`), model, Nightshift `receipt_id` and milliseconds. Every tool call records its evidence id. Scout emits `scout.decision`, `contract.issued`, `contract.verified` and `contract.refused` events. H-MEM's trust ledger records every note stored and recalled. All of it goes into the answer's `trace`, shown under "How this answer was made".
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| App | Next.js 16.3.8 (App Router, TypeScript), Tailwind 4, lucide-react, fonts via `next/font`. Runs on port **5175** (Zetaris's UI has port 3000). |
+| Runtime | Node 22.18 or newer (25 locally) |
+| Agent service | TypeScript inside the Next.js app. API routes call `src/agent/`. No separate server, no agent framework. |
+| Model calls | Our `src/agent/llm.ts` with `fetch`: Nightshift first, NVIDIA direct on network failure only, receipts, retries, `</think>` stripping |
+| Validation | `zod` for model JSON, tool inputs and tool schemas |
+| Data access | Our `src/data/zetaris.ts`: read-only SQL guard, evidence records with SHA-256 |
+| Tests | `vitest` |
+| Engines | Imported from `vendor/` through path aliases (`@meterless/hmem`, `@meterless/world-model`, `@meterless/markovian`). Their files import with `.ts` extensions, so `tsconfig.json` needs `allowImportingTsExtensions`. Scout is ours, in `src/scout/`. |
+| Modes | `WHYBILL_MODE`: `preview` (hand-written SAMPLE answers, the default today), `replay` (recorded agent answers from `eval/answers/`), `live` (the agents) |
+
+## Repo layout
 
 ```text
-why-my-bill/
-  PLAN.md  PROGRESS.md  CLAUDE.md  README.md  .env.example  .gitignore
-  data/sample/        generated household bills and meter reads (SAMPLE)
-  data/reference/     tariff rates, weather, water charges
-  scripts/            generate_sample.ts, fetch_tariffs.ts, fetch_weather.ts,
-                      zetaris/ (register + views SQL), smoke_*.ts, ask.ts, note.ts, eval.ts
-  src/                server.ts, agent.ts, data.ts, decompose.ts, causes/, llm.ts,
-                      memory.ts, facts.ts, verify.ts, thresholds.ts
-  web/index.html      one page, no build step
-  vendor/meterless/   H-MEM reference, unchanged (Apache-2.0)
-  eval/               scenarios.json (answer key), results.md
-  docs/               SPONSOR-TECH.md, PRE-EXISTING.md, DEMO-SCRIPT.md, slides.pdf
+PLAN.md  PROGRESS.md  CLAUDE.md  AGENTS.md  README.md  .env.example  package.json
+data/sample/        household_SAMPLE.json, preview_SAMPLE.json; Phase 5 adds bills and reads (SAMPLE)
+data/reference/     tariffs, weather, water charges (Phase 5)
+scripts/            smoke_llm.ts, lookup_area.ts, make_preview_SAMPLE.ts; later fetch_*, generate_sample,
+                    zetaris/*.sql, check_data
+src/app/            page.tsx, layout.tsx, api/* routes          (built)
+src/components/     page components                              (built)
+src/lib/            types, format, labels, mode, preview, source  (built)
+src/scout/          our Scout: registry, sense, guard, route, recommend, contract, telemetry,
+                    intents.json, model-profiles.json, capabilities.json
+src/agent/          llm.ts, intake.ts, triage.ts, orchestrators/, specialists/, tools/,
+                    combiner.ts, writer.ts, verify.ts, facts.ts
+src/data/           zetaris.ts
+src/billmodel/      decompose.ts, thresholds.ts, causes/
+src/memory/         hmem.ts, casefile.ts (World Model)
+vendor/meterless/   H-MEM, World Model, Markovian, Scout spec; unchanged
+eval/               triage_cases.json, scenarios.json, answers/, results.md
+docs/               SPONSOR-TECH.md, PRE-EXISTING.md, DEMO-SCRIPT.md, cursor-log.md, slides
 ```
-
-`CLAUDE.md` holds three lines: read `PLAN.md` first, follow its rules, log progress in `PROGRESS.md`.
 
 ## The bill model
 
-Every metered bill, whatever the utility, has the same shape, so one piece of arithmetic splits any change into exact £ parts that add up to the penny. The agent then runs the cause tests that apply to that utility.
+Every metered bill has the same shape, so one piece of arithmetic splits any change into exact £ parts that add up to the penny. It runs in code, as the `split_change` tool.
 
-**Terms, per bill** (A = previous bill, B = the bill being asked about): `d` days in the period; `q` true units per day from meter reads (kWh or m³); `Qt = d × q` true units; `e` units billed minus true units (non-zero when an estimated reading was used); `p` average unit price including VAT (energy charge ÷ billed units); `s` standing or fixed charge per day; `a` one-off charges minus credits; `h` mean daily weather driver (heating degree days at base 15.5 °C for gas and electricity; mean daily maximum temperature for water).
+**Terms, per bill** (A = previous bill, B = the bill asked about): `d` days; `q` true units per day from meter reads; `Qt = d × q`; `e` billed minus true units (non-zero after an estimated reading); `p` energy charge ÷ billed units; `s` standing or fixed charge per day; `a` one-offs minus credits; `h` mean daily weather driver (heating degree days at 15.5 °C for gas and electricity, mean daily maximum temperature for water).
 
 ```text
 bill = p × (Qt + e) + s × d + a
 
 B − A =  (dB − dA) × (pA × qA + sA)        period length
-       +  pA × dB × (qB − qA)                daily usage   = weather part + other part
+       +  pA × dB × (qB − qA)                daily usage = weather part + other part
        +  QtB × (pB − pA)                     unit price
        +  dB × (sB − sA)                      standing charge
        +  (pB × eB − pA × eA)                 estimated reading
        +  (aB − aA)                           one-offs and credits
 
-weather part = pA × dB × β × (hB − hA)     β from q = α + β × h fitted on the prior 12 months
-other part   = daily usage − weather part
+weather part = pA × dB × β × (hB − hA)     β from q = α + β × h on the prior 12 months
 ```
 
-The six parts sum exactly to the change; a unit test must prove this on every sample bill. A bill that went down runs the same maths with negative parts. Unmetered water has no units, so only period, price and one-off parts apply.
+Parts are rounded to pennies; any leftover penny goes to the largest calculated part, never to a one-off. A unit test proves the identity on every bill pair.
 
-**Cause tests.** Each is one read-only SQL query through Zetaris plus a rule, returning *supported*, *ruled out* or *inconclusive* (not enough data). Thresholds live in `src/thresholds.ts`.
+**Cause tests.** Each is a read-only query plus a rule, giving *supported*, *ruled out* or *inconclusive*. Thresholds live in `src/billmodel/thresholds.ts`. A specialist may only call a cause *supported* when its tool's measurement passes the threshold; the checker enforces this.
 
-| ID | Cause | Applies to | Supported when (default) | £ effect |
-| --- | --- | --- | --- | --- |
-| C1 | Unit price changed (price cap, fixed deal ended, April water rise) | All metered | pB differs from pA by 1% or more; the tariff source dates the change | unit price |
-| C2 | Standing or fixed charge changed | All | sB differs from sA by 0.5p/day or more | standing charge |
-| C3 | Billing period longer or shorter | All | dB differs from dA by 2 days or more | period length |
-| C4 | Estimated reading, later corrected | Metered | Either bill was estimated and e is over 2% of billed units | estimated reading |
-| C5 | One-off charge or credit | All | aB differs from aA | one-offs |
-| C6 | Weather | Gas, electricity (cold); water (hot, dry) | Weather part is 20% or more of daily usage, same sign, fit R² 0.5 or more | weather part |
-| C7 | Usage changed beyond the weather | Metered | Other part moves daily usage by 10% or more; recall household notes to explain it | other part |
-| C8 | Possible leak | Water | Other part up 15% or more for two bills running, with no note explaining it | flag + next step |
-| C9 | Switched fuel (heat pump, EV, new cooker) | Gas + electricity | Gas usage falls and electricity rises beyond weather in the same period, or a note says so | links two bills |
+| ID | Cause | Specialist | Supported when (default) |
+| --- | --- | --- | --- |
+| C1 | Unit price changed | Tariff | pB differs from pA by 1% or more, dated by the tariff source |
+| C2 | Standing or fixed charge changed | Tariff | sB differs from sA by 0.5p a day or more |
+| C3 | Billing period longer or shorter | Billing | dB differs from dA by 2 days or more |
+| C4 | Estimated reading, later corrected | Billing | Either bill was estimated and e is over 2% of billed units |
+| C5 | One-off charge or credit | Billing | aB differs from aA |
+| C6 | Weather | Weather | Weather part is 20% or more of the usage change, same sign, fit R² 0.5 or more |
+| C7 | Use changed beyond the weather | Usage | Other part moves daily use by 10% or more; notes recalled to explain it |
+| C8 | Possible leak | Leak | Water: other part up 15% or more with no note explaining it |
+| C9 | Switched fuel | Usage, combiner | Gas falls and electricity rises beyond weather in the same period, or a note says so |
 
-**Answer contract.** `agent.ts` returns one JSON object; the web page and the eval both read it.
+## Answer contract
 
-```json
-{
-  "question": "Why did my gas bill go up in January?",
-  "utility": "gas", "bill_a": "GAS-2025-12", "bill_b": "GAS-2026-01",
-  "change_gbp": 42.17,
-  "components": [{ "id": "weather", "gbp": 28.40, "evidence": ["E5"] }],
-  "causes": [{ "id": "C6", "verdict": "supported", "effect_gbp": 28.40, "evidence": ["E5"], "memory": [] }],
-  "facts": [{ "id": "F1", "value": "£42.17", "evidence": ["E1"] }],
-  "answer_markdown": "Your gas bill rose by {F1} ... [E5]",
-  "next_steps": [{ "action": "Send an actual meter reading", "evidence": ["E4"] }],
-  "evidence": [{ "id": "E5", "sql": "SELECT ...", "rows": 12, "sha256": "...", "at": "..." }],
-  "trace": [{ "step": "write", "route": "nightshift", "model": "...", "ms": 2140 }]
-}
-```
+The API returns one of:
 
-**Verifier** (`src/verify.ts`), run before any answer is shown:
+- `{ kind: "answer", answer }` for one utility,
+- `{ kind: "answers", answers: [...], summary_markdown }` for two or more (the page shows the summary, then one sheet per utility),
+- `{ kind: "clarify", message, options }`,
+- `{ kind: "blocked", reason }`,
+- `{ kind: "triage", ... }` temporarily in Phase 4, while orchestrators are placeholders.
 
-1. Components sum to `change_gbp` within £0.01.
-2. Every number in the answer text matches a fact.
-3. Every sentence that names a cause cites evidence.
-4. Only *supported* causes are given as reasons; *ruled out* ones are listed separately.
-5. On failure, send one rewrite with the errors; if that fails too, show a plain template answer built from the facts.
+Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_gbp, components[{id, gbp, evidence}], causes[{id, verdict, effect_gbp, evidence, memory, detail}], facts[{id, value, evidence}], answer_markdown, next_steps[{cause, action, evidence}], evidence[{id, title, sql, rows, sha256, at}], memory[{id, text, created}], trace[{step, agent, label, route, model, receipt, ms}]`. Live mode streams progress events (`{agent, status, detail}`) before the final result.
 
-## Phase 0: Accounts and installs (you) — Saturday afternoon
+**Checker** (`src/agent/verify.ts`), before any answer is shown: components sum to `change_gbp` within £0.01; every number in the text matches a fact; every sentence naming a cause cites evidence; only supported causes are given as reasons; every supported cause passes its threshold. On failure: one rewrite with the errors, then a plain template answer built from the facts.
 
-Start the Zetaris download first (step 3), because it takes 20 to 30 minutes; do the rest while it runs.
+## Done so far (Sat 24 to Sun 25 Oct)
 
-- [ ] 1. Sign in at [hackathon.genai.works](https://hackathon.genai.works/event/open-agent-hackathon-2026) and read rules sections 05 "What you can use" and 06 "Submission requirements". Note anything that changes Phase 9.
-- [x] 2. Create a public GitHub repo named `why-my-bill`, clone it, and put this file in it as `PLAN.md`.
-- [x] 3. Create a Zetaris Cloud account at [cloud.enterprise.zetaris.com/register](https://cloud.enterprise.zetaris.com/register) and start the "Run locally" download (or the AWS route; see Phase 1).
-- [x] 4. Create an NVIDIA API key at [build.nvidia.com/settings/api-keys](https://build.nvidia.com/settings/api-keys) (starts with `nvapi-`). Keep it for `.env.local`.
-- [x] 5. Install Meterless Nightshift from [meterless.ai](https://meterless.ai/): Windows 10/11 or Mac M1 to M4. On Linux or a Mac M5+, skip it and use NVIDIA direct (note this in `PROGRESS.md`).
-- [x] 6. Install Node 20+, Python 3.9+ and Docker Desktop (give Docker 8 GB of memory and 4 CPUs; on Windows use WSL2). Optional: Cursor.
-- [x] 7. Decide the household's location for weather (any UK town; you only need its latitude and longitude).
+- [x] Accounts and installs: repo, NVIDIA key, Nightshift (M1 to M4 build), Docker, Node 25, Python 3.14. Rules sections 05 and 06 read.
+- [x] Zetaris running locally (UI :3000, REST :8888); `getting-started` cloned next to the repo; preflight passes; `SELECT 1` returns 1.
+- [x] Nightshift serves Nemotron by explicit model ID, with receipts; NVIDIA direct works as the fallback; both models call tools (`npm run smoke:llm`).
+- [x] Meterless engines vendored unchanged from commit `1742dec`; H-MEM, World Model and Markovian pass their own tests 10 of 10.
+- [x] Household area from postcode district M1 (`scripts/lookup_area.ts`).
+- [x] Web app in Next.js, preview mode: bills chart, question box, answer sheet, evidence drawer, household notes, API routes. Lint and build pass; 17 API checks and 15 browser checks pass.
 
-**Done when:** you have a repo, an NVIDIA key, Nightshift installed (or a note saying why not), and Zetaris downloading or provisioning.
+## Phase 3: Foundations — Sun afternoon
 
-## Phase 1: Zetaris running — Saturday
+- [ ] 1. **(you)** Run `openssl rand -hex 32` and add the result to `.env.local` as `SCOUT_SECRET=`. Scout signs contracts with it.
+- [ ] 2. **(you)** Check your NVIDIA usage allowance at build.nvidia.com. A question will take about 10 to 15 model calls.
+- [ ] 3. Run the app on port 5175 (`dev` and `start` scripts) so it never clashes with Zetaris's UI.
+- [ ] 4. Add `zod` and `vitest`; add the engine path aliases and `allowImportingTsExtensions`; prove one import from each engine compiles in `next build`.
+- [ ] 5. `src/agent/llm.ts`: `chat({agent, model, messages, tools})` through Nightshift with the app and scope headers; NVIDIA direct only on a network failure; 401, 403 and refusals are thrown, not swallowed; strips `</think>`; returns `{message, toolCalls, route, model, receipt, ms}` and adds a trace entry. Rewrite `scripts/smoke_llm.ts` to use it.
+- [ ] 6. `src/data/zetaris.ts`: `runSql(sql)` with bearer key, `X-Org-ID` and a fresh `X-Request-ID`; `evidence(id, title, sql)` refuses anything but `SELECT`, `WITH`, `SHOW` or `DESCRIBE`, converts number strings, and returns `{id, title, sql, rows, sha256, at}`.
 
-Run Zetaris locally if Docker can have 8 GB of memory; otherwise use a managed AWS cluster on a new AWS account (up to $200 free credits; a small cluster used about $80 in a week of Zetaris's testing). If local is not answering `SELECT 1` by 20:00 tonight, switch to AWS.
+**Done when:** `npm run smoke:llm` passes through `llm.ts`, a `vitest` run passes, and `next build` compiles an import from each engine.
 
-- [x] 1. **(you)** Install: local via [Install locally](https://zetaris.github.io/getting-started/docs/install/updated_zetaris_installation_guide.html), or AWS via the [AWS Free Tier checklist](https://zetaris.github.io/getting-started/docs/install/aws-free-tier-checklist.html) then [Managed AWS cluster](https://zetaris.github.io/getting-started/docs/install/managed-aws-cluster-guide.html). Local endpoints: UI `http://localhost:3000`, REST `http://localhost:8888/api/v1.0`.
-- [x] 2. **(you)** In the Zetaris UI, create an API key under **Management → API Tokens** (shown once) and copy the numeric **ID** from **Management → Organisation**. Put both in `.env.local` yourself. Put the same values in the getting-started clone's own `.env.local` too; its scripts read their own copy.
-- [x] 3. **(Claude Code)** Clone [zetaris/getting-started](https://github.com/zetaris/getting-started) next to the repo (not inside it) and read its `AGENTS.md`, `docs/connections/client-setup.md` and `scripts/HOWTO.md`.
-- [x] 4. **(Claude Code)** Run its read-only preflight (`python3 scripts/preflight.py`), then `SELECT 1` and `SHOW LIGHTNING DATABASES` through `scripts/query_zetaris.py`.
-- [ ] 5. **(Claude Code)** Read the [File cookbook](https://zetaris.github.io/getting-started/open_data/parquet_csv/HOWTO.html), the [REST cookbook](https://zetaris.github.io/getting-started/open_data/rest_apis/HOWTO.html) and the [SQL gotchas](https://zetaris.github.io/getting-started/docs/guides/zetaris-lightning-sql-companion.html) so Phase 4 uses the right registration syntax. Summarise the steps for registering a CSV file and a REST API in `PROGRESS.md`.
+## Phase 4: Triage — Sun afternoon to evening
 
-**Done when:** `SELECT 1` returns 1 through the helper script, and `PROGRESS.md` holds the registration steps for files and REST APIs.
+- [ ] 1. `src/scout/` registry: `bill.explain.electricity`, `bill.explain.gas`, `bill.explain.water` and `GENERAL`, each with examples, capabilities, risk class, surfaces and roles, in Scout's intent shape.
+- [ ] 2. Sense: Scout's Stage-1 keyword scan, its scoring formula and confidence bands (high 0.80, medium 0.55, low 0.40), multi-intent and clarification rules.
+- [ ] 3. Guard: injection patterns, SQL keywords, out-of-scope tool requests, personal-details redaction (account numbers, card numbers, emails, phone numbers), 500-character limit.
+- [ ] 4. Intake agent (`src/agent/intake.ts`, Lightning): raw text to `{requests[{utility, period, direction}], unclear?}`, checked with `zod`; months resolved to bill pairs in code. Bills come from `preview_SAMPLE.json` until Phase 5, then from Zetaris.
+- [ ] 5. Route and Recommend: capability map (`bills.read`, `reads.read`, `tariffs.read`, `weather.read`, `water_charges.read`, `memory.recall`, `memory.write`, `casefile.write`) and model profiles (Lightning, Ultra).
+- [ ] 6. Contracts: canonical JSON, HMAC-SHA256 with `SCOUT_SECRET`, 5-minute expiry, `verifyContract`; telemetry events into the trace. Unit tests for signing, tampering and expiry.
+- [ ] 7. Placeholder orchestrators (`src/agent/orchestrators/`): verify the contract's signature, expiry and scope, refuse otherwise, and return `{utility, bill_a, bill_b, model, contractId, status: "placeholder"}`.
+- [ ] 8. `/api/ask` in live mode runs triage and returns `{kind: "triage"}` (or `clarify` or `blocked`); the page shows a temporary triage card.
+- [ ] 9. `eval/triage_cases.json`: about 25 questions with expected results, covering "energy bills", "heating bill", "my bills", both utilities named, water, months, injection attempts and personal details. `scripts/eval_triage.ts` scores them.
+- [ ] 10. Run Meterless's Scout harness against our build (`SCOUT_IMPL=... npm run evals` in `vendor/meterless/scout-intent`). Time box: 45 minutes. Record the score as it is in `eval/results.md`.
 
-## Phase 2: Nightshift serving Nemotron — Saturday
+**Done when:** "Why did my energy bills go up in January?" returns two signed contracts (gas and electricity, Dec→Jan), both verified by their placeholder orchestrators; an injection attempt is blocked; "Why is my bill so high?" asks which utility; the triage cases score 90% or better; the trace shows the intake agent's Nightshift receipt.
 
-Nightshift is the AI provider: an OpenAI-compatible API on your machine that routes each call to a model. Behind it, NVIDIA Nemotron does the reasoning. A direct NVIDIA call is the labelled fallback.
+## Phase 5: Data — Sun evening (Zetaris steps need your yes)
 
-- [x] 1. **(you)** Start Nightshift. In its **Providers** tab, add NVIDIA with your `nvapi-` key. If your GPU allows, also install a local Nemotron model.
-- [x] 2. **(you)** Find the runtime token (the `proxy-token` file in Nightshift's state folder, or the key in its connect link `http://<host>:<port>/connect#k=<key>`) and put it in `.env.local` as `NIGHTSHIFT_TOKEN`. The placeholder `rt-local` is rejected.
-- [x] 3. **(Claude Code)** Write `scripts/smoke_llm.ts`:
-  - `GET {NIGHTSHIFT_BASE_URL}/models` with `Authorization: Bearer <token>`. 200 with `meterless/*` ids = online; 401 or 403 = wrong token; no answer = offline.
-  - `POST /chat/completions` with model `meterless/fast`, headers `meterless-app: why-my-bill` and `meterless-scope: user`, timeout 180 s. Print the text and the `model` field.
-  - The same call against `https://integrate.api.nvidia.com/v1` with `NVIDIA_API_KEY` and model `nvidia/nemotron-3.5-lightning-30b-a3b`.
-- [x] 4. **(Claude Code)** Record in `PROGRESS.md` which `meterless/*` modes `/models` lists and which Nemotron model each one routed to.
+- [ ] 1. Read Zetaris's file and REST cookbooks and SQL gotchas in `../getting-started`. Find out whether Zetaris (in Docker) can read CSV files from this repo; if not, **(you)** either add a Docker volume or upload the files in the Zetaris UI. Write the registration steps in `PROGRESS.md`.
+- [ ] 2. `scripts/fetch_tariffs.ts`: Octopus household variable product, region G, unit rates and standing charges for electricity and gas, 1 Oct 2025 to 20 Oct 2026 (`value_inc_vat`). Save raw JSON and a CSV in `data/reference/`.
+- [ ] 3. `scripts/fetch_weather.ts`: Open-Meteo archive for M1 (53.4775, -2.2361), 1 Oct 2024 to 20 Oct 2026, daily mean and max temperature and rain; heating degree days = max(0, 15.5 − mean).
+- [ ] 4. `data/reference/water_charges_SAMPLE.csv`: United Utilities style 2025/26 and 2026/27 rates (water and sewerage £/m³, fixed charge), rise on 1 April, labelled illustrative.
+- [ ] 5. `scripts/generate_sample.ts` (fixed seed): daily use = α + β × weather + noise, priced with the real tariffs, then the planted events below. Files in `data/sample/`, deliberately in different shapes: `supplierA_energy_bills_SAMPLE.csv` (monthly, kWh, pence, read flag A/E, line items), `supplierA_meter_reads_SAMPLE.csv`, `waterco_bills_SAMPLE.csv` (two-monthly, litres, pounds, Actual/Estimated, water and sewerage lines). Answer key in `eval/scenarios.json`.
+- [ ] 6. Register the CSVs (and Octopus and Open-Meteo as REST sources, time box one hour; otherwise their saved CSVs) in Zetaris; create views in `whybill`: `bills` (one shape for all utilities, including `units_true`), `reads`, `weather_daily` (with `hdd`), `tariffs`, `water_charges`. Dry run first, then wait for a yes.
+- [ ] 7. `scripts/check_data.ts`: every bill's parts sum to its total within £0.01; true units present. Switch `src/lib/source.ts` and the intake agent's bill lookup to Zetaris.
 
-**Done when:** both calls in the smoke script return text, and the Nightshift reply names a Nemotron model.
+**Planted events** (each in the answer key with its bill pair):
 
-## Phase 3: Repo scaffold — Saturday evening (Claude Code)
-
-Set up the skeleton so Sunday starts with agent code, not plumbing.
-
-- [ ] 1. Create the folders from the repo layout above, `package.json` (type `module`, scripts below), `tsconfig.json`, `.gitignore` (`.env.local`, `.memory/`, `vendor/**/node_modules`, `tmp/`) and `CLAUDE.md`.
-- [ ] 2. Write `.env.example` (the human copies it to `.env.local` and fills in the secrets):
-
-```dotenv
-# Data: Zetaris
-ZETARIS_BASE_URL=http://localhost:3000
-ZETARIS_REST_URL=http://localhost:8888/api/v1.0
-ZETARIS_ORG_ID=
-ZETARIS_API_KEY=
-ZETARIS_DB=whybill
-
-# Power: Meterless Nightshift (primary)
-NIGHTSHIFT_BASE_URL=http://127.0.0.1:8088/v1
-NIGHTSHIFT_TOKEN=
-NIGHTSHIFT_APP_ID=why-my-bill
-MODEL_FAST=meterless/fast
-MODEL_DEEP=meterless/deep
-
-# Power: NVIDIA direct (labelled fallback)
-NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-NVIDIA_API_KEY=
-NVIDIA_MODEL_FAST=nvidia/nemotron-3.5-lightning-30b-a3b
-NVIDIA_MODEL_DEEP=nvidia/nemotron-3-super-120b-a12b
-
-# Build: Meterless H-MEM
-HMEM_PATH=.memory
-
-# Household
-HOME_LAT=
-HOME_LON=
-PORT=5175
-```
-
-- [x] 3. Vendor H-MEM: run `npx degit meterless/meterless/templates/agentathon-starter tmp/starter`, then `cd tmp/starter && npm install && npm run setup && npx tsx notebook.ts seed && npx tsx notebook.ts ask "what did we decide about storage"`. When that works, copy the H-MEM reference it vendored into `vendor/meterless/hmem/` unchanged and record the upstream commit in `vendor/README.md`.
-- [ ] 4. Write `src/llm.ts` from the Phase 2 smoke script: `chat(lane, messages)` tries Nightshift; on a network failure only, it calls NVIDIA direct; it returns `{text, route, model, ms}` and never hides which route answered. A 401, 403 or other refusal is thrown, not swallowed.
-- [ ] 5. Write `src/data.ts`: `runSql(sql)` ported from getting-started `scripts/query_zetaris.ts` (bearer key, `X-Org-ID`, a fresh UUID `X-Request-ID`), and `evidence(id, sql)` which refuses anything but `SELECT`/`WITH`/`SHOW`/`DESCRIBE` and returns `{id, sql, rows, rowCount, sha256, at}`. REST returns values as strings, so convert numbers explicitly.
-- [ ] 6. Add npm scripts: `smoke:zetaris`, `smoke:llm`, `smoke:hmem`, `ask`, `note`, `eval`, `serve`, `test`. Commit.
-
-**Done when:** `npm run smoke:zetaris`, `npm run smoke:llm` and `npm run smoke:hmem` all pass from this repo.
-
-## Phase 4: Data — Saturday night to Sunday morning (Claude Code)
-
-One SAMPLE household, 1 Oct 2025 to 20 Oct 2026, with real prices and real weather underneath, so every planted cause can be checked against an answer key. The three bill files deliberately use different formats; unifying them in Zetaris is the "fragmented data" part of the story.
-
-**Public data (fetch first, save raw JSON and a CSV copy in `data/reference/`):**
-
-- **Tariffs, electricity and gas** — Octopus public API, no key: `GET https://api.octopus.energy/v1/products/?is_variable=true&is_business=false` to find the household variable product, then `GET /v1/products/{product}/electricity-tariffs/E-1R-{product}-{region}/standard-unit-rates/` and `/standing-charges/`, and the same under `gas-tariffs/G-1R-{product}-{region}/`. Use `period_from` and `period_to` for history; read `value_inc_vat` (p/kWh for unit rates, p/day for standing charges). Find the region letter with `GET /v1/industry/grid-supply-points/?postcode=<postcode>` (`_A` means region A). If the product code changed during the year, fetch each version and join them by date.
-- **Weather** — Open-Meteo archive, no key: `https://archive-api.open-meteo.com/v1/archive?latitude={HOME_LAT}&longitude={HOME_LON}&start_date=2024-10-01&end_date=2026-10-20&daily=temperature_2m_mean,temperature_2m_max,precipitation_sum&timezone=Europe/London`. Heating degree days = max(0, 15.5 − mean temperature). The extra year before Oct 2025 is for fitting β.
-- **Water charges** — no public API. Write `data/reference/water_charges_SAMPLE.csv` with 2025/26 and 2026/27 rates (water and sewerage £/m³, fixed charge per year, rise on 1 April), labelled illustrative.
-
-**`scripts/generate_sample.ts`** (deterministic, fixed seed). Daily usage = α + β × weather + noise, priced with the real tariffs, then the planted events below. Files:
-
-| File | Shape (deliberately different) |
-| --- | --- |
-| `data/sample/supplierA_energy_bills_SAMPLE.csv` | Monthly electricity and gas bills; kWh; pence; read flag `A`/`E`; line items for energy, standing, adjustments |
-| `data/sample/supplierA_meter_reads_SAMPLE.csv` | Monthly actual meter reads for both fuels (the true usage) |
-| `data/sample/waterco_bills_SAMPLE.csv` | Bills every two months; litres; pounds; read status `Actual`/`Estimated`; separate water and sewerage lines |
-| `eval/scenarios.json` | Answer key: for each planted bill pair, the causes that must come out *supported* and *ruled out* |
-
-**Planted events** (record each in the answer key with the bill pair it affects):
-
-1. Gas: an estimated reading on the November 2025 bill, corrected by a catch-up on the December bill (C4).
-2. Gas and electricity: a 35-day January 2026 bill after a 28-day December bill (C3), in the coldest month (C6).
-3. Every real tariff change in the year becomes a price scenario (C1, C2), dated by the Octopus data; record each date and direction.
-4. Heat pump installed 15 March 2026: electricity daily usage up, gas down (C7, C9). This is the note the user adds in Phase 6.
-5. Electricity: a £50 goodwill credit on the June 2026 bill, which is also 3 days shorter (C5, C3), so the bill goes down.
+1. Gas: estimated reading on the November 2025 bill, caught up on the December bill (C4).
+2. Gas and electricity: 35-day January 2026 bill after a 28-day December bill (C3), in the coldest month (C6).
+3. Every real tariff change in the year (C1, C2), dated from the Octopus data.
+4. Heat pump installed 15 March 2026: electricity up, gas down (C7, C9). The note the user adds in the demo.
+5. Electricity: £50 goodwill credit on the June 2026 bill, which is also 3 days shorter (C5, C3).
 6. Water: the 1 April 2026 charge rise (C1) and a hot, dry July (C6).
-7. Water: a hidden leak from mid-June, raising usage on the next two bills with no explanation (C8).
-8. One control pair with no planted cause, where every test should come out *ruled out*.
+7. Water: a hidden leak from mid-June (C8).
+8. One control pair with no planted cause, where every test should be ruled out.
 
-**Register in Zetaris** (SQL files in `scripts/zetaris/`, dry-run first, then wait for a yes):
+**Done when:** `SELECT utility, COUNT(*) FROM whybill.bills GROUP BY utility` returns three utilities, `check_data.ts` passes, and the answer key lists all eight events.
 
-- [ ] 1. Register the three SAMPLE CSV files as file sources, using the syntax recorded in Phase 1.
-- [ ] 2. Register Octopus and Open-Meteo as REST sources. Time box: one hour; past that, register the saved CSV copies instead and say so in the README.
-- [ ] 3. Create views in `whybill`: `bills` (all utilities in one shape: `utility, bill_id, period_start, period_end, days, units_billed, unit, energy_gbp, standing_gbp_per_day, adjustments_gbp, read_type, total_gbp`), `reads`, `weather_daily` (with `hdd`), `tariffs` and `water_charges`. Unit and currency conversions happen in these views.
-- [ ] 4. Write `scripts/check_data.ts`: for every bill, energy + standing + adjustments equals the total within £0.01, and true units from reads are present.
+## Phase 6: Tools and specialists — Mon morning
 
-**Done when:** `SELECT utility, COUNT(*) FROM whybill.bills GROUP BY utility` returns three utilities, `check_data.ts` passes, and `eval/scenarios.json` lists all eight events.
+- [ ] 1. `src/billmodel/decompose.ts` and the weather fit (β, R²), as the `split_change` and `weather_fit` tools. Unit test: every bill pair sums to the penny.
+- [ ] 2. Specialist tools in `src/agent/tools/`: each is a typed function with a `zod` schema, runs read-only Zetaris queries through `evidence()`, checks its capability against the contract, and returns measurements plus evidence ids.
+- [ ] 3. Specialists (Lightning): Tariff, Billing, Weather, Usage (with H-MEM recall), Leak. Each takes one task from its orchestrator, calls its tools, and returns `{cause, verdict, effect_gbp, evidence, memory, reasoning, follow_up?}`, checked with `zod` and against the thresholds.
 
-## Phase 5: Core agent — Sunday (Claude Code)
+**Done when:** each specialist, run alone on its planted event, returns the answer key's verdict with evidence.
 
-By Sunday night one question goes from plain English to a verified, cited answer on the command line. Code does every calculation; Nemotron understands the question and writes the explanation.
+## Phase 7: Orchestrators, combiner, writer, checker — Mon late morning
 
-- [ ] 1. `src/decompose.ts`: the six-part split from the bill model, plus the weather fit (β, R²) per utility. Unit test: on every consecutive bill pair in the sample, the parts sum to the change within £0.01.
-- [ ] 2. `src/causes/C1.ts` to `C9.ts`: each builds its SQL, calls `evidence()`, applies its rule from `thresholds.ts`, and returns `{id, verdict, effect_gbp, evidence, detail}`. Each utility lists which causes apply to it.
-- [ ] 3. `src/facts.ts`: turn components and cause results into a facts table (`F1`, `F2`, …) with formatted values and their evidence ids.
-- [ ] 4. `src/agent.ts`, the pipeline:
-  1. **Understand** (fast lane): question → strict JSON `{utility or "all", month, direction}`. Resolve the bill pair with SQL. If a name or month is ambiguous, return a clarifying question instead of guessing.
-  2. **Recall**: household notes from H-MEM (a stub returning nothing until Phase 6).
-  3. **Test**: run the decomposition and every applicable cause test, in parallel.
-  4. **Write** (deep lane): the model gets the facts, verdicts and notes, and writes 3 to 6 sentences using `{F#}` for numbers and `[E#]` / `[M#]` for citations. It never writes a digit itself.
-  5. **Verify**: `src/verify.ts` per the bill model; one rewrite with the errors, then the template fallback.
-  6. **Next steps**: a fixed map from supported causes to actions (C4 → send an actual meter reading; C1 → compare fixed deals; C8 → check the water meter with every tap off; C6 → nothing to fix, it was the weather). The model only words them.
-- [ ] 5. Keep prompts in `src/prompts/*.md` so they can be tuned without touching code. For the write step, try `chat_template_kwargs: {enable_thinking: false}` if answers come back slow or wordy.
-- [ ] 6. `scripts/ask.ts`: prints the answer, the £ split, supported and ruled-out causes, evidence SQL and the trace (route and model per call). Save each run as JSON in `eval/answers/`.
-- [ ] 7. Commit and log in `PROGRESS.md`.
+- [ ] 1. Orchestrator (Ultra), one per utility: verify the contract, run `split_change`, send each part to specialists in parallel, review their reports in the case file, ask follow-ups (at most 2 rounds), stop when every £ part is explained or ruled out.
+- [ ] 2. Combiner (Ultra) for two or more utilities, including C9.
+- [ ] 3. Writer (Ultra) and `facts.ts`: placeholders and citations only; next steps from a fixed map (C4: send a meter reading; C1: compare fixed deals; C8: check the meter with every tap off; C6: nothing to fix).
+- [ ] 4. Checker (`verify.ts`): the rules in the answer contract, one rewrite, then the template.
+- [ ] 5. Save each live answer as JSON in `eval/answers/` for replay mode.
 
-**Done when:** `npm run ask -- "Why did my gas bill go up in January?"` and `npm run ask -- "Why was my electricity bill lower in June?"` both print verified answers whose supported causes match `eval/scenarios.json`.
+**Done when:** "Why did my gas bill go up in January?" and "Why was my electricity bill lower in June?" give checked answers whose supported causes match the answer key, and "Why did my energy bills change in April?" returns both utilities with the fuel switch.
 
-## Phase 6: Household memory with H-MEM — Monday morning, or Sunday night if ahead (Claude Code)
+## Phase 8: Memory and the case file — Mon midday
 
-Memory explains what bills cannot show: a heat pump, a new baby, working from home. It is also the Meterless engine judges look for, so every use must go through a named H-MEM service.
+- [ ] 1. `src/memory/hmem.ts` over H-MEM's named services: `MemoryStoreService` (notes and findings), `MemoryRetrievalService` (recall for the Usage specialist), `TrustLedgerService` (audit), feedback from the thumbs.
+- [ ] 2. `src/memory/casefile.ts` over World Model: one case per question; bills, meters and causes as entities with stable IDs; specialists write findings; orchestrators read `buildPromptContext`.
+- [ ] 3. Markovian for the orchestrator's review rounds (first to drop if late).
+- [ ] 4. After a checked answer, store each supported cause as a finding with its evidence ids.
 
-- [ ] 1. `src/memory.ts` wraps the vendored H-MEM reference: `remember(text, {source, utility, date})`, `recall(query, {utility, from, to})` returning `M#` items with the retrieval trace, `audit(id)`, and `feedback(id, "helpful" | "not_helpful")`.
-- [ ] 2. `scripts/note.ts`: `npm run note -- "We installed a heat pump on 15 March 2026"` stores a note; `npm run note -- --audit mem-1` prints its ledger.
-- [ ] 3. In `agent.ts`, the Recall step passes notes for the utility and period to the write step, and C7 and C9 use them: a note dated in or before the period that names an appliance or household change becomes the explanation, cited as `[M#]`.
-- [ ] 4. After a verified answer, store each supported cause as a finding with its evidence ids, so later questions ("has my gas been this high before?") can recall it.
-- [ ] 5. Run H-MEM's own test suite from `vendor/meterless/hmem` and record the result in `docs/SPONSOR-TECH.md`.
+**Done when:** asking about April electricity before and after adding the heat pump note gives two different answers, the second citing `[M1]`, and the H-MEM audit shows the note created and recalled.
 
-**Done when:** asking about April electricity before and after adding the heat pump note gives two different answers, the second citing `[M1]`, and `--audit mem-1` shows the note being created and recalled.
+## Phase 9: Live page — Mon early afternoon (Cursor optional)
 
-## Phase 7: The web page — Monday late morning (Claude Code or Cursor)
+- [ ] 1. `/api/ask` streams progress events; the page shows a live investigation panel (which agent is doing what) before the answer.
+- [ ] 2. Show `answers` (two or more utilities) with the summary first; show clarify options as buttons; show blocked messages plainly.
+- [ ] 3. "How this answer was made" lists every agent step with model, route, receipt and time.
+- [ ] 4. Replay mode serves `eval/answers/` with the agents and Zetaris off, labelled on the page.
+- [ ] 5. **(you, optional)** Make one UI tweak in Cursor and keep its prompts in `docs/cursor-log.md`.
 
-One page, no build step, served by the same Node server. Building it in Cursor counts toward sponsor use and saves Claude usage; keep its prompts in `docs/cursor-log.md`.
+**Done when:** clicking the January gas bar shows the live investigation then the checked answer, an evidence chip opens its SQL, and the same flow works with `WHYBILL_MODE=replay`.
 
-- [ ] 1. `src/server.ts` (Node `http`, no framework): `POST /api/ask`, `GET /api/bills`, `POST /api/note`, `POST /api/feedback`. Optional: stream step updates with server-sent events.
-- [ ] 2. `web/index.html`, top to bottom:
-  - A SAMPLE data banner.
-  - Tabs for Electricity, Gas and Water, each with a bar per bill; clicking a bar asks "Why did this bill change?"
-  - A question box with three example questions.
-  - The answer card: the change in £, the split as a short bar list, the supported causes, a "Ruled out" panel and the next steps.
-  - Citation chips `[E#]` that open a drawer with the exact SQL, row count and hash; `[M#]` chips that show the note.
-  - "How this answer was made": each step with its model, route and time.
-  - An "Add a household note" box and thumbs up and down on each answer.
-- [ ] 3. Replay mode: with `REPLAY=1`, the server answers from `eval/answers/` so the demo works with Zetaris and Nightshift off. Label it on the page.
+## Phase 10: Prove it works — Mon afternoon
 
-**Done when:** clicking the January gas bar returns the verified answer, an evidence chip opens its SQL, and the same flow works with `REPLAY=1`.
-
-## Phase 8: Prove it works — Monday early afternoon (Claude Code)
-
-A short, honest evaluation is cheap to make and strong evidence for the Technical score.
-
-- [ ] 1. `scripts/eval.ts`: for every scenario in `eval/scenarios.json`, run the decomposition and cause tests (no model needed) and compare verdicts with the answer key.
-- [ ] 2. Run the full agent, model included, on three scenarios (one up, one down, one water) and confirm the verifier passes.
-- [ ] 3. Write `eval/results.md`: a table of expected against actual per scenario and cause; precision and recall of *supported*; the identity check across all bill pairs; and the control pair.
-- [ ] 4. Fix real bugs. If you change a threshold, record the old and new values and the reason in `results.md`.
+- [ ] 1. `scripts/eval.ts`: for every scenario in the answer key, compare verdicts with expected (cause tests alone, then the full agent on three: one up, one down, one water).
+- [ ] 2. `eval/results.md`: expected against actual per scenario and cause, precision and recall of *supported*, the penny check on every bill pair, the control pair, triage scores, the Scout harness score.
+- [ ] 3. Fix real bugs. Record any threshold change with old value, new value and reason.
 
 **Done when:** every planted cause is found or its miss is explained, the control pair has no wrong *supported* verdict, and every bill pair sums to the penny.
 
-## Phase 9: Deliver and submit — Monday evening
+## Phase 11: Deliver and submit — Mon evening
 
-Freeze features at 17:00 on Monday and submit by 22:00; Tuesday is only a buffer. Check rules section 06 first and adjust this list to match it.
+Feature freeze 17:00 Monday; submit by 22:00. Tuesday is buffer only.
 
-- [ ] 1. **(Claude Code)** `README.md`: one-line pitch; demo video link; "Review it in two minutes" (replay mode, no keys needed); who it is for and the problem; how it works; a **For judges** table mapping each scoring criterion (Impact, Technical, Innovation, Demo, Product and UX, Sponsor tech) to evidence with file paths; how to run it live; data sources with SAMPLE labels.
-- [ ] 2. **(Claude Code)** `docs/SPONSOR-TECH.md`: Zetaris (sources, views, "every cause is a query", file paths); Meterless (Nightshift as provider, H-MEM services used, test results); Nemotron (model per step, taken from real traces); Cursor (what it built).
-- [ ] 3. **(Claude Code)** `docs/PRE-EXISTING.md`: vendored H-MEM (Apache-2.0, upstream commit), any code ported from zetaris/getting-started (check and credit its licence), tools used; everything else written from 22 Oct.
-- [ ] 4. **(Claude Code)** `docs/DEMO-SCRIPT.md`, about 2.5 minutes:
-  - 0:00 The problem: the bill shows a number, never the reason.
-  - 0:20 Click January gas: colder weather, a longer bill and a catch-up from November's estimate; price change ruled out. Open one evidence chip to show the SQL Zetaris ran.
-  - 1:00 Add the heat pump note, ask about April: electricity up, gas down, the answer cites the note.
-  - 1:35 A bill that went down (June electricity: credit and a shorter bill), then water: the April rise and a possible leak, with "check your meter with every tap off".
-  - 2:00 Under the hood: Zetaris sources, Nightshift receipts naming Nemotron, the H-MEM audit, the evaluation table.
-- [ ] 5. **(you)** Record the screen with your voice, 2 to 3 minutes. Upload to YouTube as unlisted and add the link to the README.
-- [ ] 6. **(you + Claude Code)** Slides as a PDF in `docs/`: problem, user, demo screenshot, how it works, sponsor stack, evaluation, roadmap (bill photo upload, real smart-meter data, broadband and council tax).
-- [ ] 7. **(Claude Code)** Final checks: a fresh clone runs in replay mode with no keys, and `git log -p` contains no keys (search for `nvapi-` and the Zetaris key).
-- [ ] 8. **(you)** Submit on the event platform: Track 02, repo URL, video, slides; opt in to the Nemotron prize if the form offers it.
+- [ ] 1. `README.md`: one-line pitch; video link; review in two minutes with replay mode (no keys); who it's for; how it works; setup, usage and dependencies (rule 6.3); a "For judges" table mapping each scoring criterion to evidence with file paths; data sources with SAMPLE labels.
+- [ ] 2. `docs/SPONSOR-TECH.md` (rule 6.4): how Zetaris and Meterless are integrated (with file paths), how Cursor was used, where NVIDIA contributes (model per agent, from real traces), and what was unique about the sponsor use.
+- [ ] 3. `docs/PRE-EXISTING.md`: vendored Meterless engines (Apache-2.0, commit `1742dec`), the Next.js scaffold, anything ported from Zetaris `getting-started` (check and credit its licence). Everything else written from 24 Oct. The same list goes in the submission form (rule 5.4).
+- [ ] 4. `docs/DEMO-SCRIPT.md`, about 2.5 minutes (rule 6.1: 1 to 4): the problem; January gas with the live investigation and one evidence chip; the heat pump note and April; a bill that went down; water and the leak; under the hood (Zetaris sources and SQL, Nightshift receipts naming Nemotron, Scout contracts, H-MEM audit, the results table).
+- [ ] 5. **(you)** Record the video with your voice and upload it to YouTube as unlisted.
+- [ ] 6. **(you and Claude Code)** Slides as a PDF in `docs/`, covering every item in rule 6.2.
+- [ ] 7. Final checks: a fresh clone runs in replay mode with no keys; `git log -p` contains no keys (search for `nvapi-`, the Zetaris key, the Nightshift token and `SCOUT_SECRET`).
+- [ ] 8. **(you)** Submit: Track 02, repo URL, video, slides, pre-existing code declared; opt in to the Nemotron prize if offered.
 
-**Done when:** the submission confirmation is on screen, before 23:45 UTC on 27 Oct at the very latest.
+**Done when:** the submission confirmation is on screen, before 23:45 UTC on 27 Oct at the latest.
 
 ## Time boxes and fallbacks
 
-When a step overruns its time box, take the fallback and move on; a smaller entry that works beats a bigger one that doesn't.
+When a step overruns, take the fallback and move on. A smaller entry that works beats a bigger one that doesn't. Zetaris, Nightshift and H-MEM are never dropped: rule 5.1 requires Zetaris and Meterless.
 
 | If this is not working | By (UK time) | Do this instead |
 | --- | --- | --- |
-| Local Zetaris answering `SELECT 1` | Sat 20:00 | Managed AWS cluster |
-| Nightshift serving a Nemotron model | Sat 22:00 | NVIDIA direct, labelled in the trace and in `SPONSOR-TECH.md` |
-| Octopus or Open-Meteo registered as REST sources | 1 hour of trying | Register the saved CSV copies; say so in the README |
-| Sample data passing `check_data.ts` | Sun 11:00 | Electricity and gas only, events 1 to 5 and 8 |
-| One question answered end to end | Sun 21:00 | Drop water, C8 and C9; ship electricity and gas |
-| H-MEM recall in answers | Mon 11:00 | Keep notes via the starter's notebook commands and show recall from the command line |
-| The web page | Mon 15:00 | A static HTML report written by `ask.ts` for each answer |
-| Claude usage limit reached | Any time | Switch to Cursor for UI and docs; record video or draft slides until it resets |
+| Triage end to end | Sun 18:00 | Scout keywords plus intake only; skip the Scout harness |
+| Zetaris reading the CSV files | Sun 21:00 | Upload the files through the Zetaris UI |
+| Octopus or Open-Meteo as REST sources | 1 hour of trying | Register their saved CSV copies; say so in the README |
+| Sample data in Zetaris and checked | Sun 23:30 | Electricity and gas only, events 1 to 5 and 8 |
+| Specialists and orchestrators | Mon 12:00 | One orchestrator for all utilities, no follow-up rounds |
+| World Model and Markovian | Mon 14:00 | Drop Markovian first, then World Model; keep H-MEM |
+| Live page with streaming | Mon 15:00 | Final answer only, no live panel; replay for the video |
+| Claude usage limit reached | Any time | Cursor for UI and docs; record video or draft slides until it resets |
 
-**Stretch, only if ahead:** run the write and verify steps as Meterless Markovian chunks; hold the property, meters and suppliers in the Meterless World Model; read a photo of a paper bill with a Nemotron vision model.
+**Roadmap (slides, not build):** enter a postcode or upload a bill for tailored prices and weather; real smart-meter data; broadband and council tax; read a photo of a paper bill with a Nemotron vision model.
 
 ## Sources
 
-- [Open Agent Hackathon 2026 event page](https://hackathon.genai.works/event/open-agent-hackathon-2026) and [GenAI Academy course page](https://academy.genai.works/courses/open-agent-hackathon-2026/details)
-- Zetaris: [getting started](https://zetaris.github.io/getting-started/), [client setup](https://zetaris.github.io/getting-started/docs/connections/client-setup.html), [client scripts](https://zetaris.github.io/getting-started/scripts/HOWTO.html), [choose an install](https://zetaris.github.io/getting-started/docs/install/choose-install.html)
-- Meterless: [Nightshift](https://meterless.ai/), [engines and provider contract](https://meterless.ai/engines.html), [repo](https://github.com/Meterless/Meterless), [agentathon starter](https://github.com/Meterless/Meterless/blob/main/templates/agentathon-starter/README.md)
-- NVIDIA: [Nemotron credentials and base URL](https://docs.n8n.io/credentials/nvidia/)
-- Octopus Energy: [API reference](https://developer.octopus.energy/docs/api/) and [endpoints guide](https://developer.octopus.energy/rest/guides/endpoints)
-- Open-Meteo: [API docs](https://open-meteo.com/en/docs), including daily variables and the [historical weather API](https://open-meteo.com/en/docs/historical-weather-api)
+- [Event page](https://hackathon.genai.works/event/open-agent-hackathon-2026)
+- Zetaris: [getting started](https://zetaris.github.io/getting-started/), [client setup](https://zetaris.github.io/getting-started/docs/connections/client-setup.html), [file cookbook](https://zetaris.github.io/getting-started/open_data/parquet_csv/HOWTO.html), [REST cookbook](https://zetaris.github.io/getting-started/open_data/rest_apis/HOWTO.html), [SQL gotchas](https://zetaris.github.io/getting-started/docs/guides/zetaris-lightning-sql-companion.html)
+- Meterless: [Nightshift](https://meterless.ai/), [engines and provider contract](https://meterless.ai/engines.html), [repo](https://github.com/Meterless/Meterless); Scout spec in `vendor/meterless/scout-intent/AGENTS.md`
+- NVIDIA: [API keys](https://build.nvidia.com/settings/api-keys)
+- Octopus Energy: [API reference](https://developer.octopus.energy/docs/api/)
+- Open-Meteo: [historical weather API](https://open-meteo.com/en/docs/historical-weather-api)
+- postcodes.io: [outcode lookup](https://postcodes.io/)
 - Existing Track 02 entry for contrast: [Kilowhy](https://github.com/yy5652-hash/kilowhy)
