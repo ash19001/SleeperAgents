@@ -28,3 +28,6 @@ So `.env.example` names the Nemotron models explicitly instead of `meterless/fas
 Preview answers are hand-written SAMPLEs from `scripts/make_preview_SAMPLE.ts` (bill-model splits, all sum to the penny). Page needs from the answer contract: `total_a`, `total_b`, `evidence[].title`, `memory[]`, `next_steps[].cause`, `trace[].label`; and the API routes listed at the top of its script.
 
 **Household area.** Sample household set to postcode district M1 (Manchester): Octopus price region G (North West England), coordinates 53.4775, -2.2361 from postcodes.io, water by United Utilities. Saved in `data/sample/household_SAMPLE.json` by `scripts/lookup_area.ts`, replacing `HOME_LAT`/`HOME_LON` in `.env`. The page shows the area under "Your bills". Tailoring to a viewer's own postcode or bill is a roadmap item.
+
+**Meterless engines vendored.** H-MEM, World Model, Markovian and Scout Intent copied unchanged into `vendor/meterless/` from Meterless commit `1742dec` (Apache-2.0); see `vendor/README.md`. Taken straight from the repo rather than through the starter's `degit` step.
+Own test suites: H-MEM, World Model and Markovian each pass 10 of 10. Scout Intent is a spec with an eval harness and no implementation, so we write our own Scout and test it with `SCOUT_IMPL`.

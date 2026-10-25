@@ -220,7 +220,7 @@ HOME_LON=
 PORT=5175
 ```
 
-- [ ] 3. Vendor H-MEM: run `npx degit meterless/meterless/templates/agentathon-starter tmp/starter`, then `cd tmp/starter && npm install && npm run setup && npx tsx notebook.ts seed && npx tsx notebook.ts ask "what did we decide about storage"`. When that works, copy the H-MEM reference it vendored into `vendor/meterless/hmem/` unchanged and record the upstream commit in `vendor/README.md`.
+- [x] 3. Vendor H-MEM: run `npx degit meterless/meterless/templates/agentathon-starter tmp/starter`, then `cd tmp/starter && npm install && npm run setup && npx tsx notebook.ts seed && npx tsx notebook.ts ask "what did we decide about storage"`. When that works, copy the H-MEM reference it vendored into `vendor/meterless/hmem/` unchanged and record the upstream commit in `vendor/README.md`.
 - [ ] 4. Write `src/llm.ts` from the Phase 2 smoke script: `chat(lane, messages)` tries Nightshift; on a network failure only, it calls NVIDIA direct; it returns `{text, route, model, ms}` and never hides which route answered. A 401, 403 or other refusal is thrown, not swallowed.
 - [ ] 5. Write `src/data.ts`: `runSql(sql)` ported from getting-started `scripts/query_zetaris.ts` (bearer key, `X-Org-ID`, a fresh UUID `X-Request-ID`), and `evidence(id, sql)` which refuses anything but `SELECT`/`WITH`/`SHOW`/`DESCRIBE` and returns `{id, sql, rows, rowCount, sha256, at}`. REST returns values as strings, so convert numbers explicitly.
 - [ ] 6. Add npm scripts: `smoke:zetaris`, `smoke:llm`, `smoke:hmem`, `ask`, `note`, `eval`, `serve`, `test`. Commit.
