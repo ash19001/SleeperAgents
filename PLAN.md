@@ -228,7 +228,7 @@ Each `answer` has: `question, utility, bill_a, bill_b, total_a, total_b, change_
 - [x] 6. Contracts: canonical JSON, HMAC-SHA256 with `SCOUT_SECRET`, 5-minute expiry, `verifyContract`; telemetry events into the trace. Unit tests for signing, tampering and expiry.
 - [x] 7. Placeholder orchestrators (`src/agent/orchestrators/`): verify the contract's signature, expiry and scope, refuse otherwise, and return `{utility, bill_a, bill_b, model, contractId, status: "placeholder"}`.
 - [x] 8. `/api/ask` in live mode runs triage and returns `{kind: "triage"}` (or `clarify` or `blocked`); the page shows a temporary triage card.
-- [ ] 9. `eval/triage_cases.json`: about 25 questions with expected results, covering "energy bills", "heating bill", "my bills", both utilities named, water, months, injection attempts and personal details. `scripts/eval_triage.ts` scores them.
+- [x] 9. `eval/triage_cases.json`: about 25 questions with expected results, covering "energy bills", "heating bill", "my bills", both utilities named, water, months, injection attempts and personal details. `scripts/eval_triage.ts` scores them.
 - [ ] 10. Run Meterless's Scout harness against our build (`SCOUT_IMPL=... npm run evals` in `vendor/meterless/scout-intent`). Time box: 45 minutes. Record the score as it is in `eval/results.md`.
 
 **Done when:** "Why did my energy bills go up in January?" returns two signed contracts (gas and electricity, Dec→Jan), both verified by their placeholder orchestrators; an injection attempt is blocked; "Why is my bill so high?" asks which utility; the triage cases score 90% or better; the trace shows the intake agent's Nightshift receipt.

@@ -118,19 +118,60 @@ function nvidiaDirect(): Route {
   };
 }
 
-async function post(route: Route, body: unknown, timeoutMs: number) {
-  // One retry for rate limits and server errors, on the same route.
+// NVIDIA's API answers 429 when calls come too fast for the account's
+// allowance (Nightshift passes it on as a 502 naming nvidia_429). So calls
+// wait for a slot, at most LLM_RPM starts a minute and LLM_CONCURRENCY at
+// once, and back off on a 429 before trying again.
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const rpm = () => Number(process.env.LLM_RPM) || 30;
+const concurrency = () => Number(process.env.LLM_CONCURRENCY) || 4;
+const starts: number[] = [];
+let active = 0;
+
+interface CallStats {
+  waitedMs: number;
+  retries: number;
+}
+
+async function slot(stats: CallStats): Promise<() => void> {
+  const began = Date.now();
+  for (;;) {
+    const now = Date.now();
+    while (starts.length && now - starts[0] > 60_000) starts.shift();
+    if (active < concurrency() && starts.length < rpm()) {
+      active++;
+      starts.push(now);
+      stats.waitedMs += now - began;
+      return () => {
+        active--;
+      };
+    }
+    await sleep(starts.length >= rpm() ? Math.min(1000, 60_050 - (now - starts[0])) : 100);
+  }
+}
+
+async function post(route: Route, body: unknown, timeoutMs: number, stats: CallStats) {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(route.url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...route.headers },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+    const release = await slot(stats);
+    let res: Response;
+    try {
+      res = await fetch(route.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...route.headers },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } finally {
+      release();
+    }
     if (res.ok) return res.json();
     const detail = (await res.text()).slice(0, 300);
-    if (attempt === 0 && (res.status === 429 || res.status >= 500)) {
-      await new Promise((r) => setTimeout(r, 1000));
+    const limited = res.status === 429 || /nvidia_429|too many requests/i.test(detail);
+    if ((limited && attempt < 4) || (!limited && res.status >= 500 && attempt === 0)) {
+      const wait = limited ? Number(res.headers.get("retry-after")) * 1000 || 2000 * 2 ** attempt : 1000;
+      stats.retries++;
+      stats.waitedMs += wait;
+      await sleep(wait + Math.random() * 250);
       continue;
     }
     throw new LlmError(`${route.name} answered ${res.status}: ${detail}`, route.name, res.status);
@@ -144,7 +185,7 @@ export function withRequestTag(messages: Message[], tag: string): Message[] {
   return messages.map((m, i) => (i === last ? { ...m, content: `${m.content ?? ""}\n\n[request ${tag}]` } : m));
 }
 
-async function send(opts: ChatOptions, fresh: boolean) {
+async function send(opts: ChatOptions, fresh: boolean, stats: CallStats) {
   const body = {
     model: opts.model,
     messages: fresh ? withRequestTag(opts.messages, randomUUID().slice(0, 8)) : opts.messages,
@@ -155,18 +196,19 @@ async function send(opts: ChatOptions, fresh: boolean) {
   const timeoutMs = opts.timeoutMs ?? 120_000;
   let route = nightshift();
   try {
-    return { route, data: await post(route, body, timeoutMs) };
+    return { route, data: await post(route, body, timeoutMs, stats) };
   } catch (err) {
     if (!unreachable(err)) throw err;
     route = nvidiaDirect();
-    return { route, data: await post(route, body, timeoutMs) };
+    return { route, data: await post(route, body, timeoutMs, stats) };
   }
 }
 
 export async function chat(opts: ChatOptions): Promise<ChatResult> {
   const started = Date.now();
+  const stats: CallStats = { waitedMs: 0, retries: 0 };
   try {
-    return await attempt(opts, started);
+    return await attempt(opts, started, stats);
   } catch (err) {
     // Failed calls are traced too, so a fallback further up can't hide them.
     opts.trace?.add({
@@ -177,19 +219,19 @@ export async function chat(opts: ChatOptions): Promise<ChatResult> {
       model: opts.model,
       receipt: null,
       ms: Date.now() - started,
-      detail: { error: (err as Error).message.slice(0, 200) },
+      detail: { error: (err as Error).message.slice(0, 200), ...stats },
     });
     throw err;
   }
 }
 
-async function attempt(opts: ChatOptions, started: number): Promise<ChatResult> {
-  let { route, data } = await send(opts, !opts.cache);
+async function attempt(opts: ChatOptions, started: number, stats: CallStats): Promise<ChatResult> {
+  let { route, data } = await send(opts, !opts.cache, stats);
   let cached = data.meterless?.from_cache === true;
   let message: Message = data.choices?.[0]?.message ?? { role: "assistant", content: "" };
   // A cached reply that came back empty is useless; ask again, uncached.
   if (cached && !message.content && !message.tool_calls?.length) {
-    ({ route, data } = await send(opts, true));
+    ({ route, data } = await send(opts, true, stats));
     cached = data.meterless?.from_cache === true;
     message = data.choices?.[0]?.message ?? { role: "assistant", content: "" };
   }
@@ -212,7 +254,7 @@ async function attempt(opts: ChatOptions, started: number): Promise<ChatResult> 
     model: result.model,
     receipt: result.receipt,
     ms: result.ms,
-    detail: { cached },
+    detail: { cached, ...stats },
   });
   return result;
 }
