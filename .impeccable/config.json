@@ -29,6 +29,42 @@
         ],
         "createdAt": "2026-10-26T12:25:37.539Z",
         "reason": "Claude: decision-round sketch, a gitignored fixture for choosing a direction, never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-26T12:55:45.199Z",
+        "reason": "Claude: decision-round sketch of an alternative direction, a gitignored fixture whose fonts are deliberately its own; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-26T12:55:45.215Z",
+        "reason": "Claude: decision-round sketch of an alternative direction, a gitignored fixture whose fonts are deliberately its own; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-airport.html"
+        ],
+        "createdAt": "2026-10-26T12:55:45.232Z",
+        "reason": "Claude: decision-round sketch of an alternative direction, a gitignored fixture whose fonts are deliberately its own; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-10-26T12:55:45.249Z",
+        "reason": "Claude: decision-round sketch of an alternative direction, a gitignored fixture whose fonts are deliberately its own; never shipped"
       }
     ]
   }
