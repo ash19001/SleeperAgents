@@ -1,0 +1,1150 @@
+{
+  "question": "Why did my water bill go up in June and July?",
+  "notes": [],
+  "recorded_at": "2026-10-25T21:15:07.103Z",
+  "result": {
+    "kind": "answer",
+    "answer": {
+      "question": "Why did my water bill go up in June and July?",
+      "utility": "water",
+      "bill_a": "WC-202604",
+      "bill_b": "WC-202606",
+      "total_a": 117.15,
+      "total_b": 178.43,
+      "change_gbp": 61.28,
+      "components": [
+        {
+          "id": "period",
+          "gbp": 0,
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        },
+        {
+          "id": "weather",
+          "gbp": 12.63,
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        },
+        {
+          "id": "usage_other",
+          "gbp": 48.65,
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        },
+        {
+          "id": "unit_price",
+          "gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E4"
+          ]
+        },
+        {
+          "id": "standing",
+          "gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E4"
+          ]
+        },
+        {
+          "id": "estimate",
+          "gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        },
+        {
+          "id": "oneoff",
+          "gbp": 0,
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        }
+      ],
+      "causes": [
+        {
+          "id": "C1",
+          "verdict": "ruled_out",
+          "effect_gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E4"
+          ],
+          "memory": [],
+          "detail": "The unit rate went from £4.48 per m³ to £4.48 per m³, too small a change to count."
+        },
+        {
+          "id": "C2",
+          "verdict": "ruled_out",
+          "effect_gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E4"
+          ],
+          "memory": [],
+          "detail": "The standing charge went from 30.15p to 30.15p a day, too small a change to count."
+        },
+        {
+          "id": "C3",
+          "verdict": "ruled_out",
+          "effect_gbp": 0,
+          "evidence": [
+            "E2",
+            "E1"
+          ],
+          "memory": [],
+          "detail": "The later bill covered 61 days; the earlier one covered 61."
+        },
+        {
+          "id": "C4",
+          "verdict": "ruled_out",
+          "effect_gbp": 0,
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ],
+          "memory": [],
+          "detail": "No estimated reading moved the billed units enough to matter."
+        },
+        {
+          "id": "C5",
+          "verdict": "ruled_out",
+          "effect_gbp": 0,
+          "evidence": [
+            "E2",
+            "E1"
+          ],
+          "memory": [],
+          "detail": "Neither bill has a different credit or one-off charge."
+        },
+        {
+          "id": "C6",
+          "verdict": "supported",
+          "effect_gbp": 12.63,
+          "evidence": [
+            "E2",
+            "E1"
+          ],
+          "memory": [],
+          "detail": "The weather explains 21% of the change in daily use (fit R² 0.84 over 4 bills)."
+        },
+        {
+          "id": "C7",
+          "verdict": "supported",
+          "effect_gbp": 48.65,
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ],
+          "memory": [],
+          "detail": "Beyond the weather, daily use changed by 49%."
+        },
+        {
+          "id": "C8",
+          "verdict": "supported",
+          "effect_gbp": 48.65,
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ],
+          "memory": [],
+          "detail": "Water use beyond the weather is up about 178 litres a day and staying up, with no household note to explain it."
+        }
+      ],
+      "facts": [
+        {
+          "id": "F1",
+          "value": "£61.28",
+          "evidence": [
+            "E2"
+          ]
+        },
+        {
+          "id": "F2",
+          "value": "£117.15",
+          "evidence": [
+            "E2"
+          ]
+        },
+        {
+          "id": "F3",
+          "value": "£178.43",
+          "evidence": [
+            "E2"
+          ]
+        },
+        {
+          "id": "F4",
+          "value": "£48.65",
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        },
+        {
+          "id": "F5",
+          "value": "£12.63",
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        },
+        {
+          "id": "F6",
+          "value": "16.4°C",
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        },
+        {
+          "id": "F7",
+          "value": "22.5°C",
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        },
+        {
+          "id": "F8",
+          "value": "49%",
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        },
+        {
+          "id": "F9",
+          "value": "178 litres a day",
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        }
+      ],
+      "answer_markdown": "Your water bill went up by {F1} from {F2} in April–May to {F3} in June–July. The later period was warmer, so you used more water, adding {F5} to the bill [E2][E1]. Your use also went up by more than the weather explains, which added {F4} [E2][E1][E3]. Water use beyond the weather is up and staying up, and no household note explains it, so this could indicate a leak [E2][E1][E3]. We checked whether the unit price, standing charge, billing period length, estimated readings or one‑off credits played a part, and none of those made a difference.",
+      "next_steps": [
+        {
+          "cause": "C8",
+          "action": "Turn off every tap and appliance, then read your water meter twice, 30 minutes apart. If the number moves, you may have a leak: call your water company.",
+          "evidence": [
+            "E2",
+            "E1",
+            "E3"
+          ]
+        },
+        {
+          "cause": "C6",
+          "action": "Nothing to fix for the weather or the length of the bill. Both even out over the year.",
+          "evidence": [
+            "E2",
+            "E1"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "E1",
+          "title": "Daily weather",
+          "source": "zetaris",
+          "sql": "SELECT day, tmean_c, tmax_c, rain_mm, hdd\nFROM whybill.weather_daily\nWHERE day BETWEEN '2024-10-01' AND '2026-07-31'\nORDER BY day",
+          "rows": 669,
+          "sha256": "607869fcbc0eea6ae3b77374dcda19cbb57aa58c2201dd7097a56887fd24ffb9",
+          "at": "2026-10-25T21:05:56.935Z"
+        },
+        {
+          "id": "E2",
+          "title": "Water bills",
+          "source": "zetaris",
+          "sql": "SELECT utility, supplier, bill_id, period_start, period_end, days, units_billed, units_true, unit, read_type,\n       energy_gbp, standing_gbp, adjustments_gbp, adjustment_note, total_gbp\nFROM whybill.bills\nWHERE utility = 'water'\nORDER BY utility, period_start",
+          "rows": 6,
+          "sha256": "4c171678e23f4c6b9c0eb4b50f6eda4e226a8caf7041b30f8342173a20a1ea71",
+          "at": "2026-10-25T21:05:56.999Z"
+        },
+        {
+          "id": "E3",
+          "title": "Water meter readings",
+          "source": "zetaris",
+          "sql": "SELECT utility, read_date, register, unit, source\nFROM whybill.reads\nWHERE utility = 'water' AND read_date BETWEEN '2026-03-31' AND '2026-07-31'\nORDER BY read_date",
+          "rows": 3,
+          "sha256": "82adc04e5eb54ad8ce814a6c9c1d4d58f327a87983c8f2ac0c10312c2c3f4d1f",
+          "at": "2026-10-25T21:06:12.268Z"
+        },
+        {
+          "id": "E4",
+          "title": "Water charges",
+          "source": "zetaris",
+          "sql": "SELECT utility, kind, valid_from, valid_to, value, unit\nFROM whybill.tariffs\nWHERE utility = 'water' AND valid_from <= '2026-07-31' AND (valid_to IS NULL OR valid_to > '2026-04-01')\nORDER BY kind, valid_from",
+          "rows": 2,
+          "sha256": "4dda26fc5d35015d2b4cacfed9cec78a429c32de3a71c7cf8d47c55cc17042dd",
+          "at": "2026-10-25T21:10:02.122Z"
+        }
+      ],
+      "memory": [],
+      "trace": [
+        {
+          "step": "scout.guard",
+          "agent": "scout",
+          "label": "Checked the question",
+          "route": "code",
+          "model": null,
+          "ms": 0.1,
+          "detail": {
+            "level": "low",
+            "flags": []
+          },
+          "at": 1792962226271
+        },
+        {
+          "step": "intake",
+          "agent": "intake",
+          "label": "Read the question (failed)",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": null,
+          "ms": 129723,
+          "detail": {
+            "error": "nightshift answered 502: {\"error\":{\"message\":\"429: {\\\"status\\\":429,\\\"title\\\":\\\"Too Many Requests\\\"}\",\"type\":\"api_error\",\"code\":\"provider_error\",\"param\":null,\"meterless_detail\":\"nvidia_429: {\\\"status\\\"",
+            "waitedMs": 118000,
+            "retries": 6
+          },
+          "at": 1792962355994
+        },
+        {
+          "step": "fallback",
+          "agent": "triage",
+          "label": "Intake agent unavailable; used Scout's keywords",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "at": 1792962355994
+        },
+        {
+          "step": "contract.issued",
+          "agent": "scout",
+          "label": "Signed contract …9DEYZG for bill.explain.water, model nemotron-ultra",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "detail": {
+            "event": "contract.issued",
+            "traceId": "01M5TE0T2Z3816NS76S2B11PA5",
+            "contractId": "01M5TE4RRWSP5G8P78NX9DEYZG",
+            "intent": "bill.explain.water",
+            "risk": "low",
+            "profile": "nemotron-ultra"
+          },
+          "at": 1792962355996
+        },
+        {
+          "step": "scout.decision",
+          "agent": "scout",
+          "label": "Scout decided: bill.explain.water (high, with the intake agent)",
+          "route": "code",
+          "model": null,
+          "ms": 1,
+          "detail": {
+            "event": "scout.decision",
+            "traceId": "01M5TE0T2Z3816NS76S2B11PA5",
+            "intent": "bill.explain.water",
+            "band": "high",
+            "risk": "low",
+            "latencyMs": 1,
+            "stage2": "used"
+          },
+          "at": 1792962355996
+        },
+        {
+          "step": "contract.verified",
+          "agent": "scout",
+          "label": "orchestrator:water verified the contract",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "detail": {
+            "event": "contract.verified",
+            "traceId": "01M5TE0T2Z3816NS76S2B11PA5",
+            "contractId": "01M5TE4RRWSP5G8P78NX9DEYZG",
+            "engine": "orchestrator:water"
+          },
+          "at": 1792962355996
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Opened the case file: +£61.28 split into 7 parts",
+          "route": "world-model",
+          "model": null,
+          "ms": 264,
+          "detail": {
+            "caseId": "case:whybill:01M5TE4RRWSP5G8P78NX9DEYZG"
+          },
+          "at": 1792962357001
+        },
+        {
+          "step": "orchestrator:water",
+          "agent": "orchestrator:water",
+          "label": "Plan the investigation",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "receipt": "rcpt_req_viyw7ofa",
+          "ms": 8879,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962365880
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Round 1: billing, tariff, weather, usage, leak",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "detail": {
+            "tasks": [
+              {
+                "specialist": "billing",
+                "task": "Confirm the +£0.00 days on bill part (C3) is correct for the identical 61-day periods. Verify the +£0.00 estimated reading part (C4) and +£0.00 credits part (C5) have no hidden adjustments.",
+                "by": "agent"
+              },
+              {
+                "specialist": "tariff",
+                "task": "Confirm the +£0.00 unit price part (C1) and +£0.00 standing charge part (C2) are correct, i.e. no tariff change occurred between the two bills.",
+                "by": "agent"
+              },
+              {
+                "specialist": "weather",
+                "task": "Verify the +£12.63 weather part (C6) using the trusted weather fit and confirm the temperature-driven consumption difference between Apr–May and Jun–Jul 2026.",
+                "by": "agent"
+              },
+              {
+                "specialist": "usage",
+                "task": "Investigate the +£48.65 use beyond weather part (C7, C9) to determine if there was a genuine change in household water consumption, a meter issue, or fuel switching.",
+                "by": "agent"
+              },
+              {
+                "specialist": "leak",
+                "task": "Investigate the +£48.65 use beyond weather part (C8) to check for any indication of a leak during the Jun–Jul 2026 period.",
+                "by": "agent"
+              }
+            ],
+            "by": "agent"
+          },
+          "at": 1792962365881
+        },
+        {
+          "step": "specialist:leak",
+          "agent": "specialist:leak",
+          "label": "Start the task",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_vaofxvbn",
+          "ms": 6111,
+          "detail": {
+            "cached": false,
+            "waitedMs": 5718,
+            "retries": 0
+          },
+          "at": 1792962371998
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:leak",
+          "label": "get_split",
+          "route": "zetaris",
+          "model": null,
+          "ms": 1.2,
+          "at": 1792962371999
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:leak",
+          "label": "get_meter_readings",
+          "route": "zetaris",
+          "model": null,
+          "ms": 270.8,
+          "at": 1792962372269
+        },
+        {
+          "step": "specialist:leak",
+          "agent": "specialist:leak",
+          "label": "Step 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_qk7zqiug",
+          "ms": 85463,
+          "detail": {
+            "cached": false,
+            "waitedMs": 79738,
+            "retries": 2
+          },
+          "at": 1792962457732
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:leak",
+          "label": "recall_notes({\"query\":\"leak\"})",
+          "route": "h-mem",
+          "model": null,
+          "ms": 0.4,
+          "at": 1792962457733
+        },
+        {
+          "step": "specialist:weather",
+          "agent": "specialist:weather",
+          "label": "Start the task",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_1g5gerk3",
+          "ms": 121653,
+          "detail": {
+            "cached": false,
+            "waitedMs": 114378,
+            "retries": 4
+          },
+          "at": 1792962487538
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:weather",
+          "label": "get_weather",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962487538
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:weather",
+          "label": "get_split",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962487538
+        },
+        {
+          "step": "specialist:weather",
+          "agent": "specialist:weather",
+          "label": "Step 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_kc1gfrwf",
+          "ms": 1017,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962488555
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:weather",
+          "label": "test_cause({\"cause\":\"C6\",\"notes\":[]})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.3,
+          "at": 1792962488556
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Start the task",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_kgjfiknp",
+          "ms": 153139,
+          "detail": {
+            "cached": false,
+            "waitedMs": 144093,
+            "retries": 5
+          },
+          "at": 1792962519023
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:billing",
+          "label": "get_bills",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962519023
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Step 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_2b3b2yim",
+          "ms": 31698,
+          "detail": {
+            "cached": false,
+            "waitedMs": 29313,
+            "retries": 1
+          },
+          "at": 1792962550722
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:billing",
+          "label": "get_meter_readings",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962550722
+        },
+        {
+          "step": "specialist:usage",
+          "agent": "specialist:usage",
+          "label": "Start the task",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_rlczipyv",
+          "ms": 185768,
+          "detail": {
+            "cached": false,
+            "waitedMs": 177415,
+            "retries": 4
+          },
+          "at": 1792962551655
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:usage",
+          "label": "get_split",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.2,
+          "at": 1792962551655
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:usage",
+          "label": "get_meter_readings",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962551655
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:usage",
+          "label": "recall_notes({\"query\":\"heat pump\"})",
+          "route": "h-mem",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962551655
+        },
+        {
+          "step": "specialist:usage",
+          "agent": "specialist:usage",
+          "label": "Step 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_idjs7n7i",
+          "ms": 18311,
+          "detail": {
+            "cached": false,
+            "waitedMs": 16226,
+            "retries": 0
+          },
+          "at": 1792962569967
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:usage",
+          "label": "test_cause({\"cause\":\"C7\",\"notes\":[]})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962569967
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Start the task (failed)",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": null,
+          "ms": 235387,
+          "detail": {
+            "error": "nightshift answered 502: {\"error\":{\"message\":\"429: {\\\"status\\\":429,\\\"title\\\":\\\"Too Many Requests\\\"}\",\"type\":\"api_error\",\"code\":\"provider_error\",\"param\":null,\"meterless_detail\":\"nvidia_429: {\\\"status\\\"",
+            "waitedMs": 223209,
+            "retries": 6
+          },
+          "at": 1792962601272
+        },
+        {
+          "step": "specialist:leak",
+          "agent": "specialist:leak",
+          "label": "Step 3",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_r2k6uhwr",
+          "ms": 174793,
+          "detail": {
+            "cached": false,
+            "waitedMs": 166886,
+            "retries": 4
+          },
+          "at": 1792962632526
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:leak",
+          "label": "test_cause({\"cause\":\"C8\",\"notes\":[]})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 1.5,
+          "at": 1792962632527
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Step 3",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_9zj06g0i",
+          "ms": 144356,
+          "detail": {
+            "cached": false,
+            "waitedMs": 135293,
+            "retries": 5
+          },
+          "at": 1792962695078
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:billing",
+          "label": "test_cause({\"cause\":\"C3\"})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.2,
+          "at": 1792962695078
+        },
+        {
+          "step": "specialist:weather",
+          "agent": "specialist:weather",
+          "label": "Step 3 (failed)",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": null,
+          "ms": 207629,
+          "detail": {
+            "error": "nightshift answered 502: {\"error\":{\"message\":\"429: {\\\"status\\\":429,\\\"title\\\":\\\"Too Many Requests\\\"}\",\"type\":\"api_error\",\"code\":\"provider_error\",\"param\":null,\"meterless_detail\":\"nvidia_429: {\\\"status\\\"",
+            "waitedMs": 195882,
+            "retries": 6
+          },
+          "at": 1792962696185
+        },
+        {
+          "step": "specialist:usage",
+          "agent": "specialist:usage",
+          "label": "Step 3",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_wwseu58q",
+          "ms": 127404,
+          "detail": {
+            "cached": false,
+            "waitedMs": 119420,
+            "retries": 3
+          },
+          "at": 1792962697371
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Step 4",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_v6imrecu",
+          "ms": 90514,
+          "detail": {
+            "cached": false,
+            "waitedMs": 45177,
+            "retries": 2
+          },
+          "at": 1792962785593
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:billing",
+          "label": "test_cause({\"cause\":\"C4\"})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962785594
+        },
+        {
+          "step": "specialist:leak",
+          "agent": "specialist:leak",
+          "label": "Step 4",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_zxxcjfyc",
+          "ms": 153085,
+          "detail": {
+            "cached": false,
+            "waitedMs": 104619,
+            "retries": 4
+          },
+          "at": 1792962785613
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Step 5",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_g2ph7y07",
+          "ms": 3036,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962788630
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:billing",
+          "label": "test_cause({\"cause\":\"C5\"})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962788630
+        },
+        {
+          "step": "specialist:billing",
+          "agent": "specialist:billing",
+          "label": "Report",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_gihz1swg",
+          "ms": 1197,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962789827
+        },
+        {
+          "step": "orchestrator:water",
+          "agent": "orchestrator:water",
+          "label": "Review round 1",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "receipt": "rcpt_req_otnuf1it",
+          "ms": 32659,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962822490
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Round 2: tariff",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "detail": {
+            "tasks": [
+              {
+                "specialist": "tariff",
+                "task": "Check C1 (unit price changed) and C2 (standing charge changed) for the split parts assigned to them (both +£0.00). Confirm whether the tariff schedule or standing charge rate changed between the two billing periods.",
+                "by": "agent"
+              }
+            ],
+            "by": "agent"
+          },
+          "at": 1792962822491
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Start the task",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_lcq0lang",
+          "ms": 992,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962823484
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:tariff",
+          "label": "get_tariff",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962823484
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Step 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_uw11t67y",
+          "ms": 5988,
+          "detail": {
+            "cached": false,
+            "waitedMs": 4000,
+            "retries": 1
+          },
+          "at": 1792962829472
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:tariff",
+          "label": "get_bills",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962829472
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Step 3",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_e5759mo3",
+          "ms": 66359,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962895832
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:tariff",
+          "label": "test_cause({\"cause\":\"C1\"})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.2,
+          "at": 1792962895832
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Step 4",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_3ql5rppc",
+          "ms": 382,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962896214
+        },
+        {
+          "step": "tool",
+          "agent": "specialist:tariff",
+          "label": "test_cause({\"cause\":\"C2\"})",
+          "route": "zetaris",
+          "model": null,
+          "ms": 0.1,
+          "at": 1792962896214
+        },
+        {
+          "step": "specialist:tariff",
+          "agent": "specialist:tariff",
+          "label": "Step 5",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "receipt": "rcpt_req_yya3qkwm",
+          "ms": 1091,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962897305
+        },
+        {
+          "step": "orchestrator:water",
+          "agent": "orchestrator:water",
+          "label": "Review round 2",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "receipt": "rcpt_req_foq4v59l",
+          "ms": 1907,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962899214
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Closed the case: All parts over £1 are explained: +£12.63 from weather and +£48.65 from a possible leak with no household note to explain the consumption increase. No tariff, billing-period, estimate, or one-off charge changes contributed. The case is closed.",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "detail": {
+            "round": 2
+          },
+          "at": 1792962899214
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Markovian ran 3 steps (completed)",
+          "route": "markovian",
+          "model": null,
+          "ms": 542214,
+          "detail": {
+            "status": "completed",
+            "tokensSaved": 0,
+            "tokenLabel": "estimated"
+          },
+          "at": 1792962899215
+        },
+        {
+          "step": "orchestrator",
+          "agent": "orchestrator:water",
+          "label": "Investigation done",
+          "route": "code",
+          "model": null,
+          "ms": 543219,
+          "detail": {
+            "contractId": "01M5TE4RRWSP5G8P78NX9DEYZG",
+            "status": "done"
+          },
+          "at": 1792962899215
+        },
+        {
+          "step": "writer",
+          "agent": "writer",
+          "label": "Write the answer",
+          "route": "nightshift",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "receipt": "rcpt_req_oa4ze77x",
+          "ms": 7884,
+          "detail": {
+            "cached": false,
+            "waitedMs": 0,
+            "retries": 0
+          },
+          "at": 1792962907100
+        },
+        {
+          "step": "check",
+          "agent": "checker",
+          "label": "Checked the answer: passed",
+          "route": "code",
+          "model": null,
+          "ms": 0,
+          "at": 1792962907100
+        }
+      ],
+      "checked": {
+        "by": "writer",
+        "problems": []
+      },
+      "assessment": {
+        "level": "high",
+        "explained_pct": 100,
+        "reasons": [
+          "100% of the movement in the bill is explained by causes that passed their tests.",
+          "Past bills predict your use from the weather well (R² 0.84 over 4 bills), so the weather's share is measured, not guessed.",
+          "Both bills used actual meter readings."
+        ],
+        "limitations": [
+          "A possible leak is a pattern in the readings, not a confirmed fault. The meter check in “What to do next” confirms it.",
+          "It explains the change between these two bills from their own data. It doesn't check the bill is correct or compare tariffs."
+        ]
+      },
+      "timeline": [
+        {
+          "actor": "Orchestrator (Nemotron Ultra)",
+          "text": "Planned the investigation: a task for each of 5 specialists.",
+          "detail": [
+            "billing: Confirm the +£0.00 days on bill part (C3) is correct for the identical 61-day periods. Verify the +£0.00 estimated reading part (C4) and +£0.00 credits part (C…",
+            "tariff: Confirm the +£0.00 unit price part (C1) and +£0.00 standing charge part (C2) are correct, i.e. no tariff change occurred between the two bills.",
+            "weather: Verify the +£12.63 weather part (C6) using the trusted weather fit and confirm the temperature-driven consumption difference between Apr–May and Jun–Jul 2026.",
+            "usage: Investigate the +£48.65 use beyond weather part (C7, C9) to determine if there was a genuine change in household water consumption, a meter issue, or fuel swit…",
+            "leak: Investigate the +£48.65 use beyond weather part (C8) to check for any indication of a leak during the Jun–Jul 2026 period."
+          ]
+        },
+        {
+          "actor": "Specialists (Nemotron Lightning)",
+          "text": "Round 1: billing, tariff, weather, usage, leak reported back. Supported so far: weather, use changed beyond the weather, possible leak.",
+          "detail": [
+            "Code check: tariff didn't test C1 (Unit price changed) itself; code measured it as ruled out",
+            "Code check: tariff didn't test C2 (Standing charge changed) itself; code measured it as ruled out"
+          ]
+        },
+        {
+          "actor": "Orchestrator (Nemotron Ultra)",
+          "text": "All parts over £1 are explained (weather +£12.63, leak +£48.65). The tariff specialist did not test C1 and C2 themselves; code measured them as ruled out. Ask tariff to verify these two causes before closing.",
+          "detail": [
+            "asked tariff: Check C1 (unit price changed) and C2 (standing charge changed) for the split parts assigned to them (both +£0.00). Confirm whether the tariff schedule or stand…"
+          ]
+        },
+        {
+          "actor": "Specialists (Nemotron Lightning)",
+          "text": "Round 2: tariff reported back. Supported so far: weather, use changed beyond the weather, possible leak.",
+          "detail": [
+            "tariff resolved C1: it now agrees with the measurement",
+            "tariff resolved C2: it now agrees with the measurement"
+          ]
+        },
+        {
+          "actor": "Orchestrator (Nemotron Ultra)",
+          "text": "Closed the case. All parts over £1 are explained: +£12.63 from weather and +£48.65 from a possible leak with no household note to explain the consumption increase. No tariff, billing-period, estimate, or one-off charge changes contributed. The case is closed.",
+          "detail": []
+        },
+        {
+          "actor": "Writer (Nemotron Ultra)",
+          "text": "Wrote the answer, using only the facts table for figures."
+        },
+        {
+          "actor": "Checker (code)",
+          "text": "Passed: the parts add up to the penny, every figure is a measurement, and every reason cites its evidence."
+        }
+      ]
+    }
+  }
+}
