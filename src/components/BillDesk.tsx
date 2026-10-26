@@ -113,9 +113,9 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
 
   return (
     <>
-      <TopBar mode={mode} />
-      {/* Phones: bills, answer, notes. Wide screens: bills over notes on the left, the answer on the right. */}
-      <main className="gutter mx-auto grid max-w-[1240px] items-start gap-5 pt-5 pb-8 lg:grid-cols-[minmax(0,430px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
+      <TopBar mode={mode} household={household} />
+      {/* Phones: bills, answer, notes. Wide screens: bills over notes on the left, the answer sheet on the right. */}
+      <main className="gutter mx-auto grid max-w-[1400px] items-start gap-4 pt-4 pb-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <BillsCard
             household={household}
@@ -136,7 +136,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           ref={answerRef}
           aria-labelledby="answer-title"
           aria-busy={busy}
-          className={`grid min-w-0 scroll-mt-4 gap-6 rounded-xl border border-line bg-surface px-[18px] py-[22px] shadow-sheet transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"} sm:px-8 sm:pt-7 sm:pb-[30px] lg:col-start-2 lg:row-span-2 lg:row-start-1`}
+          className={`min-w-0 scroll-mt-4 overflow-hidden rounded-lg border border-line bg-surface transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"} lg:col-start-2 lg:row-span-2 lg:row-start-1`}
         >
           {adding ? (
             <AddBillForm key={`${adding.utility}|${adding.period}`} utility={adding.utility} period={adding.period} onSaved={(id) => billSaved(id, adding.period)} onCancel={() => setAdding(null)} />
@@ -151,6 +151,8 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
             examples={examples}
             onAsk={ask}
             lastQuestion={lastQuestion}
+            utility={utility}
+            onUtility={setUtility}
             onOpen={(ref, answer) => setDrawer({ ref, answer })}
           />
           )}
@@ -159,11 +161,22 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
         </div>
       </main>
-      <footer className="gutter mx-auto max-w-[1240px] pb-7 text-sm text-muted">
-        SAMPLE household data. The agent reads data through Zetaris, reasons with NVIDIA Nemotron via Meterless Nightshift, and keeps household notes in Meterless H-MEM.
+      <footer className="bg-letterhead text-letterhead-2">
+        <div className="gutter mx-auto flex max-w-[1400px] flex-wrap items-baseline justify-between gap-x-8 gap-y-2 py-6 text-sm">
+          <p className="max-w-[72ch]">
+            <span className="font-semibold text-letterhead-ink">Why My Bill</span> reads the household&apos;s data through Zetaris, reasons with NVIDIA Nemotron via Meterless Nightshift, and keeps household notes in Meterless H-MEM.
+          </p>
+          <p>SAMPLE household data. Prices from Octopus Energy, weather from Open-Meteo.</p>
+        </div>
       </footer>
       <p role="status" className="sr-only">{announcement}</p>
-      <EvidenceDrawer target={drawer} mode={mode} notes={notes} onClose={() => setDrawer(null)} />
+      <EvidenceDrawer
+        target={drawer}
+        mode={mode}
+        notes={notes}
+        onOpen={(ref, from) => setDrawer((d) => d && { ref, answer: d.answer, from })}
+        onClose={() => setDrawer(null)}
+      />
     </>
   );
 }

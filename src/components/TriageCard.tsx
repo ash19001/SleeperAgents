@@ -1,4 +1,5 @@
 import { Check, ShieldCheck, X } from "lucide-react";
+import { Sheet } from "./Sheet";
 import { TraceList } from "./TraceList";
 import { fmtDateTime } from "@/lib/format";
 import { MODEL_NAMES, UTILITIES } from "@/lib/labels";
@@ -11,10 +12,9 @@ type Triage = Extract<AskResult, { kind: "triage" }>;
 export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] }) {
   const label = (id: string) => bills.find((b) => b.bill_id === id)?.label ?? id;
   return (
-    <>
+    <Sheet title="What triage decided" meta="Live">
       <header className="grid gap-1.5">
-        <p className="eyebrow">Live · triage</p>
-        <h2 id="answer-title" className="headline text-[clamp(1.3rem,1.05rem+1vw,1.7rem)] leading-tight font-bold">“{result.question}”</h2>
+        <h2 id="answer-title" className="text-[clamp(1.35rem,1.1rem+0.8vw,1.65rem)] leading-tight font-extrabold tracking-[-0.015em]">{result.question}</h2>
         <p className="text-ink-2">
           {result.source === "intake"
             ? `Read by the intake agent (Nemotron 3.5 Lightning) and checked by Scout. ${result.requests.length === 1 ? "One utility" : `${result.requests.length} utilities`} to investigate.`
@@ -30,22 +30,22 @@ export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] })
       </ul>
 
       {result.notes.length > 0 && <p className="text-sm text-ink-2">{result.notes.join(" ")}</p>}
-      <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
+      <p className="rounded-md bg-hl-wash px-3 py-2 text-[0.92rem] text-ink">
         {result.requests.every((r) => r.orchestrator.status === "placeholder")
           ? "The orchestrators checked their contracts but weren't given the data to investigate."
           : "No bill could be investigated, so there's no answer. The reasons are below."}
       </p>
       <TraceList steps={result.trace} open />
-    </>
+    </Sheet>
   );
 }
 
 function RequestRow({ request: r, label }: { request: TriageRequest; label: (id: string) => string }) {
   const ok = r.orchestrator.status === "placeholder" || r.orchestrator.status === "done";
   return (
-    <li className="grid gap-3 rounded-lg border border-line p-4">
+    <li className="grid gap-3 rounded-md border border-line p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h3 className="headline text-lg font-bold">{UTILITIES[r.utility].name}</h3>
+        <h3 className="text-lg font-bold">{UTILITIES[r.utility].name}</h3>
         <span className="text-sm text-ink-2">
           {label(r.bill_a)} → {label(r.bill_b)} · {r.direction === "change" ? "any change" : r.direction}
         </span>
@@ -62,7 +62,7 @@ function RequestRow({ request: r, label }: { request: TriageRequest; label: (id:
         <dt className="text-muted">Allowed</dt>
         <dd className="flex flex-wrap gap-1">
           {r.contract.capabilities.map((c) => (
-            <span key={c} className="rounded-[5px] border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[0.72rem]">{c}</span>
+            <span key={c} className="rounded-[3px] border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[0.76rem]">{c}</span>
           ))}
         </dd>
         <dt className="text-muted">Expires</dt>
@@ -71,7 +71,7 @@ function RequestRow({ request: r, label }: { request: TriageRequest; label: (id:
         <dd className="font-mono text-[0.76rem] break-all text-muted">{r.contract.signature.slice(0, 32)}…</dd>
       </dl>
       <p className="flex items-center gap-2 text-[0.95rem]">
-        {ok ? <ShieldCheck aria-hidden className="size-4 text-accent" /> : <X aria-hidden className="size-4 text-up-ink" />}
+        {ok ? <ShieldCheck aria-hidden className="size-4" /> : <X aria-hidden className="size-4 text-rise" />}
         {ok ? (
           <span>
             <Check aria-hidden className="mr-1 inline size-3.5" />

@@ -1,18 +1,21 @@
 "use client";
 
+import { ArrowLeft, Database, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BUTTON_QUIET_SMALL } from "./ui";
 import { fmtDate, fmtDateTime } from "@/lib/format";
 import { CAUSE_NAMES, PART_NAMES } from "@/lib/labels";
 import type { Answer, Mode, Note } from "@/lib/types";
 
-export type DrawerTarget = { ref: string; answer: Answer } | null;
+export type DrawerTarget = { ref: string; answer: Answer; from?: string } | null;
 
-// Shows the exact query behind an E# citation, or the household note behind an M# citation.
-export function EvidenceDrawer({ target, mode, notes, onClose }: {
+// Shows the exact query behind an E# citation, the household note behind an
+// M# citation, or every query behind a highlighted figure (F#).
+export function EvidenceDrawer({ target, mode, notes, onOpen, onClose }: {
   target: DrawerTarget;
   mode: Mode;
   notes: Note[];
+  onOpen: (ref: string, from?: string) => void;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -24,6 +27,9 @@ export function EvidenceDrawer({ target, mode, notes, onClose }: {
     if (!target && d.open) d.close();
   }, [target]);
 
+  const kind = target?.ref[0];
+  const label = kind === "E" ? `Evidence ${target!.ref}` : kind === "M" ? `Household note ${target!.ref}` : "Where this figure comes from";
+
   return (
     <dialog
       ref={dialog}
@@ -34,16 +40,59 @@ export function EvidenceDrawer({ target, mode, notes, onClose }: {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="gutter grid h-full max-h-[88vh] content-start gap-4 overflow-y-auto pt-4 pb-[max(24px,env(safe-area-inset-bottom,0px))] md:max-h-none md:pt-[max(18px,env(safe-area-inset-top,0px))] md:pr-[max(22px,env(safe-area-inset-right,0px))] md:pl-[22px]">
-        <div className="flex justify-end">
-          <button type="button" onClick={onClose} className={BUTTON_QUIET_SMALL}>Close</button>
+      <div className="grid h-full max-h-[88vh] grid-rows-[auto_minmax(0,1fr)] md:max-h-none">
+        <div className="flex items-center justify-between gap-3 bg-letterhead py-3 pr-[max(16px,env(safe-area-inset-right,0px))] pl-5 text-letterhead-ink md:pt-[max(12px,env(safe-area-inset-top,0px))] md:pl-6">
+          <p className="flex items-center gap-2 font-bold">
+            {target?.from && (
+              <button type="button" onClick={() => onOpen(target.from!)} className="-ml-1.5 grid size-8 place-items-center rounded-md hover:bg-white/10" aria-label="Back to the figure">
+                <ArrowLeft aria-hidden className="size-4" />
+              </button>
+            )}
+            {label}
+          </p>
+          <button type="button" onClick={onClose} className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold text-letterhead-ink hover:bg-white/10">
+            <X aria-hidden className="size-4" />Close
+          </button>
         </div>
-        {target &&
-          (target.ref.startsWith("E")
-            ? <EvidenceBody key={target.ref} refId={target.ref} answer={target.answer} mode={mode} />
-            : <NoteBody refId={target.ref} answer={target.answer} notes={notes} />)}
+        <div className="overflow-y-auto px-5 pt-5 pb-[max(28px,env(safe-area-inset-bottom,0px))] md:px-6">
+          {target &&
+            (kind === "E" ? <EvidenceBody key={target.ref} refId={target.ref} answer={target.answer} mode={mode} />
+            : kind === "M" ? <NoteBody refId={target.ref} answer={target.answer} notes={notes} />
+            : <FactBody refId={target.ref} answer={target.answer} onOpen={(ref) => onOpen(ref, target.ref)} />)}
+        </div>
       </div>
     </dialog>
+  );
+}
+
+const DL = "grid grid-cols-[max-content_minmax(0,1fr)] gap-x-5 gap-y-2 border-t border-line pt-4 text-[0.94rem]";
+
+function FactBody({ refId, answer, onOpen }: { refId: string; answer: Answer; onOpen: (ref: string) => void }) {
+  const fact = answer.facts.find((f) => f.id === refId);
+  if (!fact) return <p>That figure isn&apos;t part of this answer.</p>;
+  return (
+    <div className="grid min-w-0 gap-4">
+      <h2 id="drawer-title" className="text-[2rem] leading-tight font-extrabold tracking-[-0.015em]">
+        <span className="marker text-hl-ink">{fact.value}</span>
+      </h2>
+      <p className="text-ink-2">
+        Measured in code from {fact.evidence.length === 1 ? "this query" : `these ${fact.evidence.length} queries`}. No model typed this number: the writer used a placeholder, and code filled it in.
+      </p>
+      <ul className="grid border-t border-ink">
+        {fact.evidence.map((id) => {
+          const ev = answer.evidence.find((e) => e.id === id);
+          return (
+            <li key={id} className="border-b border-rule">
+              <button type="button" onClick={() => onOpen(id)} className="group grid w-full grid-cols-[2.75rem_minmax(0,1fr)_auto] items-baseline gap-x-3 py-3 text-left hover:bg-surface-2">
+                <span className="font-bold text-link group-hover:text-ink">{id}</span>
+                <span className="font-semibold">{ev?.title ?? id}</span>
+                <Database aria-hidden className="size-4 self-center text-muted group-hover:text-ink" />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -69,37 +118,36 @@ function EvidenceBody({ refId, answer, mode }: { refId: string; answer: Answer; 
   }
 
   return (
-    <div className="grid min-w-0 gap-3.5">
-      <p className="eyebrow">Evidence {ev.id}</p>
-      <h2 id="drawer-title" className="headline text-[1.4rem] leading-tight font-bold">{ev.title}</h2>
+    <div className="grid min-w-0 gap-4">
+      <h2 id="drawer-title" className="text-[1.45rem] leading-tight font-extrabold tracking-[-0.01em]">{ev.title}</h2>
       {mode === "preview" && (
-        <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
-          Preview: this query hasn&apos;t run yet. It shows what the agent will send to Zetaris.
+        <p className="rounded-md bg-hl-wash px-3 py-2 text-[0.92rem] text-ink">
+          Preview: this query hasn&apos;t run yet. It shows what the agents will send to Zetaris.
         </p>
       )}
       {ev.source === "local-sample" && (
-        <p className="rounded-lg bg-sample px-3 py-2 text-[0.9rem] text-sample-ink">
+        <p className="rounded-md bg-hl-wash px-3 py-2 text-[0.92rem] text-ink">
           Read from the SAMPLE supplier file on this machine. The same read becomes a Zetaris query once the data is registered there.
         </p>
       )}
       <div className="flex items-center justify-between gap-3">
-        <h3 className="eyebrow">{ev.source === "local-sample" ? "How it was read" : "Query sent to Zetaris"}</h3>
+        <h3 className="font-bold">{ev.source === "local-sample" ? "How it was read" : "Query sent to Zetaris"}</h3>
         <span className="flex items-center gap-2">
           <span role="status" className="text-sm text-muted">{copied}</span>
           <button type="button" onClick={copy} className={BUTTON_QUIET_SMALL}>{ev.source === "local-sample" ? "Copy" : "Copy SQL"}</button>
         </span>
       </div>
-      <pre className="overflow-x-auto rounded-lg border border-line bg-code px-3.5 py-3 font-mono text-[0.8rem] leading-relaxed whitespace-pre">
+      <pre className="overflow-x-auto rounded-md border border-line bg-code px-4 py-3 font-mono text-[0.8rem] leading-relaxed whitespace-pre">
         <code ref={code}>{ev.sql}</code>
       </pre>
-      <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-2 text-[0.92rem]">
+      <dl className={DL}>
         <dt className="text-muted">Rows returned</dt>
         <dd>{ev.rows}</dd>
         <dt className="text-muted">Run at</dt>
         <dd>{fmtDateTime(ev.at)}</dd>
         <dt className="text-muted">Fingerprint</dt>
         <dd className="min-w-0">
-          <span className="font-mono text-[0.76rem] break-all">{ev.sha256}</span>
+          <span className="font-mono text-[0.78rem] break-all">{ev.sha256}</span>
           <br />
           <span className="text-sm text-muted">
             {mode === "preview"
@@ -123,11 +171,10 @@ function NoteBody({ refId, answer, notes }: { refId: string; answer: Answer; not
   if (!note) return <p>That note isn&apos;t part of this answer.</p>;
   const usedFor = answer.causes.filter((c) => c.memory.includes(refId)).map((c) => CAUSE_NAMES[c.id] ?? c.id);
   return (
-    <div className="grid min-w-0 gap-3.5">
-      <p className="eyebrow">Household note {note.id}</p>
-      <h2 id="drawer-title" className="headline text-[1.4rem] leading-tight font-bold">What you told us</h2>
-      <blockquote className="rounded-r-lg border-l-[3px] border-accent bg-surface-2 px-3.5 py-3 text-[1.05rem]">{note.text}</blockquote>
-      <dl className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-2 text-[0.92rem]">
+    <div className="grid min-w-0 gap-4">
+      <h2 id="drawer-title" className="text-[1.45rem] leading-tight font-extrabold tracking-[-0.01em]">What you told us</h2>
+      <blockquote className="rounded-md bg-hl-wash px-4 py-3 text-[1.08rem] text-ink">{note.text}</blockquote>
+      <dl className={DL}>
         <dt className="text-muted">Added</dt>
         <dd>{fmtDate(note.created)}</dd>
         <dt className="text-muted">Stored in</dt>

@@ -23,7 +23,7 @@ export default async function Home() {
   if (!data.ok) {
     return (
       <main className="gutter mx-auto max-w-xl py-16">
-        <h1 className="headline text-2xl font-bold">The bills couldn&apos;t load</h1>
+        <h1 className="text-2xl font-extrabold">The bills couldn&apos;t load</h1>
         <p className="mt-3 text-ink-2">{data.message}</p>
       </main>
     );

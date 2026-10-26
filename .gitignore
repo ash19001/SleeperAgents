@@ -10,3 +10,10 @@ tmp/
 next-env.d.ts
 .vercel
 .household/
+
+# Design tool working files (screenshots, sketches)
+.taste-skill/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/hook.cache.json

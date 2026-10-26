@@ -2,7 +2,8 @@
 
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { BUTTON, BUTTON_QUIET, BUTTON_QUIET_SMALL } from "./ui";
+import { Sheet } from "./Sheet";
+import { BUTTON, BUTTON_QUIET, BUTTON_QUIET_SMALL, FIELD } from "./ui";
 import { postJson } from "@/lib/client";
 import { money } from "@/lib/format";
 import { UTILITIES } from "@/lib/labels";
@@ -47,7 +48,7 @@ const WATER: Field[] = [
 ];
 
 const CHARGES = ["energy_gbp", "standing_gbp", "adjustment_gbp", "water_gbp", "sewerage_gbp", "water_standing_gbp", "sewerage_standing_gbp"];
-const INPUT = "w-full rounded-lg border border-line bg-surface-2 px-3 py-2 tabular-nums focus:border-accent focus:ring-3 focus:ring-accent-wash focus:outline-none";
+const INPUT = `${FIELD} h-10`;
 const monthName = (period: string) => new Date(`${period}-01T00:00:00Z`).toLocaleString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
 
 export function AddBillForm({ utility, period, onSaved, onCancel }: {
@@ -104,20 +105,17 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
 
   const name = UTILITIES[utility].name.toLowerCase();
   return (
-    <form onSubmit={save} className="grid gap-4" autoComplete="off">
+    <Sheet title={period ? `Add your ${monthName(period)} ${name} bill` : `Add your next ${name} bill`} meta="Add a missing bill" heading>
+    <form onSubmit={save} className="grid gap-5" autoComplete="off">
       <div className="grid gap-1.5">
-        <p className="eyebrow">Add a missing bill</p>
-        <h2 id="answer-title" className="headline text-[1.35rem] font-bold">
-          {period ? `Add your ${monthName(period)} ${name} bill` : `Add your next ${name} bill`}
-        </h2>
-        <p className="text-ink-2">
+        <p className="max-w-[66ch] text-ink-2">
           Copy the figures from the bill. Code checks they add up, the bill goes into your supplier data in Zetaris, and the agents explain it.
           {draft && ` It starts after your latest ${name} bill, which ended on ${draft.latest_period_to}.`}
         </p>
       </div>
 
       <fieldset className="flex flex-wrap items-center gap-2">
-        <legend className="mb-1.5 text-[0.95rem] font-semibold">Meter reading on the bill</legend>
+        <legend className="mb-1.5 font-semibold">Meter reading on the bill</legend>
         {(["actual", "estimated"] as const).map((t) => (
           <button key={t} type="button" aria-pressed={readType === t} className={BUTTON_QUIET_SMALL} onClick={() => setReadType(t)}>
             {t === "actual" ? "Actual" : "Estimated"}
@@ -128,7 +126,7 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map((f) => (
           <label key={f.name} className="grid gap-1">
-            <span className="text-[0.92rem] font-semibold">{f.label}</span>
+            <span className="text-[0.94rem] font-semibold">{f.label}</span>
             <input
               type={f.type}
               name={f.name}
@@ -144,19 +142,19 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
         ))}
         {utility !== "water" && (
           <label className="grid gap-1">
-            <span className="text-[0.92rem] font-semibold">What the credit or charge is for</span>
+            <span className="text-[0.94rem] font-semibold">What the credit or charge is for</span>
             <input type="text" name="adjustment_note" maxLength={80} value={note} onChange={(e) => setNote(e.target.value)} className={INPUT} placeholder="Goodwill credit" />
           </label>
         )}
       </div>
 
-      <div className="grid gap-1 rounded-lg bg-surface-2 px-3 py-2.5 text-[0.95rem]">
+      <div className="grid gap-1 rounded-md border border-line bg-surface-2 px-4 py-3 text-[0.95rem]">
         <span>
-          Units used: <strong className="tabular-nums">{Number.isFinite(units) ? `${Math.round(units * 100) / 100} ${draft?.unit ?? ""}` : "–"}</strong>
+          Units used: <strong>{Number.isFinite(units) ? `${Math.round(units * 100) / 100} ${draft?.unit ?? ""}` : "–"}</strong>
         </span>
         <span className="flex items-center gap-1.5">
-          {adds === true ? <Check aria-hidden className="size-4 text-accent" /> : adds === false ? <X aria-hidden className="size-4 text-up-ink" /> : null}
-          Charges add up to <strong className="tabular-nums">{money(sum)}</strong>
+          {adds === true ? <Check aria-hidden className="size-4 rounded-full bg-hl p-0.5 text-hl-ink" strokeWidth={3} /> : adds === false ? <X aria-hidden className="size-4 text-rise" /> : null}
+          Charges add up to <strong>{money(sum)}</strong>
           {adds === true ? ", the same as the total." : adds === false ? `, not the total of ${money(num("total_gbp"))}.` : "."}
         </span>
       </div>
@@ -178,7 +176,8 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
           Cancel
         </button>
       </div>
-      <p role="status" className="text-sm text-up-ink">{error}</p>
+      <p role="status" className="text-sm text-rise">{error}</p>
     </form>
+    </Sheet>
   );
 }

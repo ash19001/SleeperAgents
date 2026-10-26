@@ -2,6 +2,7 @@
 
 import { Check, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Sheet } from "./Sheet";
 import { MODEL_NAMES } from "@/lib/labels";
 import type { TraceStep } from "@/lib/types";
 
@@ -44,29 +45,35 @@ export function LiveProgress({ steps }: { steps: TraceStep[] }) {
   };
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-1.5">
-        <p className="eyebrow">Live investigation · {seconds} s</p>
-        <h2 id="answer-title" className="headline text-[1.35rem] font-bold">The agents are working on it</h2>
-        <p className="text-muted">Each row is an agent. Specialists test their causes in parallel; the orchestrator reviews them; the writer and checker finish the answer. This usually takes under a minute.</p>
-      </div>
+    <Sheet title="The agents are working on it" meta={`${seconds} s so far`} heading>
+      <p className="max-w-[66ch] text-ink-2">Each row is an agent and keeps its place as it works. Specialists test their causes in parallel; the orchestrator reviews them; the writer and checker finish the answer. This usually takes under a minute.</p>
       {agents.size > 0 && (
-        <ul className="grid gap-2" aria-live="polite">
-          {[...agents].map(([agent, { last, at, count, model }]) => (
-            <li key={agent} className="grid grid-cols-[18px_minmax(0,1fr)_auto] items-start gap-x-2.5 rounded-lg border border-line px-3 py-2">
-              {done(agent, last, at) ? <Check aria-hidden className="mt-0.5 size-4 text-accent" /> : <LoaderCircle aria-hidden className="mt-0.5 size-4 animate-spin text-ink-2 motion-reduce:animate-none" />}
-              <div className="min-w-0">
-                <p className="font-semibold">{agentName(agent)}</p>
-                <p className="truncate text-[0.9rem] text-ink-2">{last.label ?? last.step}</p>
-              </div>
-              <span className="text-right text-[0.8rem] whitespace-nowrap text-muted">
-                {count} step{count === 1 ? "" : "s"}
-                {model ? <><br />{(MODEL_NAMES[model] ?? model).replace(/^Nemotron /, "")}</> : null}
-              </span>
-            </li>
-          ))}
+        <ul className="grid border-t border-ink" aria-live="polite">
+          {[...agents].map(([agent, { last, at, count, model }]) => {
+            const finished = done(agent, last, at);
+            return (
+              <li key={agent} className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-x-3 border-b border-rule py-2.5">
+                {finished ? (
+                  <Check aria-hidden className="mt-0.5 size-4 rounded-full bg-hl p-0.5 text-hl-ink" strokeWidth={3} />
+                ) : (
+                  <LoaderCircle aria-hidden className="mt-0.5 size-4 animate-spin text-ink-2 motion-reduce:animate-none" />
+                )}
+                <div className="min-w-0">
+                  <p className="font-semibold">
+                    {agentName(agent)}
+                    <span className="sr-only">{finished ? ", done" : ", working"}</span>
+                  </p>
+                  <p className="truncate text-[0.92rem] text-ink-2">{last.label ?? last.step}</p>
+                </div>
+                <span className="text-right text-[0.82rem] whitespace-nowrap text-muted">
+                  {count} step{count === 1 ? "" : "s"}
+                  {model ? <><br />{(MODEL_NAMES[model] ?? model).replace(/^Nemotron /, "")}</> : null}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
-    </div>
+    </Sheet>
   );
 }

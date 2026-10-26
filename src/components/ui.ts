@@ -1,9 +1,19 @@
 // Shared class lists for buttons. Each is complete on its own, so no two
 // padding or size classes ever compete on one element.
 export const BUTTON =
-  "rounded-lg border border-transparent bg-accent px-4 py-2 font-bold whitespace-nowrap text-accent-ink hover:bg-accent-hover disabled:opacity-60";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 font-semibold whitespace-nowrap text-primary-ink transition-colors hover:bg-primary-hover active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60";
 
 const QUIET =
-  "rounded-lg border border-line bg-transparent font-semibold text-ink hover:bg-surface-2 aria-pressed:border-accent aria-pressed:bg-accent-wash";
-export const BUTTON_QUIET = `${QUIET} px-4 py-2`;
-export const BUTTON_QUIET_SMALL = `${QUIET} inline-flex items-center gap-1.5 px-2.5 py-1 text-sm`;
+  "inline-flex items-center gap-1.5 rounded-md border border-control bg-surface font-semibold text-ink transition-colors hover:border-ink-2 hover:bg-surface-2 active:translate-y-px aria-pressed:border-primary aria-pressed:bg-select";
+export const BUTTON_QUIET = `${QUIET} h-10 px-4`;
+export const BUTTON_QUIET_SMALL = `${QUIET} h-8 px-2.5 text-sm`;
+
+// Fields share one look: white, a control border, a yellow focus ring.
+export const FIELD =
+  "w-full rounded-md border border-control bg-surface px-3 text-ink placeholder:text-muted focus:border-primary focus:outline-3 focus:outline-offset-0 focus:outline-hl";
+
+// Section headings inside the panels and the answer sheet.
+export const HEADING = "text-[1.02rem] leading-snug font-bold text-ink";
+
+// The yellow highlighter swipe for a figure that answers the question.
+export const MARKER = "marker font-bold";

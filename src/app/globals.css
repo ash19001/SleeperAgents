@@ -1,161 +1,209 @@
 @import "tailwindcss";
 
-/* Layout: a two-pane bill desk. Bills, question and notes on the left; the
-   answer sheet on the right. One column below the lg breakpoint. */
+/* The bill, highlighted: a navy statement letterhead, white paper sheets on a
+   pale blue-grey desk, and a yellow highlighter on the figures that answer
+   the question. Light by default; a navy-ground version in dark mode. */
 :root {
-  --bg: #eef3f1;
+  --ground: #eef1f6;
   --surface: #ffffff;
-  --surface-2: #f4f7f6;
-  --ink: #0f1715;
-  --ink-2: #43504c;
-  --muted: #687571;
-  --line: #d8e1de;
-  --grid: #e6ecea;
-  --axis: #b9c5c1;
-  --accent: #0b6a63;
-  --accent-hover: #08564f;
-  --accent-ink: #ffffff;
-  --accent-wash: #d9eeea;
-  --bar: #93c8c1;
-  --bar-hover: #6fb4ab;
-  --bar-sel: #0b6a63;
-  --up: #e34948;
-  --down: #2a78d6;
-  --up-ink: #a92a28;
-  --down-ink: #1b5ba8;
-  --up-wash: #fbe4e3;
-  --down-wash: #e1ecfa;
-  --sample-bg: #f8ecc4;
-  --sample-ink: #4a3800;
-  --code-bg: #f1f5f4;
-  --tip-bg: #0f1715;
+  --surface-2: #f5f7fa;
+  --ink: #0b1530;
+  --ink-2: #3c4760;
+  --muted: #59647a;
+  --line: #dce1ea;
+  --rule: #e8ecf2;
+  --control: #8792a6;
+  --grid: #e3e8f0;
+  --axis: #a3adc0;
+  --letterhead: #13224a;
+  --letterhead-ink: #ffffff;
+  --letterhead-2: #c3cbe0;
+  --primary: #13224a;
+  --primary-hover: #22356a;
+  --primary-ink: #ffffff;
+  --link: #2b54b8;
+  --hl: #ffde3b;
+  --hl-ink: #13224a;
+  --hl-wash: #fff3b0;
+  --select: #e7ecf7;
+  --bar: #c3cce0;
+  --bar-hover: #97a5c3;
+  --bar-sel: #13224a;
+  --rise: #b42318;
+  --fall: #2b54b8;
+  --rise-wash: #fdecea;
+  --fall-wash: #e7eefb;
+  --code-bg: #f5f7fa;
+  --tip-bg: #13224a;
   --tip-ink: #ffffff;
-  --backdrop: rgb(8 12 11 / 0.45);
-  --shadow: 0 1px 2px rgb(15 23 21 / 0.05), 0 8px 24px rgb(15 23 21 / 0.07);
+  --backdrop: rgb(11 21 48 / 0.45);
+  --float: 0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18);
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0c1110;
-    --surface: #141a19;
-    --surface-2: #1b2221;
-    --ink: #e8eeec;
-    --ink-2: #b3bfbb;
-    --muted: #8a9793;
-    --line: #2a3432;
-    --grid: #202927;
-    --axis: #3d4a47;
-    --accent: #46c0b2;
-    --accent-hover: #6ad3c6;
-    --accent-ink: #04211e;
-    --accent-wash: #173733;
-    --bar: #2f6e66;
-    --bar-hover: #3f8a80;
-    --bar-sel: #5fd3c5;
-    --up: #e66767;
-    --down: #3987e5;
-    --up-ink: #f29a9a;
-    --down-ink: #8cbaf0;
-    --up-wash: #3a2020;
-    --down-wash: #172a42;
-    --sample-bg: #2f2710;
-    --sample-ink: #f3dc9c;
-    --code-bg: #0f1514;
-    --tip-bg: #e8eeec;
-    --tip-ink: #0c1110;
-    --backdrop: rgb(0 0 0 / 0.6);
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+    --ground: #0a1430;
+    --surface: #101c3c;
+    --surface-2: #16244a;
+    --ink: #eef1f8;
+    --ink-2: #c6cde0;
+    --muted: #9ea9c3;
+    --line: #22325c;
+    --rule: #1b2a51;
+    --control: #6a7aa3;
+    --grid: #1e2d55;
+    --axis: #3f507f;
+    --letterhead: #060d24;
+    --letterhead-ink: #ffffff;
+    --letterhead-2: #aab4cf;
+    --primary: #ffde3b;
+    --primary-hover: #ffe873;
+    --primary-ink: #13224a;
+    --link: #9db8ff;
+    --hl: #ffde3b;
+    --hl-ink: #13224a;
+    --hl-wash: #3d3a1c;
+    --select: #1e2f5c;
+    --bar: #2c3d6b;
+    --bar-hover: #415690;
+    --bar-sel: #ffde3b;
+    --rise: #ff9486;
+    --fall: #94b3ff;
+    --rise-wash: #3a1f28;
+    --fall-wash: #182b55;
+    --code-bg: #0b1634;
+    --tip-bg: #eef1f8;
+    --tip-ink: #0b1530;
+    --backdrop: rgb(2 6 18 / 0.65);
+    --float: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.45);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #0c1110;
-  --surface: #141a19;
-  --surface-2: #1b2221;
-  --ink: #e8eeec;
-  --ink-2: #b3bfbb;
-  --muted: #8a9793;
-  --line: #2a3432;
-  --grid: #202927;
-  --axis: #3d4a47;
-  --accent: #46c0b2;
-  --accent-hover: #6ad3c6;
-  --accent-ink: #04211e;
-  --accent-wash: #173733;
-  --bar: #2f6e66;
-  --bar-hover: #3f8a80;
-  --bar-sel: #5fd3c5;
-  --up: #e66767;
-  --down: #3987e5;
-  --up-ink: #f29a9a;
-  --down-ink: #8cbaf0;
-  --up-wash: #3a2020;
-  --down-wash: #172a42;
-  --sample-bg: #2f2710;
-  --sample-ink: #f3dc9c;
-  --code-bg: #0f1514;
-  --tip-bg: #e8eeec;
-  --tip-ink: #0c1110;
-  --backdrop: rgb(0 0 0 / 0.6);
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
+  --ground: #0a1430;
+  --surface: #101c3c;
+  --surface-2: #16244a;
+  --ink: #eef1f8;
+  --ink-2: #c6cde0;
+  --muted: #9ea9c3;
+  --line: #22325c;
+  --rule: #1b2a51;
+  --control: #6a7aa3;
+  --grid: #1e2d55;
+  --axis: #3f507f;
+  --letterhead: #060d24;
+  --letterhead-ink: #ffffff;
+  --letterhead-2: #aab4cf;
+  --primary: #ffde3b;
+  --primary-hover: #ffe873;
+  --primary-ink: #13224a;
+  --link: #9db8ff;
+  --hl: #ffde3b;
+  --hl-ink: #13224a;
+  --hl-wash: #3d3a1c;
+  --select: #1e2f5c;
+  --bar: #2c3d6b;
+  --bar-hover: #415690;
+  --bar-sel: #ffde3b;
+  --rise: #ff9486;
+  --fall: #94b3ff;
+  --rise-wash: #3a1f28;
+  --fall-wash: #182b55;
+  --code-bg: #0b1634;
+  --tip-bg: #eef1f8;
+  --tip-ink: #0b1530;
+  --backdrop: rgb(2 6 18 / 0.65);
+  --float: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.45);
   color-scheme: dark;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
+  --color-ground: var(--ground);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
   --color-grid: var(--grid);
   --color-axis: var(--axis);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-ink: var(--accent-ink);
-  --color-accent-wash: var(--accent-wash);
+  --color-letterhead: var(--letterhead);
+  --color-letterhead-ink: var(--letterhead-ink);
+  --color-letterhead-2: var(--letterhead-2);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-ink: var(--primary-ink);
+  --color-link: var(--link);
+  --color-hl: var(--hl);
+  --color-hl-ink: var(--hl-ink);
+  --color-hl-wash: var(--hl-wash);
+  --color-select: var(--select);
   --color-bar: var(--bar);
   --color-bar-hover: var(--bar-hover);
   --color-bar-sel: var(--bar-sel);
-  --color-up: var(--up);
-  --color-down: var(--down);
-  --color-up-ink: var(--up-ink);
-  --color-down-ink: var(--down-ink);
-  --color-up-wash: var(--up-wash);
-  --color-down-wash: var(--down-wash);
-  --color-sample: var(--sample-bg);
-  --color-sample-ink: var(--sample-ink);
+  --color-rise: var(--rise);
+  --color-fall: var(--fall);
+  --color-rise-wash: var(--rise-wash);
+  --color-fall-wash: var(--fall-wash);
   --color-code: var(--code-bg);
   --color-tip: var(--tip-bg);
   --color-tip-ink: var(--tip-ink);
-  --shadow-sheet: var(--shadow);
-  --font-sans: var(--font-source-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-display: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
-}
-
-/* Archivo at a slightly condensed width, for headings and big figures. */
-@utility headline {
-  font-family: var(--font-display);
-  font-stretch: 87%;
+  --shadow-float: var(--float);
+  --font-sans: var(--font-franklin), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 /* Side gutter that also clears a phone's side system bar. */
 @utility gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  @media (width >= 64rem) {
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
+  }
 }
 
-/* Small mono caps label above a section. */
-@utility eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
+/* The highlighter: a flat yellow band behind a figure that answers the
+   question. When an answer lands it draws in from the left (--i staggers
+   it): a sheet-coloured cover slides off the band while the figure's ink
+   turns to the band's ink, so the figure is readable at every moment. */
+@utility marker {
+  position: relative;
+  isolation: isolate;
+  white-space: nowrap;
+  border-radius: 2px;
+  padding-inline: 0.16em;
+  background: var(--hl);
+  color: var(--hl-ink);
+  animation: marker-ink 560ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(200ms + var(--i, 0) * 140ms);
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--surface);
+    transform: scaleX(0);
+    transform-origin: right center;
+    animation: marker-in 560ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: inherit;
+  }
+}
+
+@keyframes marker-in {
+  from {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes marker-ink {
+  from {
+    color: var(--ink);
+  }
 }
 
 @layer base {
@@ -164,22 +212,35 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   body {
-    background: var(--bg);
+    background: var(--ground);
     color: var(--ink);
     font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+    caret-color: var(--link);
+  }
+  ::selection {
+    background: var(--hl);
+    color: var(--hl-ink);
   }
   h1, h2, h3 {
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 3px solid var(--hl);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 3px;
+    box-shadow: 0 0 0 5px var(--letterhead);
   }
   button {
     cursor: pointer;
+  }
+  a {
+    text-underline-offset: 0.2em;
+  }
+  * {
+    scrollbar-color: var(--axis) transparent;
   }
 }
 
@@ -191,27 +252,46 @@ dialog.drawer {
   width: 100%;
   max-width: 100%;
   max-height: 88vh;
-  border-radius: 16px 16px 0 0;
+  border-radius: 12px 12px 0 0;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: var(--shadow);
+  box-shadow: var(--float);
 }
 dialog.drawer::backdrop {
   background: var(--backdrop);
 }
+dialog.drawer[open] {
+  animation: drawer-up 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 @media (min-width: 768px) {
   dialog.drawer {
     margin: 0 0 0 auto;
-    width: min(580px, 100%);
+    width: min(600px, 100%);
     height: 100%;
     max-height: 100%;
     border-radius: 0;
+  }
+  dialog.drawer[open] {
+    animation-name: drawer-in;
+  }
+}
+@keyframes drawer-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(32px);
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition: none !important;
+    animation: none !important;
     scroll-behavior: auto !important;
   }
 }

@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, IBM_Plex_Mono, Source_Sans_3 } from "next/font/google";
+import { Libre_Franklin } from "next/font/google";
 import "./globals.css";
 
-const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo" });
-const sourceSans = Source_Sans_3({ subsets: ["latin"], variable: "--font-source-sans" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono" });
+// One statement face for everything, with tabular figures for the money.
+const franklin = Libre_Franklin({ subsets: ["latin"], variable: "--font-franklin" });
 
 export const metadata: Metadata = {
   title: "Why My Bill",
@@ -15,11 +14,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#13224a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-GB" className={`${archivo.variable} ${sourceSans.variable} ${plexMono.variable} antialiased`}>
+    <html lang="en-GB" className={`${franklin.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );
