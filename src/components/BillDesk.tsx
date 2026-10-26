@@ -122,53 +122,56 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   return (
     <>
       <TopBar mode={mode} household={household} />
-      {/* The ask box and the answer lead the reading order: first on phones, the main column on wide screens. Bills and notes follow, on the left on wide screens. */}
-      <main className="gutter mx-auto grid max-w-[1400px] items-start gap-4 pt-5 pb-10 lg:pt-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
-        <div className="grid min-w-0 content-start gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-6">
-        <AskBar question={question} onQuestion={setQuestion} onAsk={ask} examples={examples} busy={busy} />
-        <section
-          ref={answerRef}
-          aria-labelledby="answer-title"
-          aria-busy={busy}
-          className={`min-w-0 scroll-mt-4 overflow-hidden rounded-lg border border-line bg-surface transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"}`}
-        >
-          {adding ? (
-            <AddBillForm key={`${adding.utility}|${adding.period}`} utility={adding.utility} period={adding.period} onSaved={(id) => billSaved(id, adding.period)} onCancel={() => setAdding(null)} />
-          ) : (
-          <AnswerContent
-            result={result}
-            busy={busy}
-            progress={progress}
-            mode={mode}
-            bills={billList}
-            onAddBill={mode === "live" ? setAdding : undefined}
-            onAsk={ask}
-            lastQuestion={lastQuestion}
-            utility={utility}
-            onUtility={setUtility}
-            onOpen={(ref, answer) => setDrawer({ ref, answer })}
-          />
-          )}
-        </section>
+      {/* Two planes, no cards: the ask box and the answer on white lead the reading order (first on phones);
+          the bills and notes sit on the tinted rail, on the left on wide screens. */}
+      <main className="grid lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
+        <div className="min-w-0 bg-surface lg:col-start-2 lg:row-start-1">
+          <div className="gutter mx-auto grid max-w-[1080px] gap-10 pt-8 pb-14 lg:pt-10">
+            <AskBar question={question} onQuestion={setQuestion} onAsk={ask} examples={examples} busy={busy} />
+            <section
+              ref={answerRef}
+              aria-labelledby="answer-title"
+              aria-busy={busy}
+              className={`min-w-0 scroll-mt-4 border-t border-line pt-10 transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"}`}
+            >
+              {adding ? (
+                <AddBillForm key={`${adding.utility}|${adding.period}`} utility={adding.utility} period={adding.period} onSaved={(id) => billSaved(id, adding.period)} onCancel={() => setAdding(null)} />
+              ) : (
+              <AnswerContent
+                result={result}
+                busy={busy}
+                progress={progress}
+                mode={mode}
+                bills={billList}
+                onAddBill={mode === "live" ? setAdding : undefined}
+                onAsk={ask}
+                lastQuestion={lastQuestion}
+                utility={utility}
+                onUtility={setUtility}
+                onOpen={(ref, answer) => setDrawer({ ref, answer })}
+              />
+              )}
+            </section>
+          </div>
         </div>
-        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <BillsCard
-            household={household}
-            bills={billList}
-            utility={utility}
-            onUtility={setUtility}
-            selected={selected}
-            previewIds={previewIds}
-            onAsk={ask}
-            onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
-          />
-        </div>
-        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-          <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
-        </div>
+        <aside aria-label="Your bills and household notes" className="min-w-0 border-t border-line bg-ground lg:col-start-1 lg:row-start-1 lg:border-t-0 lg:border-r">
+          <div className="gutter grid gap-8 pt-8 pb-14 lg:pt-10">
+            <BillsCard
+              household={household}
+              bills={billList}
+              utility={utility}
+              onUtility={setUtility}
+              selected={selected}
+              previewIds={previewIds}
+              onAsk={ask}
+              onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
+            />
+            <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
+          </div>
+        </aside>
       </main>
       <footer className="bg-letterhead text-letterhead-2">
-        <div className="gutter mx-auto flex max-w-[1400px] flex-wrap items-baseline justify-between gap-x-8 gap-y-2 py-6 text-sm">
+        <div className="gutter flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 py-6 text-sm">
           <p className="max-w-[72ch]">
             <span className="font-semibold text-letterhead-ink">Why My Bill</span> reads the household&apos;s data through Zetaris, reasons with NVIDIA Nemotron via Meterless Nightshift, and keeps household notes in Meterless H-MEM.
           </p>

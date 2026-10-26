@@ -1,19 +1,15 @@
 import type { ReactNode } from "react";
 
-// The answer sheet's frame: a navy strip like a statement's letterhead, then
-// the body. When `heading` is set the strip's title is the sheet's heading.
-export function Sheet({ title, meta, heading, children }: { title: string; meta?: ReactNode; heading?: boolean; children: ReactNode }) {
+// The answer's frame: its heading with a plain line of context under it, then
+// the body. No box around it: space and rules do the grouping.
+export function Sheet({ title, meta, children }: { title: string; meta?: ReactNode; children: ReactNode }) {
   return (
-    <>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 bg-letterhead px-5 py-3 text-letterhead-ink sm:px-7">
-        {heading ? (
-          <h2 id="answer-title" className="text-[1.05rem] font-bold">{title}</h2>
-        ) : (
-          <p className="font-bold">{title}</p>
-        )}
-        {meta && <p className="text-sm text-letterhead-2">{meta}</p>}
-      </div>
-      <div className="grid gap-6 px-5 pt-6 pb-7 sm:px-7">{children}</div>
-    </>
+    <div className="grid gap-6">
+      <header className="grid gap-1.5">
+        <h2 id="answer-title" className="text-[clamp(1.4rem,1.1rem+0.9vw,1.8rem)] leading-tight font-extrabold tracking-[-0.015em]">{title}</h2>
+        {meta && <p className="text-[0.95rem] text-muted">{meta}</p>}
+      </header>
+      {children}
+    </div>
   );
 }

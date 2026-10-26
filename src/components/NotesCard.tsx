@@ -33,7 +33,7 @@ export function NotesCard({ notes, onAdd, suggestedNote, lastQuestion, onAsk }: 
   }
 
   return (
-    <section aria-labelledby="notes-title" className="grid min-w-0 gap-3 rounded-lg border border-line bg-surface p-5">
+    <section aria-labelledby="notes-title" className="grid min-w-0 gap-3 border-t border-line pt-8">
       <div className="grid gap-1">
         <h2 id="notes-title" className={HEADING}>Household notes</h2>
         <p className="text-sm text-ink-2">

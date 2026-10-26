@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-/* The bill, highlighted: a navy statement letterhead, white paper sheets on a
-   pale blue-grey desk, and a yellow highlighter on the figures that answer
-   the question. Light in every colour scheme. */
+/* The bill, highlighted: a navy statement letterhead with a yellow rule, a
+   white page beside a pale blue-grey rail, yellow for the main action, and a
+   yellow highlighter on the figures that answer the question. Selection is
+   navy, so state never rests on yellow against white. Light in every colour scheme. */
 :root {
   --ground: #eef1f6;
   --surface: #ffffff;
@@ -18,9 +19,10 @@
   --letterhead: #13224a;
   --letterhead-ink: #ffffff;
   --letterhead-2: #c3cbe0;
-  --primary: #13224a;
-  --primary-hover: #22356a;
-  --primary-ink: #ffffff;
+  --primary: #ffde3b;
+  --primary-hover: #f5cc14;
+  --primary-ink: #13224a;
+  --selected: #13224a;
   --link: #2b54b8;
   --hl: #ffde3b;
   --hl-ink: #13224a;
@@ -60,6 +62,7 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-ink: var(--primary-ink);
+  --color-selected: var(--selected);
   --color-link: var(--link);
   --color-hl: var(--hl);
   --color-hl-ink: var(--hl-ink);

@@ -12,7 +12,7 @@ export function AskBar({ question, onQuestion, onAsk, examples, busy }: {
   busy: boolean;
 }) {
   return (
-    <section aria-labelledby="ask-title" className="rounded-lg border border-line bg-surface px-5 py-5 sm:px-7">
+    <section aria-labelledby="ask-title">
       <form
         autoComplete="off"
         className="grid gap-3"

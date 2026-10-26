@@ -45,7 +45,7 @@ export function LiveProgress({ steps }: { steps: TraceStep[] }) {
   };
 
   return (
-    <Sheet title="The agents are working on it" meta={`${seconds} s so far`} heading>
+    <Sheet title="The agents are working on it" meta={`${seconds} s so far`}>
       <p className="max-w-[66ch] text-ink-2">Each row is an agent and keeps its place as it works. Specialists test their causes in parallel; the orchestrator reviews them; the writer and checker finish the answer. This usually takes under a minute.</p>
       {agents.size > 0 && (
         <ul className="grid border-t border-ink" aria-live="polite">

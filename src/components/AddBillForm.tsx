@@ -105,7 +105,7 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
 
   const name = UTILITIES[utility].name.toLowerCase();
   return (
-    <Sheet title={period ? `Add your ${monthName(period)} ${name} bill` : `Add your next ${name} bill`} meta="Add a missing bill" heading>
+    <Sheet title={period ? `Add your ${monthName(period)} ${name} bill` : `Add your next ${name} bill`} meta="Add a missing bill">
     <form onSubmit={save} className="grid gap-5" autoComplete="off">
       <div className="grid gap-1.5">
         <p className="max-w-[66ch] text-ink-2">

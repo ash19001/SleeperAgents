@@ -19,8 +19,8 @@ export function Mark({ className }: { className?: string }) {
 export function TopBar({ mode, household }: { mode: Mode; household: Household }) {
   return (
     <>
-      <header className="bg-letterhead text-letterhead-ink">
-        <div className="gutter mx-auto flex h-16 max-w-[1400px] items-center gap-3">
+      <header className="border-b-4 border-hl bg-letterhead text-letterhead-ink">
+        <div className="gutter flex h-16 items-center gap-3">
           <Mark className="-ml-1.5 size-10 flex-none" />
           <h1 className="text-[1.3rem] leading-none font-extrabold tracking-[-0.015em] whitespace-nowrap">Why My Bill</h1>
           <p className="ml-3 hidden min-w-0 truncate border-l border-white/20 pl-4 text-sm text-letterhead-2 md:block">

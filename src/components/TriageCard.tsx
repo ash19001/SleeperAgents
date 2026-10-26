@@ -12,9 +12,8 @@ type Triage = Extract<AskResult, { kind: "triage" }>;
 export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] }) {
   const label = (id: string) => bills.find((b) => b.bill_id === id)?.label ?? id;
   return (
-    <Sheet title="What triage decided" meta="Live">
+    <Sheet title={result.question} meta="What triage decided · Live">
       <header className="grid gap-1.5">
-        <h2 id="answer-title" className="text-[clamp(1.35rem,1.1rem+0.8vw,1.65rem)] leading-tight font-extrabold tracking-[-0.015em]">{result.question}</h2>
         <p className="text-ink-2">
           {result.source === "intake"
             ? `Read by the intake agent (Nemotron 3.5 Lightning) and checked by Scout. ${result.requests.length === 1 ? "One utility" : `${result.requests.length} utilities`} to investigate.`

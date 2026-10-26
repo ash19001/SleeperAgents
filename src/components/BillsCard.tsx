@@ -33,7 +33,7 @@ export function BillsCard({ household, bills, utility, onUtility, selected, prev
   }
 
   return (
-    <section aria-labelledby="bills-title" className="grid min-w-0 gap-4 rounded-lg border border-line bg-surface p-5">
+    <section aria-labelledby="bills-title" className="grid min-w-0 gap-4">
       <div className="grid gap-1">
         <div className="flex items-baseline justify-between gap-3">
           <h2 id="bills-title" className={HEADING}>Your bills</h2>
@@ -62,7 +62,7 @@ export function BillsCard({ household, bills, utility, onUtility, selected, prev
             onClick={() => onUtility(u)}
             onKeyDown={onTabKey}
             className={`-mb-px border-b-[3px] px-3 pt-1.5 pb-2 font-semibold transition-colors ${
-              u === utility ? "border-primary text-ink" : "border-transparent text-muted hover:text-ink"
+              u === utility ? "border-selected text-ink" : "border-transparent text-muted hover:text-ink"
             }`}
           >
             {UTILITIES[u].name}

@@ -122,7 +122,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
 
 function Message({ title, text, trace, children }: { title: string; text: string; trace?: TraceStep[]; children?: ReactNode }) {
   return (
-    <Sheet title={title} heading>
+    <Sheet title={title}>
       <p className="max-w-[62ch] text-[1.05rem] text-ink-2">{text}</p>
       {children}
       {trace && <TraceList steps={trace} />}
@@ -147,15 +147,14 @@ function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
   const current = result.answers.find((a) => a.utility === utility) ?? result.answers[0];
   const names = result.answers.map((a) => UTILITIES[a.utility].name.toLowerCase());
   return (
-    <Sheet title={`Your ${names.join(" and ")} bills, explained`} meta={checkedShort(current)}>
-      <h2 id="answer-title" className="text-[clamp(1.35rem,1.1rem+0.8vw,1.65rem)] leading-tight font-extrabold tracking-[-0.015em]">{result.question}</h2>
+    <Sheet title={result.question} meta={[`Your ${names.join(" and ")} bills`, checkedShort(current)].filter(Boolean).join(" · ")}>
       {result.summary_markdown && (
         <p className="max-w-[70ch] text-[1.08rem] leading-[1.65]">
           <RichText text={result.summary_markdown} answer={summary} marked={new Set()} onOpen={() => {}} />
         </p>
       )}
       {result.notes.length > 0 && <p className="text-sm text-muted">{result.notes.join(" ")}</p>}
-      <div role="group" aria-label="Bill to show" className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
+      <div role="group" aria-label="Bill to show" className="flex flex-wrap gap-x-8 gap-y-2 border-b border-line">
         {result.answers.map((a) => {
           const on = a === current;
           return (
@@ -164,9 +163,9 @@ function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
               type="button"
               aria-pressed={on}
               onClick={() => onUtility(a.utility)}
-              className={`grid rounded-md border px-4 py-2.5 text-left transition-colors ${on ? "border-primary bg-select" : "border-line hover:border-control"}`}
+              className={`-mb-px grid border-b-[3px] pb-2.5 text-left transition-colors ${on ? "border-selected" : "border-transparent text-ink-2 hover:text-ink"}`}
             >
-              <span className="text-sm text-ink-2">{UTILITIES[a.utility].name}</span>
+              <span className="text-sm">{UTILITIES[a.utility].name}</span>
               <span className="text-xl font-bold">{money(a.change_gbp, true)}</span>
             </button>
           );
@@ -181,8 +180,7 @@ function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: 
   const A = bills.find((b) => b.bill_id === a.bill_a);
   const B = bills.find((b) => b.bill_id === a.bill_b);
   return (
-    <Sheet title={`Your ${UTILITIES[a.utility].name.toLowerCase()} bill, explained`} meta={[`${A?.label ?? a.bill_a} → ${B?.label ?? a.bill_b}`, checkedShort(a)].filter(Boolean).join(" · ")}>
-      <h2 id="answer-title" className="text-[clamp(1.35rem,1.1rem+0.8vw,1.65rem)] leading-tight font-extrabold tracking-[-0.015em]">{a.question}</h2>
+    <Sheet title={a.question} meta={[`Your ${UTILITIES[a.utility].name.toLowerCase()} bill, ${A?.label ?? a.bill_a} → ${B?.label ?? a.bill_b}`, checkedShort(a)].filter(Boolean).join(" · ")}>
       <AnswerBody answer={a} mode={mode} bills={bills} trace={a.trace} onOpen={onOpen} />
     </Sheet>
   );
@@ -219,7 +217,7 @@ function AnswerBody({ answer: a, mode, bills, trace, onOpen }: { answer: Answer;
         <RichText text={a.answer_markdown} answer={a} marked={marked} onOpen={onOpen} />
       </p>
       <div className="grid gap-6">
-        <div role="tablist" aria-label="Answer detail" className="-mx-5 flex overflow-x-auto border-b border-line px-5 sm:-mx-7 sm:px-7">
+        <div role="tablist" aria-label="Answer detail" className="flex overflow-x-auto border-b border-line">
           {TABS.map(([t, label, short]) => (
             <button
               key={t}
@@ -232,7 +230,7 @@ function AnswerBody({ answer: a, mode, bills, trace, onOpen }: { answer: Answer;
               onClick={() => setTab(t)}
               onKeyDown={onTabKey}
               className={`-mb-px flex-none border-b-[3px] px-3 pt-1 pb-2.5 font-semibold whitespace-nowrap transition-colors first:pl-0 ${
-                t === tab ? "border-primary text-ink" : "border-transparent text-muted hover:text-ink"
+                t === tab ? "border-selected text-ink" : "border-transparent text-muted hover:text-ink"
               }`}
             >
               <span className="hidden sm:inline">{label}</span>
@@ -280,14 +278,14 @@ function BillPair({ answer: a, bills }: { answer: Answer; bills: Bill[] }) {
     ["Days on the bill", A && B ? `${A.days} → ${B.days}` : "—"],
   ];
   return (
-    <dl className="grid grid-cols-2 overflow-hidden rounded-md border border-line sm:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y border-line py-4 sm:grid-cols-4">
       {cells.map(([label, value]) => (
-        <div key={label} className="grid content-start gap-0.5 border-line px-4 py-3 odd:border-r nth-[-n+2]:border-b sm:border-r sm:nth-[-n+2]:border-b-0">
+        <div key={label} className="grid content-start gap-0.5">
           <dt className="text-sm text-muted">{label}</dt>
           <dd className="text-xl font-semibold">{value}</dd>
         </div>
       ))}
-      <div className="grid content-start gap-0.5 px-4 py-3">
+      <div className="grid content-start gap-0.5">
         <dt className="text-sm text-muted">Change</dt>
         <dd className="flex flex-wrap items-baseline gap-x-2">
           <span className={`${MARKER} text-[1.6rem] leading-tight font-extrabold tracking-[-0.01em]`}>{money(a.change_gbp, true)}</span>
@@ -539,7 +537,7 @@ function TimelineBlock({ answer: a }: { answer: Answer }) {
       <ol className="grid gap-4 border-l-2 border-line pl-5">
         {a.timeline.map((t, i) => (
           <li key={i} className="relative grid max-w-[72ch] gap-0.5">
-            <span aria-hidden className="absolute top-[7px] -left-[27px] size-3 rounded-full border-2 border-surface bg-primary" />
+            <span aria-hidden className="absolute top-[7px] -left-[27px] size-3 rounded-full border-2 border-surface bg-selected" />
             <p className="text-sm font-bold text-ink-2">{t.actor}</p>
             <p>{t.text}</p>
             {t.detail && t.detail.length > 0 && (
