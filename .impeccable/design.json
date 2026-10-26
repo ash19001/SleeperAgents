@@ -1,15 +1,66 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T18:00:00+00:00",
+  "generatedAt": "2026-10-26T20:00:00+00:00",
   "title": "Design System: Why My Bill",
   "extensions": {
     "colorMeta": {
-      "letterhead-navy": {
+      "highlighter-yellow": {
         "role": "primary",
+        "displayName": "Highlighter Yellow",
+        "canonical": "#ffde3b",
+        "oklch": "oklch(90.2% 0.171 97.0)",
+        "cssVar": "--primary, --hl",
+        "tonalRamp": [
+          "#140900",
+          "#322200",
+          "#533d00",
+          "#775a00",
+          "#997b00",
+          "#b69e25",
+          "#d7c574",
+          "#fcefb9"
+        ]
+      },
+      "highlighter-yellow-hover": {
+        "role": "primary",
+        "displayName": "Highlighter Yellow Hover",
+        "canonical": "#f5cc14",
+        "oklch": "oklch(85.6% 0.173 93.9)",
+        "cssVar": "--primary-hover",
+        "tonalRamp": [
+          "#0e0b04",
+          "#302500",
+          "#574300",
+          "#816200",
+          "#a38706",
+          "#c0ad6d",
+          "#dbd1ae",
+          "#f2efe2"
+        ]
+      },
+      "highlighter-wash": {
+        "role": "primary",
+        "displayName": "Highlighter Wash",
+        "canonical": "#fff3b0",
+        "oklch": "oklch(95.8% 0.086 99.2)",
+        "cssVar": "--hl-wash",
+        "tonalRamp": [
+          "#0f0b00",
+          "#2a2403",
+          "#484013",
+          "#685e26",
+          "#897e43",
+          "#a8a06f",
+          "#ccc59f",
+          "#f4efd4"
+        ]
+      },
+      "letterhead-navy": {
+        "role": "secondary",
         "displayName": "Letterhead Navy",
         "canonical": "#13224a",
         "oklch": "oklch(26.4% 0.077 265.9)",
-        "cssVar": "--primary",
+        "cssVar": "--letterhead, --hl-ink, --primary-ink, --tip-bg, --bar-sel",
         "tonalRamp": [
           "#050a19",
           "#1a233a",
@@ -21,25 +72,8 @@
           "#e4efff"
         ]
       },
-      "letterhead-navy-hover": {
-        "role": "primary",
-        "displayName": "Letterhead Navy Hover",
-        "canonical": "#22356a",
-        "oklch": "oklch(34.4% 0.096 266.6)",
-        "cssVar": "--primary-hover",
-        "tonalRamp": [
-          "#050a1c",
-          "#18233f",
-          "#2e3e65",
-          "#475c8e",
-          "#657cb3",
-          "#899ece",
-          "#b3c4eb",
-          "#e2efff"
-        ]
-      },
       "letterhead-mist": {
-        "role": "primary",
+        "role": "secondary",
         "displayName": "Letterhead Mist",
         "canonical": "#c3cbe0",
         "oklch": "oklch(84.2% 0.031 269.1)",
@@ -55,38 +89,21 @@
           "#ebeef7"
         ]
       },
-      "highlighter-yellow": {
+      "selected": {
         "role": "secondary",
-        "displayName": "Highlighter Yellow",
-        "canonical": "#ffde3b",
-        "oklch": "oklch(90.2% 0.171 97.0)",
-        "cssVar": "--hl",
+        "displayName": "Selected",
+        "canonical": "#13224a",
+        "oklch": "oklch(26.4% 0.077 265.9)",
+        "cssVar": "--selected",
         "tonalRamp": [
-          "#140900",
-          "#322200",
-          "#533d00",
-          "#775a00",
-          "#997b00",
-          "#b69e25",
-          "#d7c574",
-          "#fcefb9"
-        ]
-      },
-      "highlighter-wash": {
-        "role": "secondary",
-        "displayName": "Highlighter Wash",
-        "canonical": "#fff3b0",
-        "oklch": "oklch(95.8% 0.086 99.2)",
-        "cssVar": "--hl-wash",
-        "tonalRamp": [
-          "#0f0b00",
-          "#2a2403",
-          "#484013",
-          "#685e26",
-          "#897e43",
-          "#a8a06f",
-          "#ccc59f",
-          "#f4efd4"
+          "#050a19",
+          "#1a233a",
+          "#313f5e",
+          "#4b5d85",
+          "#697ca9",
+          "#8d9ec5",
+          "#b6c4e3",
+          "#e4efff"
         ]
       },
       "desk-ground": {
@@ -420,19 +437,27 @@
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "The question as the answer sheet's heading; wordmark uses the same weight at 1.3rem."
+        "purpose": "The question as the answer's heading, with a muted meta line under it."
       },
       "figure": {
         "displayName": "Figure",
-        "purpose": "The change in the field strip, always marked."
+        "purpose": "The change in the answer line, always marked."
+      },
+      "drawer-title": {
+        "displayName": "Drawer title",
+        "purpose": "Evidence and note headings in the drawer."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "\"Why My Bill\" in the letterhead."
       },
       "ask-label": {
         "displayName": "Ask label",
-        "purpose": "\"Ask why a bill changed\", 800 1.15rem -0.01em; carried in prose, not a frontmatter role."
+        "purpose": "\"Ask why a bill changed\", the ask box's label."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Panel and block headings."
+        "purpose": "Section and block headings."
       },
       "answer": {
         "displayName": "Answer",
@@ -440,11 +465,23 @@
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Default text, tabular figures."
+        "purpose": "Default text, tabular figures; meta lines and cause text at 0.94-0.95rem."
+      },
+      "supporting": {
+        "displayName": "Supporting",
+        "purpose": "Example questions, agent and trace detail, notices."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Field labels, meta, status."
+        "purpose": "Answer-line labels, status text."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Legends, chart notes, form hints, timings."
+      },
+      "tag": {
+        "displayName": "Tag",
+        "purpose": "Verdict tags and note IDs."
       },
       "citation": {
         "displayName": "Citation",
@@ -452,19 +489,23 @@
       },
       "mono": {
         "displayName": "Mono",
-        "purpose": "SQL and code blocks only."
+        "purpose": "SQL and contract IDs."
+      },
+      "mono-small": {
+        "displayName": "Mono small",
+        "purpose": "Receipts, allowed-column chips and signatures."
       }
     },
     "shadows": [
       {
         "name": "float",
         "value": "0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18)",
-        "purpose": "Tooltip and evidence drawer only; nothing on the desk casts a shadow."
+        "purpose": "Tooltip and evidence drawer only; nothing on the page casts a shadow."
       },
       {
         "name": "focus-halo",
         "value": "outline: 3px solid var(--hl); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead)",
-        "purpose": "Global focus-visible ring, legible on paper and navy."
+        "purpose": "Global focus-visible ring, legible on paper, the rail, navy and the yellow button."
       }
     ],
     "motion": [
@@ -498,7 +539,7 @@
       {
         "name": "sm",
         "value": "640px",
-        "note": "sheet and ask box side padding 20px to 28px; split ledger goes to one row"
+        "note": "answer line goes from two to four columns; split ledger goes to one row"
       },
       {
         "name": "md",
@@ -508,7 +549,7 @@
       {
         "name": "lg",
         "value": "1024px",
-        "note": "two-column desk (360px bills and notes + main column with ask box above the answer sheet); gutter 32px"
+        "note": "two planes: rail minmax(300px,380px) on the left with a right rule, main plane on the right centred at max 1080px; gutter 32px"
       },
       {
         "name": "xl",
@@ -516,55 +557,80 @@
         "note": "Answer tab splits into two columns"
       }
     ],
-    "colorScheme": "light only; no dark token set"
+    "colorScheme": "only light (CSS color-scheme and viewport meta); no dark token set",
+    "rules": [
+      {
+        "name": "letterhead-foot",
+        "value": "border-bottom: 4px solid var(--hl)",
+        "purpose": "Yellow rule along the letterhead's foot."
+      },
+      {
+        "name": "plane-rule",
+        "value": "1px solid var(--line)",
+        "purpose": "Rail's right edge (top edge on phones), rule above the answer, rule above Household notes, answer line top and bottom."
+      },
+      {
+        "name": "tab-underline",
+        "value": "border-bottom: 3px solid var(--selected); margin-bottom: -1px",
+        "purpose": "Active tab and chosen utility."
+      }
+    ]
   },
   "components": [
     {
       "name": "Ask Box",
       "kind": "input",
-      "refersTo": "ask-box",
-      "description": "The page's main control, top of the main column and first on phones: label, 48px field with the large Ask button, and a Try: row of example questions.",
+      "refersTo": "main-plane",
+      "description": "The page's main control, unboxed at the top of the main plane and first on phones: label, 48px field with the large yellow Ask button, and a Try: row of example questions.",
       "html": "<section class=\"ds-ask\"><form class=\"ds-ask-form\" onsubmit=\"return false\"><label class=\"ds-ask-label\" for=\"ds-q\">Ask why a bill changed</label><div class=\"ds-ask-row\"><input id=\"ds-q\" class=\"ds-ask-field\" placeholder=\"Why did my gas bill go up in January?\"><button class=\"ds-btn-large\">Ask</button></div><div class=\"ds-try\"><span>Try:</span><ul><li><button type=\"button\">Why did my gas bill go up in January?</button></li><li><button type=\"button\">Why was my electricity bill lower in June?</button></li></ul></div></form></section>",
-      "css": ".ds-ask { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); border: 1px solid var(--line, #dce1ea); border-radius: 8px; background: var(--surface, #fff); color: var(--ink, #0b1530); padding: 20px 28px; } .ds-ask-form { display: grid; gap: 12px; } .ds-ask-label { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; } .ds-ask-row { display: flex; gap: 8px; } .ds-ask-field { flex: 1; min-width: 0; height: 48px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font: inherit; font-size: 1.05rem; caret-color: var(--link, #2b54b8); } .ds-ask-field::placeholder { color: var(--muted, #59647a); } .ds-ask-field:focus { border-color: var(--primary, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; } .ds-btn-large { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border: 0; border-radius: 6px; background: var(--primary, #13224a); color: var(--primary-ink, #fff); font: inherit; font-size: 1.05rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-large:hover { background: var(--primary-hover, #22356a); } .ds-btn-large:active { transform: translateY(1px); } .ds-btn-large:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-try { display: flex; align-items: baseline; gap: 12px; } .ds-try span { flex: none; font-size: 14px; color: var(--muted, #59647a); } .ds-try ul { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; } .ds-try button { border: 0; background: none; padding: 2px 0; font: inherit; font-size: .92rem; text-align: left; color: var(--link, #2b54b8); text-decoration: underline transparent; text-underline-offset: .2em; cursor: pointer; } .ds-try button:hover { color: var(--ink, #0b1530); text-decoration-color: currentColor; } .ds-try button:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); }"
+      "css": ".ds-ask { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); background: var(--surface, #fff); color: var(--ink, #0b1530); } .ds-ask-form { display: grid; gap: 12px; } .ds-ask-label { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; } .ds-ask-row { display: flex; gap: 8px; } .ds-ask-field { flex: 1; min-width: 0; height: 48px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font: inherit; font-size: 1.05rem; caret-color: var(--link, #2b54b8); } .ds-ask-field::placeholder { color: var(--muted, #59647a); } .ds-ask-field:focus { border-color: var(--selected, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; } .ds-btn-large { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border: 0; border-radius: 6px; background: var(--primary, #ffde3b); color: var(--primary-ink, #13224a); font: inherit; font-size: 1.05rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-large:hover { background: var(--primary-hover, #f5cc14); } .ds-btn-large:active { transform: translateY(1px); } .ds-btn-large:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-try { display: flex; align-items: baseline; gap: 12px; } .ds-try span { flex: none; font-size: 14px; color: var(--muted, #59647a); } .ds-try ul { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; } .ds-try button { border: 0; background: none; padding: 2px 0; font: inherit; font-size: .92rem; text-align: left; color: var(--link, #2b54b8); text-decoration: underline transparent; text-underline-offset: .2em; cursor: pointer; } .ds-try button:hover { color: var(--ink, #0b1530); text-decoration-color: currentColor; } .ds-try button:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); }"
     },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one solid action per area (Save note, Add bill); navy with a white label.",
-      "html": "<button class=\"ds-btn-primary\">Ask</button>",
-      "css": ".ds-btn-primary { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 6px; background: var(--primary, #13224a); color: var(--primary-ink, #fff); font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-primary:hover { background: var(--primary-hover, #22356a); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-primary:disabled { opacity: .6; cursor: not-allowed; }"
+      "description": "The one main action per area (Ask, Save note, Save bill and explain it); yellow with a navy label (11.6:1, 10.0:1 on hover).",
+      "html": "<button class=\"ds-btn-primary\">Save note</button>",
+      "css": ".ds-btn-primary { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 6px; background: var(--primary, #ffde3b); color: var(--primary-ink, #13224a); font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-primary:hover { background: var(--primary-hover, #f5cc14); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-primary:disabled { opacity: .6; cursor: not-allowed; }"
     },
     {
       "name": "Quiet Button",
       "kind": "button",
       "refersTo": "button-quiet",
-      "description": "Secondary and toggle actions; small size for in-row choices and ratings.",
+      "description": "Secondary and toggle actions; pressed takes a navy border and select wash. Small size for in-row choices.",
       "html": "<div style=\"display:flex;gap:8px\"><button class=\"ds-btn-quiet\">Cancel</button><button class=\"ds-btn-quiet ds-btn-quiet--sm\" aria-pressed=\"true\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 10v12\"/><path d=\"M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z\"/></svg>Yes</button></div>",
-      "css": ".ds-btn-quiet { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, border-color .15s; } .ds-btn-quiet:hover { border-color: var(--ink-2, #3c4760); background: var(--surface-2, #f5f7fa); } .ds-btn-quiet:active { transform: translateY(1px); } .ds-btn-quiet[aria-pressed=true] { border-color: var(--primary, #13224a); background: var(--select, #e7ecf7); } .ds-btn-quiet:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-quiet--sm { height: 32px; padding: 0 10px; font-size: 14px; }"
+      "css": ".ds-btn-quiet { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, border-color .15s; } .ds-btn-quiet:hover { border-color: var(--ink-2, #3c4760); background: var(--surface-2, #f5f7fa); } .ds-btn-quiet:active { transform: translateY(1px); } .ds-btn-quiet[aria-pressed=true] { border-color: var(--selected, #13224a); background: var(--select, #e7ecf7); } .ds-btn-quiet:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-quiet--sm { height: 32px; padding: 0 10px; font-size: 14px; }"
     },
     {
       "name": "Field",
       "kind": "input",
       "refersTo": "field",
-      "description": "Paper field with a control border; primary border and flush yellow outline on focus. 40px in forms.",
+      "description": "Paper field with a control border; navy border and flush yellow outline on focus. 40px in forms.",
       "html": "<input class=\"ds-field\" placeholder=\"Bill total\">",
-      "css": ".ds-field { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; caret-color: var(--link, #2b54b8); } .ds-field::placeholder { color: var(--muted, #59647a); } .ds-field:focus { border-color: var(--primary, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; }"
+      "css": ".ds-field { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; caret-color: var(--link, #2b54b8); } .ds-field::placeholder { color: var(--muted, #59647a); } .ds-field:focus { border-color: var(--selected, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; }"
     },
     {
       "name": "Letterhead",
       "kind": "nav",
-      "description": "64px navy bar: Mark, wordmark, household line, mode.",
+      "description": "Full-width 64px navy bar with a 4px yellow foot rule: Mark, wordmark, household line, mode.",
       "html": "<header class=\"ds-letterhead\"><svg viewBox=\"0 0 32 32\" width=\"40\" height=\"40\" aria-hidden=\"true\"><rect x=\"8\" y=\"5\" width=\"16\" height=\"22\" rx=\"2\" fill=\"#fff\"/><rect x=\"11\" y=\"9\" width=\"10\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"9.5\" y=\"14\" width=\"13\" height=\"5\" rx=\"1\" fill=\"#ffde3b\"/><rect x=\"11\" y=\"15.5\" width=\"8\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"11\" y=\"22\" width=\"6\" height=\"2\" rx=\"1\" fill=\"#13224a\"/></svg><span class=\"ds-wordmark\">Why My Bill</span><span class=\"ds-household\">M1 Manchester · North West England price region (G)</span><span class=\"ds-mode\">Replay</span></header>",
-      "css": ".ds-letterhead { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 32px; background: var(--letterhead, #13224a); color: var(--letterhead-ink, #fff); } .ds-wordmark { font-size: 1.3rem; line-height: 1; font-weight: 800; letter-spacing: -0.015em; white-space: nowrap; } .ds-household { margin-left: 12px; padding-left: 16px; border-left: 1px solid rgb(255 255 255 / .2); font-size: 14px; color: var(--letterhead-2, #c3cbe0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-mode { margin-left: auto; font-size: 14px; color: var(--letterhead-2, #c3cbe0); }"
+      "css": ".ds-letterhead { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 32px; border-bottom: 4px solid var(--hl, #ffde3b); background: var(--letterhead, #13224a); color: var(--letterhead-ink, #fff); } .ds-wordmark { font-size: 1.3rem; line-height: 1; font-weight: 800; letter-spacing: -0.015em; white-space: nowrap; } .ds-household { margin-left: 12px; padding-left: 16px; border-left: 1px solid rgb(255 255 255 / .2); font-size: 14px; color: var(--letterhead-2, #c3cbe0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-mode { margin-left: auto; font-size: 14px; color: var(--letterhead-2, #c3cbe0); }",
+      "refersTo": "letterhead"
     },
     {
-      "name": "Answer Sheet",
-      "kind": "card",
-      "refersTo": "sheet-strip",
-      "description": "White statement sheet headed by a navy strip; the question as the heading; field strip with the marked change.",
-      "html": "<section class=\"ds-sheet\"><div class=\"ds-sheet-strip\"><strong>Your gas bill, explained</strong><span>Dec 2025 → Jan 2026</span></div><div class=\"ds-sheet-body\"><h2>Why did my gas bill go up in January?</h2><dl class=\"ds-fields\"><div><dt>Dec 2025 bill</dt><dd>£91.04</dd></div><div><dt>Change</dt><dd><span class=\"ds-marker\">+£32.18</span></dd></div></dl></div></section>",
-      "css": ".ds-sheet { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); overflow: hidden; border: 1px solid var(--line, #dce1ea); border-radius: 8px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-variant-numeric: tabular-nums; } .ds-sheet-strip { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; padding: 12px 28px; background: var(--letterhead, #13224a); color: var(--letterhead-ink, #fff); font-size: 1.05rem; } .ds-sheet-strip span { font-size: 14px; color: var(--letterhead-2, #c3cbe0); } .ds-sheet-body { display: grid; gap: 24px; padding: 24px 28px 28px; } .ds-sheet-body h2 { margin: 0; font-size: clamp(1.35rem, 1.1rem + .8vw, 1.65rem); line-height: 1.25; font-weight: 800; letter-spacing: -0.015em; } .ds-fields { display: grid; grid-template-columns: 1fr 1fr; margin: 0; border: 1px solid var(--line, #dce1ea); border-radius: 6px; } .ds-fields div { padding: 12px 16px; } .ds-fields div + div { border-left: 1px solid var(--line, #dce1ea); } .ds-fields dt { font-size: 14px; color: var(--muted, #59647a); } .ds-fields dd { margin: 0; font-size: 1.25rem; font-weight: 600; } .ds-marker { border-radius: 2px; padding: 0 .16em; background: var(--hl, #ffde3b); color: var(--hl-ink, #13224a); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }"
+      "name": "Underline Tabs",
+      "kind": "nav",
+      "description": "Utility and answer tabs: muted at rest, ink with a 3px navy underline when selected; the two-utility switch uses the same treatment.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button role=\"tab\" aria-selected=\"false\">Electricity</button><button role=\"tab\" aria-selected=\"true\">Gas</button><button role=\"tab\" aria-selected=\"false\">Water</button></div>",
+      "css": ".ds-tabs { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: flex; border-bottom: 1px solid var(--line, #dce1ea); } .ds-tabs button { margin-bottom: -1px; padding: 6px 12px 8px; border: 0; border-bottom: 3px solid transparent; background: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--muted, #59647a); cursor: pointer; transition: color .15s; } .ds-tabs button:hover { color: var(--ink, #0b1530); } .ds-tabs button[aria-selected=true] { border-bottom-color: var(--selected, #13224a); color: var(--ink, #0b1530); } .ds-tabs button:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); }"
+    },
+    {
+      "name": "Answer",
+      "kind": "custom",
+      "refersTo": "main-plane",
+      "description": "Unboxed answer: the question as the heading, a muted meta line, then the ruled answer line with the marked change.",
+      "html": "<section class=\"ds-answer-frame\"><header><h2>Why did my gas bill go up in January?</h2><p>Your gas bill, Dec 2025 → Jan 2026 · Checked in code</p></header><dl class=\"ds-line\"><div><dt>Dec 2025 bill</dt><dd>£91.04</dd></div><div><dt>Jan 2026 bill</dt><dd>£123.22</dd></div><div><dt>Days on the bill</dt><dd>28 → 35</dd></div><div><dt>Change</dt><dd><span class=\"ds-marker\">+£32.18</span> <span class=\"ds-up\">↑ Up</span></dd></div></dl></section>",
+      "css": ".ds-answer-frame { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: grid; gap: 24px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-variant-numeric: tabular-nums; } .ds-answer-frame header { display: grid; gap: 6px; } .ds-answer-frame h2 { margin: 0; font-size: clamp(1.4rem, 1.1rem + .9vw, 1.8rem); line-height: 1.25; font-weight: 800; letter-spacing: -0.015em; text-wrap: balance; } .ds-answer-frame header p { margin: 0; font-size: .95rem; color: var(--muted, #59647a); } .ds-line { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px 24px; margin: 0; padding: 16px 0; border-top: 1px solid var(--line, #dce1ea); border-bottom: 1px solid var(--line, #dce1ea); } @media (min-width: 640px) { .ds-line { grid-template-columns: repeat(4, minmax(0,1fr)); } } .ds-line div { display: grid; align-content: start; gap: 2px; } .ds-line dt { font-size: 14px; color: var(--muted, #59647a); } .ds-line dd { margin: 0; font-size: 1.25rem; font-weight: 600; } .ds-marker { border-radius: 2px; padding: 0 .16em; background: var(--hl, #ffde3b); color: var(--hl-ink, #13224a); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; } .ds-up { font-size: 14px; font-weight: 600; color: var(--rise, #b42318); }"
     },
     {
       "name": "Highlighter",
@@ -592,10 +658,10 @@
   ],
   "narrative": {
     "northStar": "The Bill, Highlighted",
-    "overview": "**Creative North Star: \"The Bill, Highlighted\"**\n\nThe screen is a supplier's \"your bill explained\" statement that the household has gone over with a highlighter. A navy letterhead runs across the top and heads each statement sheet; white paper sheets sit on a pale blue-grey desk; navy ink carries the text; and a flat yellow marker band sits behind the few figures that answer the question. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.\n\nDensity is that of a statement, not a dashboard: ruled ledger rows, a field strip of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). The page is light in every colour scheme (`color-scheme: light`); there is no dark theme.\n\nThe world refuses the category default of an assistant chat beside KPI tiles on grey cards.",
+    "overview": "**Creative North Star: \"The Bill, Highlighted\"**\n\nThe screen is a supplier's \"your bill explained\" statement that the household has gone over with a highlighter. A navy letterhead with a yellow rule along its foot runs across the top; below it the page is two flat planes, a white page where the household asks and reads the answer, and a pale blue-grey rail beside it holding their bills and notes. Navy ink carries the text; a flat yellow marker band sits behind the few figures that answer the question, and the same yellow fills the one main action. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.\n\nDensity is that of a statement, not a dashboard: ruled ledger rows, a ruled line of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Nothing on the page is boxed as a card; space, the two planes and rules do the grouping. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). The page is light in every colour scheme (`color-scheme: only light`, in CSS and the viewport meta), so browsers' automatic dark modes do not repaint it; there is no dark theme.\n\nThe world refuses the category default of an assistant chat beside KPI tiles on grey cards.",
     "keyCharacteristics": [
-      "Navy letterhead bar and sheet strips; white sheets on a blue-grey desk.",
-      "One yellow, used as a highlighter on evidence, never as decoration.",
+      "Navy letterhead with a 4px yellow foot rule; a white page beside a blue-grey rail; no cards.",
+      "Yellow for the main action and as a highlighter on evidence; selection and state in navy.",
       "Ruled statement rows with a heavy ink top rule and light rules between.",
       "Tabular Libre Franklin throughout; weight, not new faces, makes the hierarchy.",
       "Flat at rest; shadow only on floating layers.",
@@ -604,17 +670,17 @@
     "rules": [
       {
         "name": "The Yellow Rule",
-        "body": "Yellow (`highlighter-yellow`) is reserved for the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, focus rings and text selection. Ticks and status icons are ink, never yellow, and no button, tag or label is yellow.",
+        "body": "Yellow (`highlighter-yellow`) is for the main action, the letterhead's foot rule, the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, focus rings and text selection. State and selection are never shown in yellow on white: tabs, pressed buttons, focused fields, the selected bar and timeline dots are navy (`selected`). Ticks and status icons are ink, and no tag or label is yellow.",
         "section": "colors"
       },
       {
         "name": "The Bars Hold Rule",
-        "body": "Chart bars hold 3:1 against their panel (bar slate 3.3:1 on paper).",
+        "body": "Chart bars hold 3:1 against their plane (bar slate 3.3:1 on paper, and on the rail).",
         "section": "colors"
       },
       {
         "name": "The Signed Money Rule",
-        "body": "Rise and fall colours never carry meaning alone: every amount shows its sign, and the field strip adds an arrow and \"Up\"/\"Down\".",
+        "body": "Rise and fall colours never carry meaning alone: every amount shows its sign, and the answer line adds an arrow and \"Up\"/\"Down\".",
         "section": "colors"
       },
       {
@@ -629,34 +695,43 @@
       },
       {
         "name": "The Ask and Answer First Rule",
-        "body": "The ask box, then the answer sheet, lead the reading order on every width: the top of the main column on wide screens, the first two blocks on phones. The question field lives only in the ask box: no second question form in the side column, and no ask control in the sheet strip. Chart bars and note actions ask through it.",
+        "body": "The ask box, then the answer, lead the reading order on every width: the top of the main plane on wide screens, the first two blocks on phones, with the rail after them. The question field lives only in the ask box: no second question form in the rail, and no ask control in the answer. Chart bars and note actions ask through it.",
+        "section": "layout"
+      },
+      {
+        "name": "The Two Planes Rule",
+        "body": "Sections are grouped by the two planes, space and rules, never by a card. The ask box, the answer, \"Your bills\" and \"Household notes\" have no border, box or fill of their own.",
         "section": "layout"
       },
       {
         "name": "The Flat Sheet Rule",
-        "body": "Nothing that sits on the desk casts a shadow. If it does not float over the page, it has no shadow.",
+        "body": "Nothing that sits on the page casts a shadow. If it does not float over the page, it has no shadow.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do keep yellow to the Yellow Rule list: evidenced figures (the change and the two largest supported causes), the selected bar's cap, focus and selection.",
+      "Do keep yellow to the Yellow Rule list: the main action, the letterhead's foot rule, evidenced figures (the change and the two largest supported causes), the selected bar's cap, focus and selection highlight.",
+      "Do show selection and state in navy (`selected`): tab underlines, pressed-button borders, focused-field borders, the selected bar, timeline dots.",
+      "Do use one yellow primary button per area, with navy text.",
       "Do make every marked figure a button that opens its evidence.",
-      "Do head every sheet and drawer with the navy letterhead strip.",
+      "Do group with the two planes, space and 1px rules; head only the floating drawer with a navy strip.",
       "Do draw money at true length to one scale, with signed amounts right-aligned to one edge.",
       "Do separate ledger rows with light rules under a 1px ink top rule.",
       "Do set citations as small raised reference groups in muted ink that take the highlighter swipe on hover or focus.",
-      "Do keep chart bars at 3:1 or better against their panel.",
-      "Do put the ask box first: the top of the main column on wide screens and the first block on phones.",
+      "Do keep chart bars at 3:1 or better against their plane.",
+      "Do put the ask box first, then the answer, then the rail on phones.",
       "Do say the household is made up in the one footer line for the mode, and nowhere else."
     ],
     "donts": [
+      "Don't show state or selection in yellow on white; yellow underlines, yellow pressed states and yellow tab markers are out.",
+      "Don't box a page section: no border, card, fill or radius around the ask box, the answer, the answer line, the bills or the notes.",
       "Don't colour ticks or status icons yellow; they are ink.",
       "Don't box citations as chips or pills.",
       "Don't give a split chart separate scales for rises and falls, or fix the zero line at the centre.",
-      "Don't put a shadow on anything that sits on the desk.",
+      "Don't put a shadow on anything that sits on the page.",
       "Don't let rise and fall colour carry meaning without a sign.",
       "Don't add a second typeface or uppercase labels.",
-      "Don't add a dark theme or tokens keyed to `prefers-color-scheme: dark`; the page is light only.",
+      "Don't add a dark theme or tokens keyed to `prefers-color-scheme: dark`; the page is `only light`.",
       "Don't add a SAMPLE tag, badge or banner; the footer line carries it.",
       "Don't build an assistant chat beside KPI tiles on grey cards."
     ]

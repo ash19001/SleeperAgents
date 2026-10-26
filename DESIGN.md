@@ -2,11 +2,12 @@
 name: Why My Bill
 description: A household's own bill, marked up with a yellow highlighter on the figures that answer the question.
 colors:
-  letterhead-navy: "#13224a"
-  letterhead-navy-hover: "#22356a"
-  letterhead-mist: "#c3cbe0"
   highlighter-yellow: "#ffde3b"
+  highlighter-yellow-hover: "#f5cc14"
   highlighter-wash: "#fff3b0"
+  letterhead-navy: "#13224a"
+  letterhead-mist: "#c3cbe0"
+  selected: "#13224a"
   desk-ground: "#eef1f6"
   paper: "#ffffff"
   paper-tint: "#f5f7fa"
@@ -36,7 +37,7 @@ typography:
     fontFeature: "tnum"
   headline:
     fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "clamp(1.35rem, 1.1rem + 0.8vw, 1.65rem)"
+    fontSize: "clamp(1.4rem, 1.1rem + 0.9vw, 1.8rem)"
     fontWeight: 800
     lineHeight: 1.25
     letterSpacing: "-0.015em"
@@ -48,6 +49,25 @@ typography:
     lineHeight: 1.25
     letterSpacing: "-0.01em"
     fontFeature: "tnum"
+  drawer-title:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.45rem"
+    fontWeight: 800
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+    fontFeature: "tnum"
+  wordmark:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.3rem"
+    fontWeight: 800
+    lineHeight: 1
+    letterSpacing: "-0.015em"
+  ask-label:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.15rem"
+    fontWeight: 800
+    lineHeight: 1.55
+    letterSpacing: "-0.01em"
   title:
     fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "1.02rem"
@@ -66,11 +86,29 @@ typography:
     fontWeight: 400
     lineHeight: 1.55
     fontFeature: "tnum"
+  supporting:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "0.92rem"
+    fontWeight: 400
+    lineHeight: 1.55
+    fontFeature: "tnum"
   label:
     fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.43
+    fontFeature: "tnum"
+  caption:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "0.82rem"
+    fontWeight: 400
+    lineHeight: 1.55
+    fontFeature: "tnum"
+  tag:
+    fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "0.78rem"
+    fontWeight: 600
+    lineHeight: 1.55
     fontFeature: "tnum"
   citation:
     fontFamily: "Libre Franklin, system-ui, -apple-system, Segoe UI, sans-serif"
@@ -82,12 +120,16 @@ typography:
     fontSize: "0.8rem"
     fontWeight: 400
     lineHeight: 1.625
+  mono-small:
+    fontFamily: "ui-monospace, SF Mono, Menlo, Consolas, monospace"
+    fontSize: "0.76rem"
+    fontWeight: 400
+    lineHeight: 1.55
 rounded:
   mark: "2px"
   tag-sm: "3px"
   tag: "4px"
   md: "6px"
-  lg: "8px"
   drawer: "12px"
   full: "9999px"
 spacing:
@@ -97,20 +139,22 @@ spacing:
   lg: "16px"
   xl: "20px"
   2xl: "24px"
-  3xl: "28px"
-  4xl: "32px"
+  3xl: "32px"
+  4xl: "40px"
+  5xl: "56px"
 components:
   button-primary:
-    backgroundColor: "{colors.letterhead-navy}"
-    textColor: "{colors.paper}"
+    backgroundColor: "{colors.highlighter-yellow}"
+    textColor: "{colors.letterhead-navy}"
     rounded: "{rounded.md}"
     padding: "0 16px"
     height: "40px"
   button-primary-hover:
-    backgroundColor: "{colors.letterhead-navy-hover}"
+    backgroundColor: "{colors.highlighter-yellow-hover}"
+    textColor: "{colors.letterhead-navy}"
   button-primary-large:
-    backgroundColor: "{colors.letterhead-navy}"
-    textColor: "{colors.paper}"
+    backgroundColor: "{colors.highlighter-yellow}"
+    textColor: "{colors.letterhead-navy}"
     rounded: "{rounded.md}"
     padding: "0 24px"
     height: "48px"
@@ -143,18 +187,21 @@ components:
     rounded: "{rounded.md}"
     padding: "0 12px"
     height: "48px"
-  ask-box:
-    backgroundColor: "{colors.paper}"
-    rounded: "{rounded.lg}"
-    padding: "20px 28px"
-  panel:
-    backgroundColor: "{colors.paper}"
-    rounded: "{rounded.lg}"
-    padding: "20px"
-  sheet-strip:
+  letterhead:
     backgroundColor: "{colors.letterhead-navy}"
     textColor: "{colors.paper}"
-    padding: "12px 28px"
+    typography: "{typography.wordmark}"
+    height: "64px"
+  rail:
+    backgroundColor: "{colors.desk-ground}"
+    width: "minmax(300px, 380px)"
+  main-plane:
+    backgroundColor: "{colors.paper}"
+    width: "1080px"
+  drawer-strip:
+    backgroundColor: "{colors.letterhead-navy}"
+    textColor: "{colors.paper}"
+    padding: "12px 24px"
   marker:
     backgroundColor: "{colors.highlighter-yellow}"
     textColor: "{colors.letterhead-navy}"
@@ -163,6 +210,7 @@ components:
   verdict-supported:
     backgroundColor: "{colors.select-wash}"
     textColor: "{colors.ink}"
+    typography: "{typography.tag}"
     rounded: "{rounded.tag}"
     padding: "1px 6px 1px 4px"
   note-id:
@@ -183,15 +231,15 @@ components:
 
 **Creative North Star: "The Bill, Highlighted"**
 
-The screen is a supplier's "your bill explained" statement that the household has gone over with a highlighter. A navy letterhead runs across the top and heads each statement sheet; white paper sheets sit on a pale blue-grey desk; navy ink carries the text; and a flat yellow marker band sits behind the few figures that answer the question. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.
+The screen is a supplier's "your bill explained" statement that the household has gone over with a highlighter. A navy letterhead with a yellow rule along its foot runs across the top; below it the page is two flat planes, a white page where the household asks and reads the answer, and a pale blue-grey rail beside it holding their bills and notes. Navy ink carries the text; a flat yellow marker band sits behind the few figures that answer the question, and the same yellow fills the one main action. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.
 
-Density is that of a statement, not a dashboard: ruled ledger rows, a field strip of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). The page is light in every colour scheme (`color-scheme: light`); there is no dark theme.
+Density is that of a statement, not a dashboard: ruled ledger rows, a ruled line of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Nothing on the page is boxed as a card; space, the two planes and rules do the grouping. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). The page is light in every colour scheme (`color-scheme: only light`, in CSS and the viewport meta), so browsers' automatic dark modes do not repaint it; there is no dark theme.
 
 The world refuses the category default of an assistant chat beside KPI tiles on grey cards.
 
 **Key Characteristics:**
-- Navy letterhead bar and sheet strips; white sheets on a blue-grey desk.
-- One yellow, used as a highlighter on evidence, never as decoration.
+- Navy letterhead with a 4px yellow foot rule; a white page beside a blue-grey rail; no cards.
+- Yellow for the main action and as a highlighter on evidence; selection and state in navy.
 - Ruled statement rows with a heavy ink top rule and light rules between.
 - Tabular Libre Franklin throughout; weight, not new faces, makes the hierarchy.
 - Flat at rest; shadow only on floating layers.
@@ -199,16 +247,17 @@ The world refuses the category default of an assistant chat beside KPI tiles on 
 
 ## Colors
 
-Navy and yellow on paper: a cool, inky statement palette with one hot accent kept rare.
+Navy and yellow on paper: a cool, inky statement palette with one hot accent kept to action and evidence.
 
 ### Primary
-- **Letterhead Navy** (`letterhead-navy`): the top bar, the footer, every sheet and drawer header strip, the primary button, the selected chart bar, active tab underlines, timeline dots and the ink on yellow.
-- **Letterhead Navy Hover** (`letterhead-navy-hover`): primary button hover only.
-- **Letterhead Mist** (`letterhead-mist`): secondary text on the letterhead (household line, sheet meta, mode label, footer).
+- **Highlighter Yellow** (`highlighter-yellow`, CSS `--primary` and `--hl`): the fill of the main action buttons (Ask, Save note, "Save bill and explain it") with navy text (11.6:1), the marker band on evidenced figures, the letterhead's foot rule, the selected bar's 6px cap, focus rings and text selection.
+- **Highlighter Yellow Hover** (`highlighter-yellow-hover`): main-action hover only (navy text holds 10.0:1).
+- **Highlighter Wash** (`highlighter-wash`): a pale tint for household-note IDs, household-note quotes and notices in the drawer and triage card.
 
 ### Secondary
-- **Highlighter Yellow** (`highlighter-yellow`): the marker band, the selected bar's 6px cap, focus rings and text selection.
-- **Highlighter Wash** (`highlighter-wash`): a pale tint for household-note IDs, household-note quotes and notices in the drawer and triage card.
+- **Letterhead Navy** (`letterhead-navy`): the letterhead, the footer, the evidence drawer's header strip, the chart tooltip, and the ink on yellow.
+- **Selected** (`selected`, same navy as its own token): everything that shows selection or state: the 3px underline of the active tab, the border of a pressed quiet button, a focused field's border, the selected chart bar and the timeline dots.
+- **Letterhead Mist** (`letterhead-mist`): secondary text on navy (household line, mode label, footer).
 
 ### Tertiary
 - **Rise Brick** (`rise-brick`) and **Rise Wash** (`rise-wash`): money that adds to the bill; low-confidence tag.
@@ -217,38 +266,44 @@ Navy and yellow on paper: a cool, inky statement palette with one hot accent kep
 - **Bar Slate** (`bar-slate`, hover `bar-slate-hover`): unselected chart bars.
 
 ### Neutral
-- **Desk Ground** (`desk-ground`): the page behind the sheets.
-- **Paper** (`paper`): the ask box, panels, the answer sheet, the drawer, fields.
+- **Desk Ground** (`desk-ground`): the rail, and the page behind everything.
+- **Paper** (`paper`): the main plane (ask box and answer), the drawer, fields and quiet buttons.
 - **Paper Tint** (`paper-tint`): row hover, quiet-button hover, code blocks, form summaries.
 - **Ink** (`ink`), **Ink Soft** (`ink-soft`), **Ink Muted** (`ink-muted`): primary text, supporting text, meta and axis labels.
-- **Line** (`line`): panel and field-strip borders, tab-list base. **Rule** (`rule`): hairlines between ledger rows. **Grid** (`grid`): chart gridlines. **Axis** (`axis`): split-bar zero line, decorative icons, scrollbar thumb.
+- **Line** (`line`): the rules that separate sections (the rail's right edge, the rule above the answer, the rule above Household notes, the answer line's top and bottom), tab-list bases. **Rule** (`rule`): hairlines between ledger rows. **Grid** (`grid`): chart gridlines. **Axis** (`axis`): split-bar zero line, decorative icons, scrollbar thumb.
 - **Control** (`control`): borders of fields and quiet buttons (3.1:1 on paper).
-- **Select Wash** (`select-wash`): pressed quiet buttons, the chosen bill option, the "Supported" and "High confidence" tags.
+- **Select Wash** (`select-wash`): pressed quiet buttons, the "Supported" and "High confidence" tags.
 
 ### Named Rules
-**The Yellow Rule.** Yellow (`highlighter-yellow`) is reserved for the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, focus rings and text selection. Ticks and status icons are ink, never yellow, and no button, tag or label is yellow.
+**The Yellow Rule.** Yellow (`highlighter-yellow`) is for the main action, the letterhead's foot rule, the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, focus rings and text selection. State and selection are never shown in yellow on white: tabs, pressed buttons, focused fields, the selected bar and timeline dots are navy (`selected`). Ticks and status icons are ink, and no tag or label is yellow.
 
-**The Bars Hold Rule.** Chart bars hold 3:1 against their panel (bar slate 3.3:1 on paper).
+**The Bars Hold Rule.** Chart bars hold 3:1 against their plane (bar slate 3.3:1 on paper, and on the rail).
 
-**The Signed Money Rule.** Rise and fall colours never carry meaning alone: every amount shows its sign, and the field strip adds an arrow and "Up"/"Down".
+**The Signed Money Rule.** Rise and fall colours never carry meaning alone: every amount shows its sign, and the answer line adds an arrow and "Up"/"Down".
 
 ## Typography
 
 **Display Font:** Libre Franklin (via `next/font`, with system-ui, -apple-system, Segoe UI fallback)
-**Label/Mono Font:** ui-monospace, SF Mono, Menlo, Consolas (SQL and code only)
+**Label/Mono Font:** ui-monospace, SF Mono, Menlo, Consolas (SQL, receipts, contract IDs and signatures only)
 
 **Character:** one statement face for everything, set with tabular figures site-wide so pounds and pence align in every column. Hierarchy comes from weight (400 / 600 / 700 / 800) and a few deliberate sizes, never from a second display face.
 
 ### Hierarchy
 - **Display** (800, 2rem, -0.015em): the highlighted figure at the top of the evidence drawer.
-- **Headline** (800, fluid 1.35-1.65rem, -0.015em, balanced wrap): the question as the answer sheet's heading. The brand wordmark in the letterhead uses the same weight and tracking at 1.3rem.
-- **Figure** (800, 1.6rem, -0.01em): the change in the field strip, always with the marker. Other field-strip values are 1.25rem semibold.
-- **Ask label** (800, 1.15rem, -0.01em): "Ask why a bill changed", the label of the ask box; one step above Title because the ask box is the page's main control.
-- **Title** (700, 1.02rem, snug): panel and block headings ("Your bills", "Where the £ went", "Why it changed"). Sheet-strip titles are 1.05rem bold on navy.
+- **Headline** (800, fluid 1.4-1.8rem, -0.015em, balanced wrap): the question as the answer's heading, with a plain muted meta line under it at body size.
+- **Figure** (800, 1.6rem, -0.01em): the change in the answer line, always with the marker. Other values on that line are 1.25rem semibold; the two-utility switch shows each change at 1.25rem bold.
+- **Drawer title** (800, 1.45rem, -0.01em): evidence and note headings in the drawer.
+- **Wordmark** (800, 1.3rem, -0.015em, line-height 1): "Why My Bill" in the letterhead.
+- **Ask label** (800, 1.15rem, -0.01em): "Ask why a bill changed"; one step above Title because the ask box is the page's main control.
+- **Title** (700, 1.02rem, snug): section and block headings ("Your bills", "Household notes", "Where the £ went", "Why it changed").
 - **Answer** (400, 1.08rem, 1.7, max 68-70ch): the 2-4 sentence answer, with figures in bold and evidenced figures marked.
-- **Body** (400, 15px, 1.55): everything else. Cause explanations run at 0.94rem in ink-soft, max 66ch.
-- **Label** (400, 0.875rem): field-strip labels, meta lines, status text; legends and chart notes at 0.82rem.
+- **Body** (400, 15px, 1.55): everything else, including the answer's meta line and cause explanations (ink-soft, max 66ch), at 0.94-0.95rem.
+- **Supporting** (400, 0.92rem): example questions, agent and trace detail lines, notices.
+- **Label** (400, 0.875rem): answer-line labels, status text, "Try:".
+- **Caption** (400, 0.82rem): legends, chart notes, form hints, timings; chart axis months sit at 0.69-0.7rem.
+- **Tag** (600, 0.78rem): verdict tags and note IDs.
 - **Citation** (600, 0.68rem, raised 0.42em): evidence references.
+- **Mono** (0.8rem) for SQL and contract IDs; **Mono small** (0.76rem) for receipts, allowed-column chips and signatures.
 
 ### Named Rules
 **The Tabular Rule.** Every figure is tabular (`font-variant-numeric: tabular-nums` on body); money columns are right-aligned to one edge.
@@ -257,63 +312,73 @@ Navy and yellow on paper: a cool, inky statement palette with one hot accent kep
 
 ## Layout
 
-A centred desk, max 1400px, with a side gutter of 16px on phones and 32px from 1024px (both clear the safe-area insets). The letterhead is a 64px bar. From `lg` (1024px) the desk is two columns, 24px apart: a 360px left column ("Your bills", chart only, then "Household notes") and the main column spanning both rows, which holds the ask box with the answer sheet 24px below it. Below `lg` everything stacks with 16px gaps in reading order: ask box, answer sheet, bills, notes. The desk starts 20px below the letterhead (24px from `lg`). A navy footer closes the page: the product line and one line per mode saying the household is made up (letterhead mist, 0.875rem, 24px padding). Inside the answer sheet the Answer tab splits into two columns from `xl` (1280px): "Where the £ went" with steps and confidence on the left, "Why it changed" on the right, 40px apart.
+Two planes under a full-width letterhead and over a full-width footer, with no page-wide cap; the side gutter is 16px on phones and 32px from 1024px (both clear the safe-area insets). The letterhead is a 64px navy bar with a 4px yellow rule along its foot.
 
-Rhythm runs on 4px: 8px and 12px inside rows, 16px between controls, 20px panel padding (the ask box 20px, 28px sides from 640px), 24px between sheet sections, 32px between answer blocks. Sheet body padding is 20px on phones and 28px from 640px. Ledger rows take 8-12px vertical padding.
+From `lg` (1024px) the page is two columns at full height. On the left, the rail (`minmax(300px, 380px)`, desk ground, a 1px line on its right) holds "Your bills" (tabs and chart) and then "Household notes" under a top rule, 32px apart. On the right, the main plane (paper) centres its content at a maximum of 1080px: the ask box, then a 1px line, then the answer section, 40px apart with 40px above the answer. Content starts 32px below the letterhead (40px from `lg`) and ends 56px above the footer. Below `lg` the order is ask, answer, then the rail, which takes a top rule instead of a side rule. A navy footer closes the page: the product line and one line per mode saying the household is made up (letterhead mist, 0.875rem, 24px padding).
 
-**The Ask and Answer First Rule.** The ask box, then the answer sheet, lead the reading order on every width: the top of the main column on wide screens, the first two blocks on phones. The question field lives only in the ask box: no second question form in the side column, and no ask control in the sheet strip. Chart bars and note actions ask through it.
+Inside the answer: the heading and meta line, then 24px between blocks. The answer line (From / To / Days / Change) is one ruled line: a 1px line top and bottom, 16px vertical padding, four columns from `sm` (640px) and two on phones, with no inner boxes. The Answer tab splits into two columns from `xl` (1280px): "Where the £ went" with steps and confidence on the left, "Why it changed" on the right, 40px apart; blocks inside are 32px apart.
+
+Rhythm runs on 4px: 8px and 12px inside rows, 16px between controls, 24px between answer parts, 32px between blocks and rail sections, 40px between the main plane's parts. Ledger rows take 8-12px vertical padding.
+
+**The Ask and Answer First Rule.** The ask box, then the answer, lead the reading order on every width: the top of the main plane on wide screens, the first two blocks on phones, with the rail after them. The question field lives only in the ask box: no second question form in the rail, and no ask control in the answer. Chart bars and note actions ask through it.
+
+**The Two Planes Rule.** Sections are grouped by the two planes, space and rules, never by a card. The ask box, the answer, "Your bills" and "Household notes" have no border, box or fill of their own.
 
 ## Elevation & Depth
 
-Flat at rest. Panels and the sheet are separated from the desk by a 1px line and tone (paper on blue-grey), not shadow. Shadow appears only on layers that float above the page.
+Flat at rest. The rail and the main plane are separated by tone (blue-grey beside white) and a 1px line, not shadow; sections inside them by space and rules. Shadow appears only on layers that float above the page.
 
 ### Shadow Vocabulary
 - **Float** (`box-shadow: 0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18)`): the chart tooltip and the evidence drawer only. The drawer's backdrop is navy at 45%.
 
 ### Named Rules
-**The Flat Sheet Rule.** Nothing that sits on the desk casts a shadow. If it does not float over the page, it has no shadow.
+**The Flat Sheet Rule.** Nothing that sits on the page casts a shadow. If it does not float over the page, it has no shadow.
 
 ## Shapes
 
-Small, mostly square-ish corners. 2px for the marker band, chart bar tops and the citation swipe; 3-4px for tags (verdicts, confidence, note IDs, code spans); 6px for buttons, fields, the field strip and inner boxes; 8px for the ask box, panels and the answer sheet. The evidence drawer is square-edged as a side sheet from 768px and takes 12px top corners as a bottom sheet on phones. Full rounds only for timeline and preview dots.
+Small, mostly square-ish corners, on controls and small wells only. 2px for the marker band, chart bar tops and the citation swipe; 3-4px for tags (verdicts, confidence, note IDs, allowed-column chips); 6px for buttons, fields, the tooltip, code blocks, notices and form summaries. Page sections have no corners because they have no boxes. The evidence drawer is square-edged as a side sheet from 768px and takes 12px top corners as a bottom sheet on phones. Full rounds only for timeline and preview dots.
 
-Rules are the main structural device: a 2px ink rule under the chart, a 1px ink top rule over every ledger list (causes, split, evidence, live progress), light rules between rows, 3px underlines for active tabs. Empty states use a dashed control border.
+Rules are the main structural device: the yellow 4px foot of the letterhead; 1px lines between planes and sections; a 1px line above and below the answer line; a 2px ink rule under the chart; a 1px ink top rule over every ledger list (causes, split, evidence, live progress); light rules between rows; 3px navy underlines for active tabs. Empty states use a dashed control border.
 
 ## Components
 
 ### Buttons
 Plain, solid, statement-office buttons.
 - **Shape:** gently squared (6px), 40px tall; the Ask button alone is 48px.
-- **Primary:** navy fill, white semibold label, 16px side padding. Hover lightens the navy; press nudges down 1px. Disabled at 60% opacity.
+- **Primary:** highlighter-yellow fill, navy semibold label, 16px side padding. Hover deepens the yellow; press nudges down 1px. Disabled at 60% opacity. One per area: Ask, Save note, "Save bill and explain it".
 - **Primary large:** the same button at 48px with 24px side padding and a 1.05rem bold label; used only for Ask in the ask box, to match the 48px field beside it.
-- **Quiet:** paper fill with a control-coloured border, ink semibold label; hover darkens the border to ink-soft and tints the fill; pressed (`aria-pressed`) takes the primary border and select wash. A 32px small size (10px padding, 0.875rem) is used for in-row actions, ratings and bill choices.
-- **On the letterhead:** text buttons with a 10% white hover wash (Close, Back).
+- **Quiet:** paper fill with a control-coloured border, ink semibold label; hover darkens the border to ink-soft and tints the fill; pressed (`aria-pressed`) takes a navy (`selected`) border and select wash. A 32px small size (10px padding, 0.875rem) is used for in-row actions, read-type choices and bill options.
+- **On the drawer strip:** text buttons with a 10% white hover wash (Close, Back).
 
 ### Chips (citations)
 - **Style:** not chips. Citations are small raised reference groups (0.68rem semibold, raised 0.42em) in muted ink, kept on one line. On hover or focus a yellow highlighter swipe draws in from the left (300ms) behind the ID and the text turns navy.
 - **State:** household-note references (M#) sit on the highlighter wash at rest and take full yellow on hover.
 
 ### Cards / Containers
-- **Corner Style:** 8px.
-- **Background:** paper on the desk ground.
+- **Corner Style:** none at page level; 6px for small wells.
+- **Background:** the main plane is paper, the rail is desk ground.
 - **Shadow Strategy:** none (Flat Sheet Rule).
-- **Border:** 1px line.
-- **Internal Padding:** 20px for left-column panels; the answer sheet is a navy strip (12px by 20-28px) over a body padded 20-28px.
+- **Border:** none around sections; a 1px line rule separates them.
+- **Internal Padding:** the planes take the page gutter (16px, 32px from `lg`) and 32-40px top padding. Wells (code block, notices, form summary) take 12-16px.
 
 ### Inputs / Fields
 - **Style:** paper, 1px control border, 6px radius, 12px side padding, 40px tall in forms; muted placeholder. The question field is 48px with 1.05rem text. Notes use the same look as a resizable textarea.
-- **Focus:** border goes to primary and a 3px yellow outline sits flush outside it.
-- **Global focus:** every other control gets a 3px yellow outline, 2px offset, with a 5px letterhead-navy halo so the ring reads on both paper and navy.
+- **Focus:** the border goes navy (`selected`) and a 3px yellow outline sits flush outside it.
+- **Global focus:** every other control gets a 3px yellow outline, 2px offset, with a 5px letterhead-navy halo so the ring reads on paper, the rail, navy and the yellow button.
 
 ### Navigation
-- **Letterhead:** 64px navy bar: the Mark (a white bill with one yellow highlighted line), the "Why My Bill" wordmark in 800 weight, the household line in letterhead mist behind a faint divider (hidden below 768px; "Your bills" repeats it on phones), and the mode label at the right. Nothing in the letterhead is yellow except the Mark's line.
-- **Tabs:** semibold labels, muted at rest, ink when active with a 3px primary underline that overlaps the 1px line beneath; arrow keys move between tabs. Answer tabs shorten their labels on phones.
+- **Letterhead:** a full-width 64px navy bar with a 4px yellow rule along its foot: the Mark (a white bill with one yellow highlighted line), the "Why My Bill" wordmark, the household line in letterhead mist behind a faint divider (hidden below 768px; "Your bills" repeats it on phones), and the mode label at the right.
+- **Tabs:** semibold labels, muted at rest, ink when active with a 3px navy underline that overlaps the 1px line beneath; arrow keys move between tabs. Used for the utility tabs in the rail and the answer tabs (which shorten their labels on phones).
+- **Utility switch:** when an answer covers two utilities, the same underline tab treatment, 32px apart: the utility name at 0.875rem over its signed change at 1.25rem bold; the chosen one takes the navy underline.
 
 ### Ask box
-The page's main control, at the top of the main column and first on phones. An 8px paper panel with a 1px line border (20px padding, 28px sides from 640px) holding, 12px apart: the "Ask why a bill changed" label (Ask label style), a row of the 48px question field and the large primary Ask button 8px apart, and a "Try:" row of example questions. "Try:" is 0.875rem muted; each example is a link-blue text button at 0.92rem, 16px apart, wrapping under one another beside "Try:"; on hover the text turns ink and gains its underline. Asking from an example, a chart bar or a note runs the same question through this box.
+The page's main control, at the top of the main plane and first on phones; unboxed. Holding, 12px apart: the "Ask why a bill changed" label (Ask label), a row of the 48px question field and the large yellow Ask button 8px apart, and a "Try:" row of example questions. "Try:" is 0.875rem muted; each example is a link-blue text button at 0.92rem, 16px apart, wrapping under one another beside "Try:"; on hover the text turns ink and gains its underline. Asking from an example, a chart bar or a note runs the same question through this box.
+
+### Answer
+Unboxed, below a rule. The question is the heading (Headline) with a plain muted meta line under it ("Your gas bill, Dec 2025 → Jan 2026 · Checked in code"). Then the answer line (see Layout), the answer paragraph, and the Answer | How the agents worked it out | Evidence tabs.
 
 ### Footer
-A navy band matching the letterhead: the product line (wordmark semibold in white) and, per mode, one line in letterhead mist saying the household is made up and which data is real. This line is how the page meets PLAN.md rule 8 (label sample data in the UI), by the owner's decision of 26 Oct; nothing else on the page labels the data as sample.
+A full-width navy band matching the letterhead: the product line (wordmark semibold in white) and, per mode, one line in letterhead mist saying the household is made up and which data is real. This line is how the page meets PLAN.md rule 8 (label sample data in the UI), by the owner's decision of 26 Oct; nothing else on the page labels the data as sample.
 
 ### The Highlighter (signature)
 A flat yellow band behind a figure that answers the question: navy bold text, 2px corners, 0.16em side padding, never wrapping. When an answer lands it draws in from the left over 560ms (`cubic-bezier(0.16, 1, 0.3, 1)`), 200ms after landing and staggered 140ms per figure, while the figure's ink turns from ink to navy so it stays readable throughout. Each marked figure is a button that opens the evidence drawer. Reduced motion shows it static.
@@ -324,32 +389,39 @@ A ledger of labelled rows: label, bar track, right-aligned signed amount, with a
 ### Bills chart
 Twelve slate bars to one £ scale with nice-step gridlines and a 2px ink baseline; the selected bar is navy with a 6px yellow cap and its amount printed above. Hover or focus shows a navy tooltip with the Float shadow. Every bar is a button that asks about that bill.
 
+### Agents' timeline
+A 2px line rail with 12px navy dots ringed in paper; each step is a semibold line with 0.92rem muted detail, max 72ch.
+
 ### Verdict and confidence tags
 4px tags at 0.78-0.82rem semibold with an ink icon: "Supported" on select wash, "Ruled out" outlined in line with muted text, "Inconclusive" with a dashed control border; confidence High on select wash, Medium outlined, Low on rise wash in rise brick.
 
 ### Evidence drawer
-A native dialog: right side sheet up to 600px from 768px (slides in 32px over 260ms), bottom sheet to 88vh with 12px top corners on phones (rises 24px). Navy header strip, the figure at Display size with the marker, then evidence rows and the SQL in a mono code block on paper tint.
+A native dialog: right side sheet up to 600px from 768px (slides in 32px over 260ms), bottom sheet to 88vh with 12px top corners on phones (rises 24px). A navy header strip (Back, Close), the figure at Display size with the marker or a Drawer title, then evidence rows and the SQL in a mono code block on paper tint.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep yellow to the Yellow Rule list: evidenced figures (the change and the two largest supported causes), the selected bar's cap, focus and selection.
+- **Do** keep yellow to the Yellow Rule list: the main action, the letterhead's foot rule, evidenced figures (the change and the two largest supported causes), the selected bar's cap, focus and selection highlight.
+- **Do** show selection and state in navy (`selected`): tab underlines, pressed-button borders, focused-field borders, the selected bar, timeline dots.
+- **Do** use one yellow primary button per area, with navy text.
 - **Do** make every marked figure a button that opens its evidence.
-- **Do** head every sheet and drawer with the navy letterhead strip.
+- **Do** group with the two planes, space and 1px rules; head only the floating drawer with a navy strip.
 - **Do** draw money at true length to one scale, with signed amounts right-aligned to one edge.
 - **Do** separate ledger rows with light rules under a 1px ink top rule.
 - **Do** set citations as small raised reference groups in muted ink that take the highlighter swipe on hover or focus.
-- **Do** keep chart bars at 3:1 or better against their panel.
-- **Do** put the ask box first: the top of the main column on wide screens and the first block on phones.
+- **Do** keep chart bars at 3:1 or better against their plane.
+- **Do** put the ask box first, then the answer, then the rail on phones.
 - **Do** say the household is made up in the one footer line for the mode, and nowhere else.
 
 ### Don't:
+- **Don't** show state or selection in yellow on white; yellow underlines, yellow pressed states and yellow tab markers are out.
+- **Don't** box a page section: no border, card, fill or radius around the ask box, the answer, the answer line, the bills or the notes.
 - **Don't** colour ticks or status icons yellow; they are ink.
 - **Don't** box citations as chips or pills.
 - **Don't** give a split chart separate scales for rises and falls, or fix the zero line at the centre.
-- **Don't** put a shadow on anything that sits on the desk.
+- **Don't** put a shadow on anything that sits on the page.
 - **Don't** let rise and fall colour carry meaning without a sign.
 - **Don't** add a second typeface or uppercase labels.
-- **Don't** add a dark theme or tokens keyed to `prefers-color-scheme: dark`; the page is light only.
+- **Don't** add a dark theme or tokens keyed to `prefers-color-scheme: dark`; the page is `only light`.
 - **Don't** add a SAMPLE tag, badge or banner; the footer line carries it.
 - **Don't** build an assistant chat beside KPI tiles on grey cards.

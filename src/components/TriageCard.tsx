@@ -42,7 +42,7 @@ export function TriageCard({ result, bills }: { result: Triage; bills: Bill[] })
 function RequestRow({ request: r, label }: { request: TriageRequest; label: (id: string) => string }) {
   const ok = r.orchestrator.status === "placeholder" || r.orchestrator.status === "done";
   return (
-    <li className="grid gap-3 rounded-md border border-line p-4">
+    <li className="grid gap-3 border-t border-line pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h3 className="text-lg font-bold">{UTILITIES[r.utility].name}</h3>
         <span className="text-sm text-ink-2">
