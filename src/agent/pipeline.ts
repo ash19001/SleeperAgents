@@ -2,9 +2,11 @@
 // one investigation per utility in parallel, then the writer and checker
 // for each, and the combiner when there are two or more. Clarify, blocked
 // and general replies pass straight through from triage; if no utility
-// could be investigated, the triage result goes back with the reasons.
+// could be investigated, the triage result goes back with the reasons. If
+// the models or Zetaris fell back along the way, the result says so.
 
 import type { DataSource } from "../data/types.ts";
+import { questionNotices, withQuestion } from "../lib/session.ts";
 import type { AskResult, Utility } from "../lib/types.ts";
 import type { HouseholdMemory } from "../memory/hmem.ts";
 import { composeAnswer } from "./answer.ts";
@@ -24,7 +26,15 @@ export interface PipelineOptions extends Omit<TriageOptions, "orchestrate"> {
 
 const NAME: Record<Utility, string> = { electricity: "Electricity", gas: "Gas", water: "Water" };
 
-export async function answerQuestion(question: string, opts: PipelineOptions): Promise<AskResult> {
+export function answerQuestion(question: string, opts: PipelineOptions): Promise<AskResult> {
+  return withQuestion(async () => {
+    const result = await answer(question, opts);
+    const notices = questionNotices(result.kind === "answer" || result.kind === "answers");
+    return notices.length ? { ...result, notices } : result;
+  });
+}
+
+async function answer(question: string, opts: PipelineOptions): Promise<AskResult> {
   const found = new Map<string, InvestigationResult>();
   const result = await triage(question, {
     ...opts,

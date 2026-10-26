@@ -16,6 +16,7 @@ import { z } from "zod";
 import type { PartId } from "../../billmodel/decompose.ts";
 import type { DataSource, EvidenceRecord, UBill } from "../../data/types.ts";
 import { CAUSE_NAMES, PART_NAMES } from "../../lib/labels.ts";
+import { currentQuestion, modelTrouble } from "../../lib/session.ts";
 import type { TimelineEntry, Utility } from "../../lib/types.ts";
 import { CaseFile, type CaseFinding, type Issue, type Review } from "../../memory/casefile.ts";
 import type { ExecutionContract } from "../../scout/types.ts";
@@ -131,8 +132,11 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
   let rounds = 0;
 
   // One Ultra call: the plan (step 0) or a review. If the reply is unusable
-  // twice, code decides: send everyone at the start, otherwise close.
+  // twice, or the call fails, code decides: send everyone at the start,
+  // otherwise close.
+  let callFailed = false; // the last decision fell to code because Ultra's call failed
   async function decide(n: number, carryover: string, last: boolean): Promise<Review> {
+    callFailed = false;
     const instruction =
       n === 0
         ? `This is the start: no specialist has reported yet. Give every specialist (${team.join(", ")}) a task. Set "done" to false.`
@@ -155,6 +159,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
         if (parsed.ok) return { round: n + 1, ...parsed.value, by: "agent", ...(res.reasoning ? { reasoning: res.reasoning.slice(0, 4000) } : {}) };
         messages.push({ role: "assistant", content: res.text }, { role: "user", content: `That wasn't usable: ${parsed.error}. Reply with only the JSON object.` });
       } catch {
+        callFailed = true;
         break;
       }
     }
@@ -186,7 +191,9 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
       if (n === 0) tasks = team.map((s) => ({ specialist: s, task: asked.get(s) ?? "", by: review.by }));
       else if (!last) {
         tasks = review.done ? [] : [...asked].map(([specialist, task]) => ({ specialist, task, by: review.by }));
-        sentBack = file.issues().filter((i) => team.includes(i.specialist as SpecialistName) && !followedUp.has(i.specialist as SpecialistName) && !tasks.some((t) => t.specialist === i.specialist));
+        // With the models down for this question, a specialist sent back
+        // can't do more than code already did.
+        sentBack = currentQuestion()?.models ? [] : file.issues().filter((i) => team.includes(i.specialist as SpecialistName) && !followedUp.has(i.specialist as SpecialistName) && !tasks.some((t) => t.specialist === i.specialist));
         const bySpecialist = new Map<SpecialistName, Issue[]>();
         for (const i of sentBack) bySpecialist.set(i.specialist as SpecialistName, [...(bySpecialist.get(i.specialist as SpecialistName) ?? []), i]);
         for (const [specialist, issues] of bySpecialist) tasks.push({ specialist, task: issues.map((i) => issueTask(i, file)).join(" "), by: "code" });
@@ -197,7 +204,7 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
       const ultraAsked = tasks.filter((t) => t.by === "agent");
       const codeAsked = tasks.filter((t) => t.by === "code" && n > 0);
       if (n === 0) {
-        timeline.push({ actor: review.by === "agent" ? ULTRA : CHECK, text: review.by === "agent" ? `Planned the investigation: a task for each of ${tasks.length} specialists.` : "The orchestrator's plan was unusable, so code sent every specialist its default task.", detail: tasks.map((t) => `${t.specialist}: ${clip(t.task || "check your causes")}`) });
+        timeline.push({ actor: review.by === "agent" ? ULTRA : CHECK, text: review.by === "agent" ? `Planned the investigation: a task for each of ${tasks.length} specialists.` : `The orchestrator${callFailed ? ` ${modelTrouble()}` : "'s plan was unusable"}, so code sent every specialist its default task.`, detail: tasks.map((t) => `${t.specialist}: ${clip(t.task || "check your causes")}`) });
       } else {
         if (review.by === "agent" && (closing || ultraAsked.length || !codeAsked.length)) {
           // Ultra's note may ask for work a specialist can't be given (one
@@ -211,12 +218,14 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
         }
         if (codeAsked.length) {
           step(`Sent back to ${codeAsked.map((t) => t.specialist).join(", ")}: issues code found in their work`, "code", 0, { issues: sentBack.map((i) => i.text) });
-          timeline.push({ actor: CHECK, text: review.done ? "The orchestrator was ready to close, but code found issues in the specialists' work and sent them back." : "Code also found issues in the specialists' work and sent them back.", detail: sentBack.map((i) => `${i.text}: sent back to ${i.specialist}`) });
+          const text = review.by !== "agent" ? "Code found issues in the specialists' work and sent them back." : review.done ? "The orchestrator was ready to close, but code found issues in the specialists' work and sent them back." : "Code also found issues in the specialists' work and sent them back.";
+          timeline.push({ actor: CHECK, text, detail: sentBack.map((i) => `${i.text}: sent back to ${i.specialist}`) });
         }
       }
       if (closing) {
-        step(review.by === "agent" ? `Closed the case: ${review.note || "every part accounted for"}` : "Closed the case (code: no usable review)", "code", 0, { round: rounds });
-        if (review.by !== "agent") timeline.push({ actor: CHECK, text: "The orchestrator's review was unusable, so code closed the case." });
+        const why = callFailed ? `the orchestrator ${modelTrouble()}` : "no usable review";
+        step(review.by === "agent" ? `Closed the case: ${review.note || "every part accounted for"}` : `Closed the case (code: ${why})`, "code", 0, { round: rounds });
+        if (review.by !== "agent") timeline.push({ actor: CHECK, text: `The orchestrator${callFailed ? ` ${modelTrouble()}` : "'s review was unusable"}, so code closed the case.` });
         return { content: `${review.note}\n[TASK_COMPLETE]` };
       }
 
@@ -244,7 +253,16 @@ export async function investigate(contract: ExecutionContract, utility: Utility,
           : issuesBefore.filter((i) => tasks.some((t) => t.specialist === i.specialist)).map((i) => (now.some((x) => x.cause === i.cause && x.kind === i.kind) ? `${i.specialist} still disagrees on ${i.cause}; the measurement stands` : `${i.specialist} resolved ${i.cause}: it now agrees with the measurement`))),
       ];
       const supported = file.findings().filter((f) => f.verdict === "supported").map((f) => CAUSE_NAMES[f.cause].toLowerCase());
-      timeline.push({ actor: LIGHTNING, text: `Round ${rounds}: ${tasks.map((t) => t.specialist).join(", ")} reported back.${supported.length ? ` Supported so far: ${supported.join(", ")}.` : ""}`, detail });
+      // A specialist whose model call failed didn't report: code tested its causes.
+      const reported = results.filter((r) => !r.callFailed).map((r) => r.specialist);
+      const failed = results.filter((r) => r.callFailed).map((r) => r.specialist);
+      const text = [
+        `Round ${rounds}:`,
+        reported.length ? `${reported.join(", ")} reported back.` : "",
+        failed.length ? `${failed.join(", ")} ${modelTrouble()}, so code tested ${failed.length === 1 ? "its" : "their"} causes.` : "",
+        supported.length ? `Supported so far: ${supported.join(", ")}.` : "",
+      ];
+      timeline.push({ actor: reported.length ? LIGHTNING : CHECK, text: text.filter(Boolean).join(" "), detail });
       log.push(`round ${rounds} asked ${tasks.map((t) => t.specialist).join(", ")}`);
       return { content: `${review.note}\n[STATE_CHECKPOINT]\n${carryState(file, log)}` };
     },

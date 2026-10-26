@@ -63,7 +63,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
     case "answer": {
       const a = result.answer;
       // A new key per answer resets the tabs and the feedback buttons.
-      return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} />;
+      return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} notices={result.notices} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} />;
     }
     case "answers":
       return <AnswersView key={`${result.question}|${result.answers.map((a) => a.bill_b).join()}`} result={result} mode={mode} bills={bills} utility={utility} onUtility={onUtility} onOpen={onOpen} />;
@@ -73,7 +73,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
       if (missing) {
         const month = new Date(`${missing.period}-01T00:00:00Z`).toLocaleString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
         return (
-          <Message title="That bill isn't here yet" text={result.message} trace={result.trace}>
+          <Message title="That bill isn't here yet" text={result.message} trace={result.trace} notices={result.notices}>
             {onAddBill && (
               <div>
                 <button type="button" className={BUTTON} onClick={() => onAddBill(missing)}>
@@ -89,6 +89,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
           title={opts.some((o) => o.question) ? "There's no bill for that date" : "Which bill do you mean?"}
           text={result.message}
           trace={result.trace}
+          notices={result.notices}
         >
           {opts.length > 0 && (
             <div className="flex flex-wrap gap-2" aria-label="Choose a bill">
@@ -105,7 +106,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
     case "blocked":
       return <Message title="I can't help with that question" text={`${result.reason} Ask why one of your bills changed instead.`} trace={result.trace} />;
     case "general":
-      return <Message title="Ask about a bill" text={result.message} trace={result.trace} />;
+      return <Message title="Ask about a bill" text={result.message} trace={result.trace} notices={result.notices} />;
     case "triage":
       return <TriageCard result={result} bills={bills} />;
     case "no_preview":
@@ -116,17 +117,33 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
         />
       );
     case "error":
-      return <Message title="Couldn't get an answer" text={`${result.message}. Check that the server is running, then try again.`} />;
+      return <Message title="Couldn't get an answer" text={/[.?!]$/.test(result.message) ? result.message : `${result.message}.`} />;
   }
 }
 
-function Message({ title, text, trace, children }: { title: string; text: string; trace?: TraceStep[]; children?: ReactNode }) {
+function Message({ title, text, trace, notices, children }: { title: string; text: string; trace?: TraceStep[]; notices?: string[]; children?: ReactNode }) {
   return (
     <Sheet title={title}>
+      <Notices notices={notices} />
       <p className="max-w-[62ch] text-[1.05rem] text-ink-2">{text}</p>
       {children}
       {trace && <TraceList steps={trace} />}
     </Sheet>
+  );
+}
+
+// What fell back while answering (the models, Zetaris), above everything else.
+function Notices({ notices }: { notices?: string[] }) {
+  if (!notices?.length) return null;
+  return (
+    <div role="status" className="grid gap-2">
+      {notices.map((n) => (
+        <p key={n} className="flex max-w-[70ch] items-start gap-2 rounded-md bg-hl-wash px-3 py-2 text-[0.92rem] text-ink">
+          <Info aria-hidden className="mt-0.5 size-4 flex-none" />
+          {n}
+        </p>
+      ))}
+    </div>
   );
 }
 
@@ -148,6 +165,7 @@ function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
   const names = result.answers.map((a) => UTILITIES[a.utility].name.toLowerCase());
   return (
     <Sheet title={result.question} meta={[`Your ${names.join(" and ")} bills`, checkedShort(current)].filter(Boolean).join(" · ")}>
+      <Notices notices={result.notices} />
       {result.summary_markdown && (
         <p className="max-w-[70ch] text-[1.08rem] leading-[1.65]">
           <RichText text={result.summary_markdown} answer={summary} marked={new Set()} onOpen={() => {}} />
@@ -176,11 +194,12 @@ function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
   );
 }
 
-function AnswerView({ answer: a, mode, bills, onOpen }: { answer: Answer; mode: Mode; bills: Bill[]; onOpen: Open }) {
+function AnswerView({ answer: a, notices, mode, bills, onOpen }: { answer: Answer; notices?: string[]; mode: Mode; bills: Bill[]; onOpen: Open }) {
   const A = bills.find((b) => b.bill_id === a.bill_a);
   const B = bills.find((b) => b.bill_id === a.bill_b);
   return (
     <Sheet title={a.question} meta={[`Your ${UTILITIES[a.utility].name.toLowerCase()} bill, ${A?.label ?? a.bill_a} → ${B?.label ?? a.bill_b}`, checkedShort(a)].filter(Boolean).join(" · ")}>
+      <Notices notices={notices} />
       <AnswerBody answer={a} mode={mode} bills={bills} trace={a.trace} onOpen={onOpen} />
     </Sheet>
   );
@@ -432,7 +451,7 @@ function Checked({ answer }: { answer: Answer }) {
   return (
     <p className="flex items-center gap-2 text-sm text-ink-2">
       <ShieldCheck aria-hidden className="size-4 flex-none" />
-      {CHECKED[answer.checked.by]}
+      {answer.checked.writer_failed ? "The writer's model couldn't be used, so this is the plain version built from the measurements, checked in code." : CHECKED[answer.checked.by]}
     </p>
   );
 }

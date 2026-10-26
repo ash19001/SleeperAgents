@@ -127,7 +127,7 @@ function EvidenceBody({ refId, answer, mode }: { refId: string; answer: Answer; 
       )}
       {ev.source === "local-sample" && (
         <p className="rounded-md bg-hl-wash px-3 py-2 text-[0.92rem] text-ink">
-          Read from the supplier file on this machine, not from Zetaris. The same read becomes a Zetaris query once the data is registered there.
+          Read from the SAMPLE file on this machine, not from Zetaris: Zetaris wasn&apos;t available or isn&apos;t set up. The same read is a Zetaris query when it is.
         </p>
       )}
       <div className="flex items-center justify-between gap-3">

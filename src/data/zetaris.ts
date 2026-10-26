@@ -13,21 +13,27 @@ type Row = Record<string, string | null>;
 
 const READ_ONLY = /^\s*(select|with|show|describe)\b/i;
 
-export async function runSql(sql: string, limit = 5000): Promise<Row[]> {
+export async function runSql(sql: string, limit = 5000, timeoutMs = 60_000): Promise<Row[]> {
   const bare = sql.replace(/'[^']*'/g, "''");
   if (!READ_ONLY.test(sql) || /;\s*\S/.test(bare)) throw new Error("Zetaris: the app sends one read-only statement at a time (SELECT, WITH, SHOW or DESCRIBE).");
   const base = (process.env.ZETARIS_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
-  const res = await fetch(`${base}/api/proxy/sql-editor/sqls/run-query`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.ZETARIS_API_KEY ?? ""}`,
-      "X-Org-ID": String(process.env.ZETARIS_ORG_ID ?? ""),
-      "X-Request-ID": randomUUID(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ sql, limit, ...(process.env.ZETARIS_ENGINE_ID ? { engineId: process.env.ZETARIS_ENGINE_ID } : {}) }),
-    signal: AbortSignal.timeout(60_000),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${base}/api/proxy/sql-editor/sqls/run-query`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.ZETARIS_API_KEY ?? ""}`,
+        "X-Org-ID": String(process.env.ZETARIS_ORG_ID ?? ""),
+        "X-Request-ID": randomUUID(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sql, limit, ...(process.env.ZETARIS_ENGINE_ID ? { engineId: process.env.ZETARIS_ENGINE_ID } : {}) }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (err) {
+    const timedOut = (err as Error).name === "TimeoutError";
+    throw new Error(timedOut ? `Zetaris didn't answer within ${timeoutMs / 1000} s` : `Zetaris isn't reachable at ${base}`, { cause: err });
+  }
   if (!res.ok) throw new Error(`Zetaris answered ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const body = (await res.json()) as { headers: string[]; data: (string | null)[][] };
   return body.data.map((row) => Object.fromEntries(body.headers.map((h, i) => [h, row[i]])));

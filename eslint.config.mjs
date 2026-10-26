@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Third-party code, vendored unchanged.
     "vendor/**",
+    // Side servers' build output (NEXT_DIST_DIR=tmp/…).
+    "tmp/**",
   ]),
 ]);
 

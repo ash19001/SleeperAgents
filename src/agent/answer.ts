@@ -11,6 +11,7 @@ import { z } from "zod";
 import type { CauseId } from "../billmodel/causes.ts";
 import type { PartId } from "../billmodel/decompose.ts";
 import { CAUSE_NAMES } from "../lib/labels.ts";
+import { modelTrouble } from "../lib/session.ts";
 import type { Answer, Note, TimelineEntry } from "../lib/types.ts";
 import { PART_CAUSES } from "../memory/casefile.ts";
 import { assess } from "./confidence.ts";
@@ -93,6 +94,7 @@ export function templateAnswer(r: InvestigationResult, table: FactsTable, expect
 export interface Checked {
   by: "writer" | "rewrite" | "template";
   problems: string[][]; // the checker's findings on each attempt that failed
+  writer_failed?: boolean; // the writer's model call failed, so the checks never ran on its text
 }
 
 // expected: the direction the question assumed ("why was it so cheap" is down).
@@ -116,6 +118,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
   const CHECKER = "Checker (code)";
   let text = "";
   let by: Checked["by"] = "template";
+  let writerFailed = false;
   for (const attempt of ["writer", "rewrite"] as const) {
     let draft: string;
     try {
@@ -132,7 +135,8 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
       draft = parsed.value.answer_markdown.trim();
     } catch (err) {
       problems.push([`The writer failed: ${(err as Error).message.slice(0, 120)}`]);
-      timeline.push({ actor: CHECKER, text: "The writer couldn't be reached." });
+      timeline.push({ actor: CHECKER, text: `The writer ${modelTrouble()}.` });
+      writerFailed = true;
       break;
     }
     const started = performance.now();
@@ -173,7 +177,7 @@ export async function composeAnswer(question: string, r: InvestigationResult, ct
     evidence: r.evidence.map(({ id, title, source, sql, rows, sha256, at }) => ({ id, title, source, sql, rows, sha256, at })),
     memory: notes,
     trace: ctx.trace.steps,
-    checked: { by, problems },
+    checked: { by, problems, ...(writerFailed ? { writer_failed: true } : {}) },
     assessment: assess(r),
     timeline: [...r.timeline, ...timeline],
   };

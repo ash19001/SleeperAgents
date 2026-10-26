@@ -16,8 +16,13 @@
 // is empty and nothing is injected. Each investigation reasons only from its
 // own evidence; household memory is the app's own H-MEM, used deliberately
 // through recall_notes. NIGHTSHIFT_SCOPE=user turns Nightshift's memory back on.
+//
+// Within one question (src/lib/session.ts), once Nightshift is unreachable or
+// refuses the token, or the question's time limit passes, no more calls are
+// sent: each fails at once, so the fallbacks finish the answer in code.
 
 import { randomUUID } from "node:crypto";
+import { currentQuestion } from "../lib/session.ts";
 import type { Trace } from "./trace.ts";
 
 export interface ToolCall {
@@ -72,13 +77,25 @@ export interface ChatResult {
 export class LlmError extends Error {
   readonly status: number | null;
   readonly route: string;
+  readonly sent: boolean; // false: the call was never sent
 
-  constructor(message: string, route: string, status: number | null = null) {
+  constructor(message: string, route: string, status: number | null = null, sent = true) {
     super(message);
     this.name = "LlmError";
     this.route = route;
     this.status = status;
+    this.sent = sent;
   }
+}
+
+const OUT_OF_TIME = { reason: "time", why: "out of time" } as const;
+
+// Past the question's time limit: send nothing more; code finishes the answer.
+function checkDeadline() {
+  const q = currentQuestion();
+  if (!q || Date.now() < q.deadline) return;
+  q.models ??= OUT_OF_TIME;
+  throw new LlmError("Not sent: the question's time limit was reached.", "nightshift", null, false);
 }
 
 export const fastModel = () => process.env.MODEL_FAST || "nvidia/nemotron-3.5-lightning-30b-a3b";
@@ -127,8 +144,10 @@ function nightshift(): Route {
 // (Nightshift passes it on as a 502 naming nvidia_429). So calls
 // wait for a slot, at most LLM_RPM starts a minute and LLM_CONCURRENCY at
 // once. A 429 cools every call in the process down, not just the one that
-// got it: all calls wait out the back-off, and the rate is halved for the
-// next two minutes, so parallel agents don't keep hitting the limit.
+// got it: all calls wait out the back-off (Retry-After, at most a minute),
+// and the rate is halved for the next two minutes, so parallel agents don't
+// keep hitting the limit. A call that never reached Nightshift gives its
+// slot back.
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const RECENT_429_MS = 120_000;
 let coolUntil = 0;
@@ -146,9 +165,10 @@ interface CallStats {
   retries: number;
 }
 
-async function slot(stats: CallStats): Promise<() => void> {
+async function slot(stats: CallStats): Promise<(refund: boolean) => void> {
   const began = Date.now();
   for (;;) {
+    checkDeadline();
     const now = Date.now();
     while (starts.length && now - starts[0] > 60_000) starts.shift();
     if (now < coolUntil) {
@@ -159,8 +179,10 @@ async function slot(stats: CallStats): Promise<() => void> {
       active++;
       starts.push(now);
       stats.waitedMs += now - began;
-      return () => {
+      return (refund) => {
         active--;
+        const i = starts.indexOf(now);
+        if (refund && i >= 0) starts.splice(i, 1);
       };
     }
     await sleep(starts.length >= rpm() ? Math.min(1000, 60_050 - (now - starts[0])) : 100);
@@ -168,27 +190,40 @@ async function slot(stats: CallStats): Promise<() => void> {
 }
 
 async function post(route: Route, body: unknown, timeoutMs: number, stats: CallStats) {
+  const q = currentQuestion();
   for (let attempt = 0; ; attempt++) {
     const release = await slot(stats);
+    // The call's own timeout, or less when the question's time limit is nearer.
+    const limit = Math.max(1, Math.min(timeoutMs, (q?.deadline ?? Infinity) - Date.now()));
+    let reached = true;
     let res: Response;
     try {
       res = await fetch(route.url, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...route.headers },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(timeoutMs),
+        signal: AbortSignal.timeout(limit),
       });
+    } catch (err) {
+      reached = !unreachable(err);
+      if (q && limit < timeoutMs && (err as Error).name === "TimeoutError") q.models ??= OUT_OF_TIME;
+      throw err;
     } finally {
-      release();
+      release(!reached);
     }
     if (res.ok) return res.json();
     const detail = (await res.text()).slice(0, 300);
     const limited = res.status === 429 || /nvidia_429|too many requests/i.test(detail);
     if ((limited && attempt < 6) || (!limited && res.status >= 500 && attempt === 0)) {
-      const wait = limited ? Number(res.headers.get("retry-after")) * 1000 || Math.min(30_000, 4000 * 2 ** attempt) : 1000;
+      const wait = limited ? Math.min(60_000, Number(res.headers.get("retry-after")) * 1000 || Math.min(30_000, 4000 * 2 ** attempt)) : 1000;
       if (limited) {
         last429 = Date.now();
         coolUntil = Math.max(coolUntil, Date.now() + wait);
+      }
+      // A wait that runs past the question's time limit isn't worth starting.
+      if (q && Date.now() + wait >= q.deadline) {
+        q.models ??= OUT_OF_TIME;
+        throw new LlmError(`${route.name} answered ${res.status}, and waiting to retry would pass the question's time limit`, route.name, res.status);
       }
       stats.retries++;
       stats.waitedMs += wait;
@@ -215,11 +250,27 @@ async function send(opts: ChatOptions, fresh: boolean, stats: CallStats) {
     max_tokens: opts.maxTokens ?? (opts.thinking ? 4096 : 1024),
   };
   const timeoutMs = opts.timeoutMs ?? 120_000;
-  const route = nightshift();
+  // Nightshift not set up, not running or refusing the token: the rest of
+  // this question doesn't try again.
+  const q = currentQuestion();
+  const unavailable = (why: string) => {
+    if (q) q.models ??= { reason: "unavailable", why };
+  };
+  let route: Route;
+  try {
+    route = nightshift();
+  } catch (err) {
+    unavailable("Meterless Nightshift isn't set up in .env.local");
+    throw new LlmError((err as Error).message, "nightshift", null, false);
+  }
   try {
     return { route, data: await post(route, body, timeoutMs, stats) };
   } catch (err) {
-    if (unreachable(err)) throw new LlmError(`Meterless Nightshift isn't reachable at ${route.url}. Is the Nightshift app running?`, route.name);
+    if (unreachable(err)) {
+      unavailable("Meterless Nightshift isn't running");
+      throw new LlmError(`Meterless Nightshift isn't reachable at ${route.url}. Is the Nightshift app running?`, route.name);
+    }
+    if (err instanceof LlmError && (err.status === 401 || err.status === 403)) unavailable("Meterless Nightshift refused the app's token");
     throw err;
   }
 }
@@ -227,16 +278,20 @@ async function send(opts: ChatOptions, fresh: boolean, stats: CallStats) {
 export async function chat(opts: ChatOptions): Promise<ChatResult> {
   const started = Date.now();
   const stats: CallStats = { waitedMs: 0, retries: 0 };
+  const q = currentQuestion();
   try {
+    if (q?.models) throw new LlmError(`Not sent: ${q.models.reason === "time" ? "the question's time limit was reached" : q.models.why}.`, "nightshift", null, false);
+    checkDeadline();
     return await attempt(opts, started, stats);
   } catch (err) {
     // Failed calls are traced too, so a fallback further up can't hide them.
+    const sent = !(err instanceof LlmError) || err.sent;
     opts.trace?.add({
       step: opts.agent,
       agent: opts.agent,
-      label: `${opts.label} (failed)`,
+      label: `${opts.label} (${sent ? "failed" : "not sent"})`,
       route: "nightshift",
-      model: opts.model,
+      model: sent ? opts.model : null,
       receipt: null,
       ms: Date.now() - started,
       detail: { error: (err as Error).message.slice(0, 200), ...stats },

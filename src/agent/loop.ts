@@ -24,6 +24,7 @@ export interface AgentRun<R> {
   steps: number;
   toolCalls: number;
   error?: string;
+  callFailed?: boolean; // a model call failed (rather than the agent running out of steps)
 }
 
 export type ChatFn = (opts: ChatOptions) => Promise<ChatResult>;
@@ -95,7 +96,7 @@ export async function runAgent<R>(spec: AgentSpec<R>, task: string, inv: Investi
     try {
       res = await chatFn({ agent: spec.name, label: step === 1 ? "Start the task" : last ? "Report" : `Step ${step}`, model: spec.model, messages, tools: last ? undefined : spec.tools.map(toSpec), thinking: spec.thinking, trace: inv.trace });
     } catch (err) {
-      return { report: null, steps: step, toolCalls, error: (err as Error).message };
+      return { report: null, steps: step, toolCalls, error: (err as Error).message, callFailed: true };
     }
     if (last && res.toolCalls.length) break;
     if (res.toolCalls.length) {

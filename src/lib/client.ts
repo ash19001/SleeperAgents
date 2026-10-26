@@ -1,6 +1,17 @@
+// The browser couldn't reach the app's own server at all.
+const SERVER_DOWN = "The app's server isn't answering. Check that it's running, then try again.";
+
+async function call(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new Error(SERVER_DOWN);
+  }
+}
+
 // Browser-side call to one of the app's API routes.
 export async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
+  const res = await call(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -12,7 +23,7 @@ export async function postJson<T>(url: string, body: unknown): Promise<T> {
 
 // Posts and reads an NDJSON stream, handing each event to onEvent as it arrives.
 export async function postStream(url: string, body: unknown, onEvent: (event: Record<string, unknown>) => void): Promise<void> {
-  const res = await fetch(url, {
+  const res = await call(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/x-ndjson" },
     body: JSON.stringify(body),
@@ -24,7 +35,9 @@ export async function postStream(url: string, body: unknown, onEvent: (event: Re
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   for (;;) {
-    const { value, done } = await reader.read();
+    const { value, done } = await reader.read().catch(() => {
+      throw new Error(SERVER_DOWN); // the server stopped partway through
+    });
     if (done) break;
     buffer += value;
     const lines = buffer.split("\n");

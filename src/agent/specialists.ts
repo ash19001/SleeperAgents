@@ -55,6 +55,7 @@ export interface SpecialistResult {
   steps: number;
   toolCalls: number;
   error?: string;
+  callFailed?: boolean; // its model call failed, so code tested its causes
 }
 
 const prompt = (name: string) => readFileSync(resolve(`src/agent/prompts/specialists/${name}.md`), "utf8");
@@ -123,5 +124,5 @@ export async function runSpecialist(name: SpecialistName, task: string, inv: Inv
       claimed: claim?.verdict ?? null,
     });
   }
-  return { specialist: name, findings, follow_up: run.report?.follow_up ?? null, steps: run.steps, toolCalls: run.toolCalls, error: run.error };
+  return { specialist: name, findings, follow_up: run.report?.follow_up ?? null, steps: run.steps, toolCalls: run.toolCalls, error: run.error, callFailed: run.callFailed };
 }

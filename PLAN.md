@@ -119,7 +119,7 @@ Every model call records agent, route (`nightshift`; there is no direct route, s
 | App | Next.js 16.3.8 (App Router, TypeScript), Tailwind 4, lucide-react, fonts via `next/font`. Runs on port **5175** (Zetaris's UI has port 3000). |
 | Runtime | Node 22.18 or newer (25 locally) |
 | Agent service | TypeScript inside the Next.js app. API routes call `src/agent/`. No separate server, no agent framework. |
-| Model calls | Our `src/agent/llm.ts` with `fetch`: Nightshift first, NVIDIA direct on network failure only, receipts, retries, `</think>` stripping |
+| Model calls | Our `src/agent/llm.ts` with `fetch`: Nightshift only (the NVIDIA key lives there), receipts, retries, a time limit per question, `</think>` stripping |
 | Validation | `zod` for model JSON, tool inputs and tool schemas |
 | Data access | Our `src/data/zetaris.ts`: read-only SQL guard, evidence records with SHA-256 |
 | Tests | `vitest` |

@@ -2,8 +2,17 @@
 
 const MAX_TEXT = 500;
 
+// A server error in words the household can act on; the full error goes to the log.
+export function userMessage(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(`[why-my-bill] ${err instanceof Error && err.stack ? err.stack : message}`);
+  // Only when WHYBILL_DATA=zetaris; otherwise the local copy stands in.
+  if (/^Zetaris\b/.test(message)) return `${message}. Start Zetaris, or unset WHYBILL_DATA so the app can read the local SAMPLE copy.`;
+  return message;
+}
+
 export function failure(err: unknown) {
-  return Response.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+  return Response.json({ error: userMessage(err) }, { status: 500 });
 }
 
 // Reads one required text field from a JSON body.

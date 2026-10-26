@@ -1,5 +1,5 @@
 import { ask } from "@/lib/source";
-import { failure, readText } from "@/lib/http";
+import { failure, readText, userMessage } from "@/lib/http";
 import type { TraceStep } from "@/lib/types";
 
 // A client that accepts NDJSON gets each agent step as it happens, then the
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       try {
         send({ type: "result", result: await ask(question.value, step) });
       } catch (err) {
-        send({ type: "error", message: err instanceof Error ? err.message : String(err) });
+        send({ type: "error", message: userMessage(err) });
       }
       controller.close();
     },

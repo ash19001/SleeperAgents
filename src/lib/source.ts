@@ -13,6 +13,7 @@ import { localSource, resetLocalCache } from "@/data/local";
 import { refreshFeeds } from "@/data/zetaris";
 import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
+import { questionTimeLimitMs, withQuestion } from "./session";
 import * as preview from "./preview";
 import { loadReplay, saveReplay } from "./replay";
 import type { AskResult, Bill, Household, Note, TraceStep, Utility } from "./types";
@@ -66,8 +67,13 @@ export async function ask(question: string, onStep?: (step: TraceStep) => void):
     onStep?.(s);
   };
   console.log(`[why-my-bill] question: ${question}`);
-  const result = await answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep: log });
-  saveReplay(question, notes, result);
+  // One question, with a time limit: past it, code finishes the answer.
+  const result = await withQuestion(
+    async () => answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep: log }),
+    questionTimeLimitMs(),
+  );
+  // An answer that fell back (no models, no Zetaris) isn't kept for replay.
+  if (!result.notices?.length) saveReplay(question, notes, result);
   return result;
 }
 

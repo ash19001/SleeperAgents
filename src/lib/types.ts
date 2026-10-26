@@ -117,7 +117,7 @@ export interface Answer {
   trace: TraceStep[];
   // Live answers: who wrote the text that passed the checker, how sure the
   // answer is, and how the agents worked it out.
-  checked?: { by: "writer" | "rewrite" | "template"; problems: string[][] };
+  checked?: { by: "writer" | "rewrite" | "template"; problems: string[][]; writer_failed?: boolean }; // writer_failed: the writer's model call failed
   assessment?: Assessment;
   timeline?: TimelineEntry[];
 }
@@ -150,7 +150,8 @@ export interface ClarifyOption {
   question?: string; // ask exactly this when chosen (e.g. the same question for another year)
 }
 
-export type AskResult =
+// notices: what fell back while answering (the models, Zetaris), in plain words.
+export type AskResult = (
   | { kind: "answer"; answer: Answer }
   | {
       kind: "answers"; // two or more utilities: the summary, then one answer each
@@ -173,4 +174,5 @@ export type AskResult =
       redactions: string[];
       notes: string[];
       trace: TraceStep[];
-    };
+    }
+) & { notices?: string[] };

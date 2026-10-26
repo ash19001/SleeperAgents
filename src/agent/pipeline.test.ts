@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { localSource } from "../data/local.ts";
+import { currentQuestion } from "../lib/session.ts";
 import { HouseholdMemory } from "../memory/hmem.ts";
 import type { Intake } from "./intake.ts";
 import { diligentSpecialist, fakeReply } from "./fakes.ts";
@@ -60,6 +61,37 @@ describe("answerQuestion", () => {
     expect(r.summary_markdown).toContain("Both come from the same change");
     expect(r.notes).toEqual([]);
     expect(r.trace.some((s) => s.label === "Used the template summary")).toBe(true);
+  });
+
+  // What chat() does when Nightshift isn't running: marks the models down for the question and throws.
+  const nightshiftDown = async (): Promise<ChatResult> => {
+    const q = currentQuestion();
+    if (q) q.models ??= { reason: "unavailable", why: "Meterless Nightshift isn't running" };
+    throw new Error("Meterless Nightshift isn't reachable");
+  };
+
+  it("finishes in code with the models down, and says so", async () => {
+    const r = await answerQuestion("Why did my gas bill go up in January?", { bills, scout, user: user(), data: localSource, chatFn: nightshiftDown, intake: async () => null });
+    expect(r.kind).toBe("answer");
+    if (r.kind !== "answer") return;
+    expect(r.notices).toEqual([expect.stringMatching(/^The AI models couldn't finish this answer \(Meterless Nightshift isn't running\), so code completed it/)]);
+    expect(r.answer.checked).toMatchObject({ by: "template", writer_failed: true });
+    expect(r.answer.causes.some((c) => c.verdict === "supported")).toBe(true);
+    const said = r.answer.timeline!.map((t) => t.text);
+    expect(said).toContain("The orchestrator couldn't be reached, so code sent every specialist its default task.");
+    expect(said.some((t) => /couldn't be reached, so code tested their causes/.test(t))).toBe(true);
+    expect(said.join(" ")).not.toMatch(/unusable|reported back|ready to close|sent them back/);
+  });
+
+  it("says why it asks which bill when the models are down", async () => {
+    const r = await answerQuestion("Why did my energy bills go up in January?", { bills, scout, user: user(), data: localSource, chatFn: nightshiftDown, intake: () => nightshiftDown().then(() => null, () => null) });
+    expect(r.kind).toBe("clarify");
+    expect(r.notices).toEqual([expect.stringMatching(/read by keyword rules alone/)]);
+  });
+
+  it("has no notices when nothing fell back", async () => {
+    const r = await answerQuestion("Why did my gas bill go up in January?", { bills, scout, user: user(), data: localSource, chatFn: fake(), intake: intake([{ utility: "gas", period: "2026-01", direction: "up" }]) });
+    expect(r.notices).toBeUndefined();
   });
 
   it("passes clarifying questions straight through", async () => {
