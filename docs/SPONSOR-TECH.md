@@ -43,7 +43,7 @@ Why My Bill explains why a UK household's electricity, gas or water bill changed
 
 ## Meterless
 
-**Nightshift.** Every model call goes through Nightshift's OpenAI-compatible gateway (`src/agent/llm.ts`), with the app and scope headers, and its receipt is kept in the trace, printed in the server log and shown on the page. There is no other route: the NVIDIA key lives in Nightshift, not in this project. If Nightshift can't be reached, the call fails with a clear message and the pipeline's fallbacks take over. We found that Nightshift's response cache keys on the user message alone and drops tool calls from cached replies; `llm.ts` tags each call so agents always get a fresh reply, and allows the cache only where the answer depends on the user message alone.
+**Nightshift.** Every model call goes through Nightshift's OpenAI-compatible gateway (`src/agent/llm.ts`), with the app and scope headers, and its receipt is kept in the trace, printed in the server log and shown on the page. There is no other route: the NVIDIA key lives in Nightshift, not in this project. If Nightshift can't be reached, the call fails with a clear message and the pipeline's fallbacks take over. We found that Nightshift's response cache keys on the user message alone and drops tool calls from cached replies; `llm.ts` tags each call so agents always get a fresh reply, and allows the cache only where the answer depends on the user message alone. We also found that Nightshift's own memory injects up to three earlier answers into every prompt, and the orchestrator copied them across unrelated cases; every scope builds up a store, so each call now gets a fresh scope (checked in the benchmark: nothing injected in 132 calls). Household memory is the app's own H-MEM, used deliberately.
 
 **Scout Intent.** Meterless publish Scout as a specification and an evaluation harness, with no implementation. We implemented it (`src/scout/`): guard, lexical sense with confidence bands, intent registry, capability graph, model profiles, and signed, expiring execution contracts. Contracts carry the bill references and capability scope; orchestrators verify them, and the agent loop refuses any tool whose capability the contract doesn't grant. Meterless's own harness scores it (`eval/scout_harness_report.md`).
 
@@ -59,12 +59,23 @@ Why My Bill explains why a UK household's electricity, gas or water bill changed
 | --- | --- | --- |
 | Intake | Nemotron 3.5 Lightning 30B | Fast, cheap, structured output |
 | Specialists (billing, tariff, weather, usage, leak) | Nemotron 3.5 Lightning 30B | Many short tool-calling loops in parallel |
-| Orchestrators | Nemotron 3 Ultra 550B | Planning and reviewing the whole case |
+| Orchestrators | Nemotron 3 Ultra 550B, reasoning on | Planning and reviewing the whole case; reasoning measurably improves its oversight (below) |
 | Writer and combiner | Nemotron 3 Ultra 550B | The text the household reads |
 
-Both models call tools through Nightshift. Reasoning is switched off by default (`chat_template_kwargs: {enable_thinking: false}`): Nemotron otherwise spends the token budget reasoning and can return an empty reply.
+Both models call tools through Nightshift. Reasoning is off for the intake, specialists and writer (`chat_template_kwargs: {enable_thinking: false}`): their tasks are short and structured, they make most of the calls, and with reasoning on Nemotron can spend the whole token budget thinking and return an empty reply. It's on for the orchestrator, with room in its budget, because there it pays:
 
-PER_AGENT_FIGURES
+**Measured** (`npm run eval:orchestrator`, `eval/orchestrator_benchmark.md`). 33 case files built from the 11 scenarios, clean or with a planted problem (a specialist contradicting its own measurement, or skipping its tests), each reviewed twice by Ultra with reasoning off and on:
+
+| | Reasoning off | Reasoning on |
+| --- | --- | --- |
+| Planted problems sent back to the right specialist | 61% (27/44) | 93% (41/44) |
+| Cases with a problem closed anyway | 39% (17/44) | 7% (3/44) |
+| Clean cases closed without needless follow-ups | 94% | 94% |
+| Time per review (median) | 4.6 s | 13.5 s |
+
+Paired by case: 15 handled only with reasoning, 1 only without (exact McNemar test, p = 0.0005). Code still sends back anything the orchestrator misses, so answers never depend on it, but with reasoning the agent does the oversight itself.
+
+Per question (one utility, the last live run): 19 model calls, of which intake 1, orchestrator 2, specialists 15 and writer 1.
 
 ## Tests that show each part working
 

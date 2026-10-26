@@ -1,0 +1,29 @@
+{
+  "id": "water-summer-leak/skipped",
+  "variant": "skipped",
+  "thinking": true,
+  "rep": 2,
+  "valid": true,
+  "done": false,
+  "asked": [
+    "billing"
+  ],
+  "issueSpecialists": [
+    "billing"
+  ],
+  "recall": 1,
+  "extraAsks": 0,
+  "noteAmounts": 0,
+  "noteRight": 0,
+  "closingParts": 0,
+  "closingCovered": 0,
+  "ms": 4853,
+  "tokens": 689,
+  "reasoningChars": 2308,
+  "memories": 0,
+  "note": "All major causes have supported verdicts, but billing specialist must verify the three zero-effect causes that code measured as ruled out.",
+  "reasoning": "The case file shows that all causes have been measured and verdicts given. However, there are issues: billing didn't test C3, C4, C5 itself; code measured them as ruled out. According to instructions, issues found in code (send each back to its specialist, unless it has had its follow-up). The billing specialist hasn't had a follow-up yet (only round 1). So we need to send billing back to test those causes. But note: the case file says \"No part over £1 is still open.\" However, the issues need to be addressed before closing. The billing specialist should be asked to test C3, C4, C5. But they were already measured by code as ruled out. The instruction: \"The case file lists issues code found in the specialists' work: a verdict its own measurement contradicts, or a cause the specialist never tested. Send each back to its specialist with a clear task before closing the case.\" So we must send billing back to test those causes. However, the billing specialist already did round 1. We have 2 follow-up rounds left. We can ask billing to verify those causes. But the verdicts are already ruled_out by code. The specialist may just confirm. The task: ask billing to test C3, C4, C5. But they are already ruled out. The specialist might just run their tools. We'll ask billing to test those causes. Since they are all ruled out, we can ask them to confirm. But we must give a clear task: which part of the split to look at and what to check. The parts: Days on the bill (C3), Estimated reading (C4), Credits and one-off charges (C5). All have £0.00 effect. The specialist should check those causes. We'll request billing to test C3, C4, C5. Since they are three causes, but we can ask in one request? The format allows multiple requests, but each specialist gets at most one follow-up. We can ask billing to test all three. That's one request. We'll do that. Then after that, we can close. But we have to wait for the specialist's response? Actually the simulation expects us to output requests and then the system will simulate the specialist's work. We'll output a request for billing. Then next round we'll review. But the instruction says \"Reply with only this JSON\". We'll output done: false, requests with billing task. Note: we have 2 follow-up rounds left. We'll use one now. Let's craft the task.",
+  "planted": "billing reports without testing C3, C4, C5",
+  "unexplained": [],
+  "prompt": "CASE FILE: water bill\nEarlier bill: Apr–May 2026 (2026-04-01 to 2026-05-31, 61 days, £117.15, actual reading)\nLater bill: Jun–Jul 2026 (2026-06-01 to 2026-07-31, 61 days, £178.43, actual reading)\nChange: +£61.28 [E1,E2]\nSplit of the change (exact, adds up to the change):\n- Days on the bill: +£0.00 (causes C3)\n- Weather: +£12.63 (causes C6)\n- Use beyond the weather: +£48.65 (causes C7, C8, C9)\n- Unit price: +£0.00 (causes C1)\n- Standing charge: +£0.00 (causes C2)\n- Estimated reading: +£0.00 (causes C4)\n- Credits and one-off charges: +£0.00 (causes C5)\nWeather fit: trusted.\n\nFindings (latest per cause; verdicts and £ are measured in code):\n- C1 Unit price changed: ruled_out, effect +£0.00, measured 0 against |change| ≥ 1% [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C2 Standing charge changed: ruled_out, effect +£0.00, measured 0 against |change| ≥ 0.5p a day [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C3 Bill covered more or fewer days: ruled_out, effect +£0.00, measured 0 against |change| ≥ 2 days [E1,E2] (billing, round 1)\n- C4 Estimated reading corrected: ruled_out, effect +£0.00, measured 0 against an estimate moved billed units by > 2% [E1,E2,E4] (billing, round 1)\n- C5 Credit or one-off charge: ruled_out, effect +£0.00, measured 0 against one-offs differ [E1,E2] (billing, round 1)\n- C6 Weather: supported, effect +£12.63, measured 20.6 against weather ≥ 20% of the use change, same direction, R² ≥ 0.5 [E1,E2] (weather, round 1) \"Measured with test_cause.\"\n- C7 Use changed beyond the weather: supported, effect +£48.65, measured 49.26 against use beyond the weather moves daily use by ≥ 10% [E1,E2,E4] (usage, round 1) \"Measured with test_cause.\"\n- C8 Possible leak: supported, effect +£48.65, measured 49.26 against water use beyond the weather up ≥ 15% and staying up, with no note to explain it [E1,E2,E4] (leak, round 1) \"Measured with test_cause.\"\n\nIssues found in code (send each back to its specialist, unless it has had its follow-up):\n- billing didn't test C3 (Bill covered more or fewer days) itself; code measured it as ruled out.\n- billing didn't test C4 (Estimated reading corrected) itself; code measured it as ruled out.\n- billing didn't test C5 (Credit or one-off charge) itself; code measured it as ruled out.\n\nNo part over £1 is still open.\n\nCarried over from earlier steps:\nCOMPLETED: round 1 asked billing, tariff, weather, usage, leak\nREMAINING: every part over £1 has a supported cause\nDECISIONS: C1 ruled_out, C2 ruled_out, C3 ruled_out, C4 ruled_out, C5 ruled_out, C6 supported, C7 supported, C8 supported\nCONTEXT: no open questions\n\nReview the latest findings. Close the case, or ask follow-ups (2 follow-up rounds left).\nReply with only this JSON:\n{\"done\": false, \"requests\": [{\"specialist\": \"billing\", \"task\": \"...\"}], \"note\": \"...\"}"
+}

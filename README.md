@@ -56,7 +56,7 @@ question ─► Scout guard ─► Intake agent ─► Scout: one signed contrac
 | --- | --- | --- |
 | Scout guard and contracts | Code (our Meterless Scout Intent) | Blocks injection and off-topic input; signs a contract per utility saying which bills and data each investigation may read |
 | Intake | Nemotron 3.5 Lightning | Turns the question into one request per utility and month |
-| Orchestrator, one per utility | Nemotron 3 Ultra | Plans each specialist's task, reviews the case file, asks follow-ups, closes the case |
+| Orchestrator, one per utility | Nemotron 3 Ultra, reasoning on | Plans each specialist's task, reviews the case file, sends problems back, closes the case. With reasoning it sent back 93% of planted problems against 61% without |
 | Specialists: billing, tariff, weather, usage, leak | Nemotron 3.5 Lightning | Tool loops over Zetaris queries; each tests the causes it owns; usage and leak recall household notes from H-MEM |
 | Code measurement | Code | Every verdict and £ figure; the agents choose what to look at and explain, but can't change a number |
 | Writer and combiner | Nemotron 3 Ultra | The text the household reads, with `{F1}` placeholders and `[E1]` citations only |
@@ -82,6 +82,7 @@ If Zetaris isn't set up, the agents read the same files locally and every eviden
 | `npm test` | 160 tests: bill model (every pair to the penny), Scout, the agent loop, specialists, orchestrator and critique loop, case file, H-MEM, facts, checker, confidence, adding bills, pipeline |
 | `npm run eval:answers` | The whole pipeline against the answer key: 58 of 58 checks in both full runs ([eval/results.md](eval/results.md)) |
 | `npm run eval:triage` | 25 triage questions: 25 of 25 (25 Oct) |
+| `npm run eval:orchestrator` | The orchestrator's judgement on 33 case files, reasoning off against on: 61% against 93% of planted problems sent back (p = 0.0005); [eval/orchestrator_benchmark.md](eval/orchestrator_benchmark.md) |
 | `npm run zetaris:check` | Zetaris's views against the source files, and the same verdicts on all 11 scenarios |
 | `npm run lint`, `npm run build` | Clean |
 
@@ -93,7 +94,7 @@ Sample inputs: `eval/scenarios.json` (11 bill pairs with their answer key), `eva
 | --- | --- |
 | Impact | A real question every household has; answers end in a concrete next step; [data/README.md](data/README.md) for the scenarios |
 | Technical | Code-measured causes and an exact £ split (`src/billmodel/`); 160 tests; 58 of 58 on the answer key; fallbacks for Zetaris, Nightshift and model failures |
-| Innovation | Models never write a number (placeholders plus a code checker); signed per-utility contracts scope what each agent may read; code critiques the specialists and sends work back |
+| Innovation | Models never write a number (placeholders plus a code checker); signed per-utility contracts scope what each agent may read; code critiques the specialists and sends work back; the orchestrator's reasoning measured, not assumed (93% against 61% of planted problems caught) |
 | Demo | Replay mode (no keys); the live panel shows the agents at work; [docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md) |
 | Product and UX | Phone-first page; every number has an evidence chip; confidence and limitations in plain English; add a missing bill |
 | Sponsor tech | [docs/SPONSOR-TECH.md](docs/SPONSOR-TECH.md): Zetaris as the only data path, all four Meterless engines plus Nightshift in working features, Nemotron Lightning and Ultra per agent |

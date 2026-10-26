@@ -20,6 +20,28 @@ Reading the run-1 answers found two faults the checker can't see, both fixed bef
 
 Not changed: April–May water flags a possible leak (use up 17% beyond a trusted weather fit, from the sample's garden watering on dry warm days). The key doesn't cover it; it may be a false alarm, and the answer calls a leak a pattern to check, not a fault.
 
+## The orchestrator's judgement: reasoning off against on (26 Oct 2026)
+
+`npm run eval:orchestrator` builds 33 case files in code from the 11 answer-key scenarios: each clean, with one specialist contradicting its own measurement, and with one specialist skipping its tests. They are exactly what the orchestrator sees at its first review, made by the real investigation code with fake specialists. Nemotron 3 Ultra reviewed each with its reasoning off and on, twice, through Nightshift with no earlier answers injected. Code scored every decision. Full results: [orchestrator_benchmark.md](orchestrator_benchmark.md); every decision with its reasoning: `eval/benchmark/`.
+
+| Measure | Reasoning off | Reasoning on |
+| --- | --- | --- |
+| Planted problems sent back to the right specialist | 61% (27/44) | **93% (41/44)** |
+| Cases with a problem it closed anyway | 39% (17/44) | **7% (3/44)** |
+| Clean cases closed without needless follow-ups | 94% (17/18) | 94% (17/18) |
+| £ figures in its notes that are in the case file | 99% (138/139) | 100% (83/83) |
+| Replies in the required format | 98% | 100% |
+| Time per review (median) | 4.6 s | 13.5 s |
+
+Paired by case: only reasoning on sent every problem back in 15 of the 44 reviews with problems, only reasoning off in 1 (exact McNemar test, p = 0.0005). The orchestrator now reasons by default (`ORCHESTRATOR_THINKING`); code still sends back anything it misses.
+
+Two things found on the way, both fixed before the benchmark that counts:
+
+- Nightshift keeps its own memory of past answers and injected up to three into every prompt (about 900 extra tokens a call). The orchestrator copied them word for word: two runs with different problems gave the same note. Every scope we tried (`user`, `session`, `none`) builds up its own store after a while, so each call now gets a fresh scope, and the benchmark checks that nothing was injected (0 of 132).
+- The orchestrator's prompt said code would send problems back if it didn't, and it duly left them to code. The prompt now asks it to send them back itself.
+
+A first attempt measured this through the whole pipeline (11 questions, both conditions). It was abandoned: NVIDIA rate-limited the key so heavily that questions took up to an hour and calls failed, and the memory injection above made the two conditions copy each other.
+
 ## Triage (25 Oct 2026)
 
 `npm run eval:triage` runs the 25 questions in `eval/triage_cases.json` through the real triage, with the intake agent on Nemotron 3.5 Lightning via Meterless Nightshift.

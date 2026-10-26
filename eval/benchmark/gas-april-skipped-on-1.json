@@ -1,0 +1,29 @@
+{
+  "id": "gas-april/skipped",
+  "variant": "skipped",
+  "thinking": true,
+  "rep": 1,
+  "valid": true,
+  "done": false,
+  "asked": [
+    "billing"
+  ],
+  "issueSpecialists": [
+    "billing"
+  ],
+  "recall": 1,
+  "extraAsks": 0,
+  "noteAmounts": 0,
+  "noteRight": 0,
+  "closingParts": 0,
+  "closingCovered": 0,
+  "ms": 21600,
+  "tokens": 662,
+  "reasoningChars": 1944,
+  "memories": 0,
+  "note": "Tariff and usage causes are supported and explain the large changes. Billing specialist needs to verify the three causes (C3, C4, C5) that code measured but they didn't test themselves.",
+  "reasoning": "Let me analyze the case file carefully.\n\nThe change is -£29.72 split into:\n- Days on the bill: -£1.32 (C3) - ruled_out, but issues say billing didn't test C3 itself\n- Weather: +£0.00 (C6) - inconclusive\n- Use beyond weather: -£26.90 (C7, C9) - both supported\n- Unit price: -£0.11 (C1) - supported\n- Standing charge: -£1.39 (C2) - supported\n- Estimated reading: +£0.00 (C4) - ruled_out, but issues say billing didn't test C4 itself\n- Credits: +£0.00 (C5) - ruled_out, but issues say billing didn't test C5 itself\n\nIssues found:\n1. billing didn't test C3 itself; code measured it as ruled_out\n2. billing didn't test C4 itself; code measured it as ruled_out  \n3. billing didn't test C5 itself; code measured it as ruled_out\n\nThe instructions say: \"The case file lists issues code found in the specialists' work: a verdict its own measurement contradicts, or a cause the specialist never tested. Send each back to its specialist with a clear task before closing the case.\"\n\nSo I need to send these back to billing specialist for follow-up. Each specialist gets at most one follow-up, but these are three different causes all for billing. Since they're all for the same specialist (billing), I should probably ask billing to check all three causes they didn't test.\n\nThe note says \"no part over £1 is still open\" and \"Parts over £1 whose causes were all checked and ruled out (accounted for: too small a change to count as a cause): Days on the bill.\"\n\nBut the issues say billing didn't actually test C3, C4, C5 - code measured them. So I need to ask billing to verify these.\n\nAlso, C6 Weather is inconclusive, but the weather part is £0.00 and the note says weather fit not trusted, so weather effect sits in use beyond weather. C7 is supported for the large -£26.90 part.\n\nThe case seems mostly resolved except for the billing specialist not having tested their three causes. I should ask billing to test C3, C4, C5.\n\nLet me formulate the request.",
+  "planted": "billing reports without testing C3, C4, C5",
+  "unexplained": [],
+  "prompt": "CASE FILE: gas bill\nEarlier bill: Mar 2026 (2026-03-02 to 2026-04-01, 31 days, £40.99, actual reading)\nLater bill: Apr 2026 (2026-04-02 to 2026-05-01, 30 days, £11.27, actual reading)\nChange: −£29.72 [E1,E2]\nSplit of the change (exact, adds up to the change):\n- Days on the bill: −£1.32 (causes C3)\n- Weather: +£0.00 (causes C6)\n- Use beyond the weather: −£26.90 (causes C7, C8, C9)\n- Unit price: −£0.11 (causes C1)\n- Standing charge: −£1.39 (causes C2)\n- Estimated reading: +£0.00 (causes C4)\n- Credits and one-off charges: +£0.00 (causes C5)\nWeather fit: not trusted (too few bills, or the household's pattern changed), so the weather part is 0 and any weather effect sits in use beyond the weather.\n\nFindings (latest per cause; verdicts and £ are measured in code):\n- C1 Unit price changed: supported, effect −£0.11, measured -4.23 against |change| ≥ 1% [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C2 Standing charge changed: supported, effect −£1.39, measured -4.64 against |change| ≥ 0.5p a day [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C3 Bill covered more or fewer days: ruled_out, effect −£1.32, measured -1 against |change| ≥ 2 days [E1,E2] (billing, round 1)\n- C4 Estimated reading corrected: ruled_out, effect +£0.00, measured 0 against an estimate moved billed units by > 2% [E1,E2,E4] (billing, round 1)\n- C5 Credit or one-off charge: ruled_out, effect +£0.00, measured 0 against one-offs differ [E1,E2] (billing, round 1)\n- C6 Weather: inconclusive, effect +£0.00, measured n/a against weather ≥ 20% of the use change, R² ≥ 0.5 [E1,E2] (weather, round 1) \"Measured with test_cause.\"\n- C7 Use changed beyond the weather: supported, effect −£26.90, measured -91.02 against use beyond the weather moves daily use by ≥ 10% [E1,E2,E4] (usage, round 1) \"Measured with test_cause.\"\n- C9 Switched fuel: supported, effect +£0.00, measured -91.02 against gas falls and electricity rises beyond the weather, or a note says so [E1,E2,E5,E4] (usage, round 1) \"Measured with test_cause.\"\n\nIssues found in code (send each back to its specialist, unless it has had its follow-up):\n- billing didn't test C3 (Bill covered more or fewer days) itself; code measured it as ruled out.\n- billing didn't test C4 (Estimated reading corrected) itself; code measured it as ruled out.\n- billing didn't test C5 (Credit or one-off charge) itself; code measured it as ruled out.\n\nNo part over £1 is still open.\nParts over £1 whose causes were all checked and ruled out (accounted for: too small a change to count as a cause): Days on the bill.\n\nCarried over from earlier steps:\nCOMPLETED: round 1 asked billing, tariff, weather, usage\nREMAINING: every part over £1 has a supported cause\nDECISIONS: C1 supported, C2 supported, C3 ruled_out, C4 ruled_out, C5 ruled_out, C6 inconclusive, C7 supported, C9 supported\nCONTEXT: no open questions\n\nReview the latest findings. Close the case, or ask follow-ups (2 follow-up rounds left).\nReply with only this JSON:\n{\"done\": false, \"requests\": [{\"specialist\": \"billing\", \"task\": \"...\"}], \"note\": \"...\"}"
+}

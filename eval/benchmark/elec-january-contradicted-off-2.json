@@ -1,0 +1,29 @@
+{
+  "id": "elec-january/contradicted",
+  "variant": "contradicted",
+  "thinking": false,
+  "rep": 2,
+  "valid": true,
+  "done": false,
+  "asked": [
+    "billing"
+  ],
+  "issueSpecialists": [
+    "billing"
+  ],
+  "recall": 1,
+  "extraAsks": 0,
+  "noteAmounts": 0,
+  "noteRight": 0,
+  "closingParts": 0,
+  "closingCovered": 0,
+  "ms": 8556,
+  "tokens": 138,
+  "reasoningChars": 0,
+  "memories": 0,
+  "note": "The billing specialist's finding for C3 contradicts its own measurement. The measurement supports the cause (7 days ≥ 2 days), so the verdict must be corrected before closing the case.",
+  "reasoning": "",
+  "planted": "billing claims C3 the opposite of its measurement",
+  "unexplained": [],
+  "prompt": "CASE FILE: electricity bill\nEarlier bill: Dec 2025 (2025-12-01 to 2025-12-28, 28 days, £79.94, actual reading)\nLater bill: Jan 2026 (2025-12-29 to 2026-02-01, 35 days, £110.45, actual reading)\nChange: +£30.51 [E1,E2]\nSplit of the change (exact, adds up to the change):\n- Days on the bill: +£19.98 (causes C3)\n- Weather: +£4.26 (causes C6)\n- Use beyond the weather: +£2.05 (causes C7, C8, C9)\n- Unit price: +£4.01 (causes C1)\n- Standing charge: +£0.21 (causes C2)\n- Estimated reading: +£0.00 (causes C4)\n- Credits and one-off charges: +£0.00 (causes C5)\nWeather fit: trusted.\n\nFindings (latest per cause; verdicts and £ are measured in code):\n- C1 Unit price changed: supported, effect +£4.01, measured 4.52 against |change| ≥ 1% [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C2 Standing charge changed: supported, effect +£0.21, measured 0.61 against |change| ≥ 0.5p a day [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C3 Bill covered more or fewer days: supported, effect +£19.98, measured 7 against |change| ≥ 2 days [E1,E2] (billing, round 1, agent disagreed and was overruled) \"Measured with test_cause.\"\n- C4 Estimated reading corrected: ruled_out, effect +£0.00, measured 0 against an estimate moved billed units by > 2% [E1,E2,E4] (billing, round 1) \"Measured with test_cause.\"\n- C5 Credit or one-off charge: ruled_out, effect +£0.00, measured 0 against one-offs differ [E1,E2] (billing, round 1) \"Measured with test_cause.\"\n- C6 Weather: supported, effect +£4.26, measured 67.51 against weather ≥ 20% of the use change, same direction, R² ≥ 0.5 [E1,E2] (weather, round 1) \"Measured with test_cause.\"\n- C7 Use changed beyond the weather: ruled_out, effect +£2.05, measured 2.49 against use beyond the weather moves daily use by ≥ 10% [E1,E2,E4] (usage, round 1) \"Measured with test_cause.\"\n- C9 Switched fuel: ruled_out, effect +£0.00, measured 2.03 against gas falls and electricity rises beyond the weather, or a note says so [E1,E2,E5,E4] (usage, round 1) \"Measured with test_cause.\"\n\nIssues found in code (send each back to its specialist, unless it has had its follow-up):\n- billing said C3 (Bill covered more or fewer days) was ruled out, but its measurement says supported (7 against |change| ≥ 2 days).\n\nNo part over £1 is still open.\nParts over £1 whose causes were all checked and ruled out (accounted for: too small a change to count as a cause): Use beyond the weather.\n\nCarried over from earlier steps:\nCOMPLETED: round 1 asked billing, tariff, weather, usage\nREMAINING: every part over £1 has a supported cause\nDECISIONS: C1 supported, C2 supported, C3 supported, C4 ruled_out, C5 ruled_out, C6 supported, C7 ruled_out, C9 ruled_out\nCONTEXT: no open questions\n\nReview the latest findings. Close the case, or ask follow-ups (2 follow-up rounds left).\nReply with only this JSON:\n{\"done\": false, \"requests\": [{\"specialist\": \"billing\", \"task\": \"...\"}], \"note\": \"...\"}"
+}

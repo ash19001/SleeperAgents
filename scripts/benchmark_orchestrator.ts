@@ -15,8 +15,10 @@
 // Writes eval/orchestrator_benchmark.md and eval/benchmark/*.json.
 //
 // Run: npm run eval:orchestrator [-- --repeat=2]
+//      npm run eval:orchestrator -- --rep=2     (one more repetition; the report covers every one saved)
+//      npm run eval:orchestrator -- --rescore   (rebuild the report from eval/benchmark/, no model calls)
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import type { PartId } from "../src/billmodel/decompose.ts";
 import { diligentSpecialist, fakeReply } from "../src/agent/fakes.ts";
 import { chat, deepModel, type ChatOptions, type Message } from "../src/agent/llm.ts";
@@ -90,11 +92,15 @@ function stateAtReview(inv: InvestigationResult) {
 }
 
 const near = (x: number, known: number[]) => known.some((k) => Math.abs(Math.abs(x) - Math.abs(k)) <= 0.011);
-const amounts = (text: string) => [...text.matchAll(/£\s?(\d+(?:,\d{3})*(?:\.\d{1,2})?)/g)].map((m) => Number(m[1].replace(/,/g, "")));
+// £ figures in a text, leaving out thresholds ("parts over £1").
+const amounts = (text: string) =>
+  [...text.matchAll(/(?<!(?:over|exceeds?|exceeding|under|below|above|than)\s)£\s?(\d+(?:,\d{3})*(?:\.\d{1,2})?)/gi)].map((m) => Number(m[1].replace(/,/g, "")));
+const rescore = process.argv.includes("--rescore");
+const onlyRep = Number(process.argv.find((a) => a.startsWith("--rep="))?.slice(6) ?? 0);
 
 // Build the cases.
 const cases: { id: string; scenario: Scenario; variant: Variant; messages: Message[]; inv: InvestigationResult; issueSpecialists: string[]; planted: string }[] = [];
-for (const sc of scenarios) {
+for (const sc of rescore ? [] : scenarios) {
   const clean = await caseAtFirstReview(sc, diligentSpecialist);
   cases.push({ id: `${sc.id}/clean`, scenario: sc, variant: "clean", messages: clean.messages, inv: clean.inv, issueSpecialists: [], planted: "none" });
   // Contradict the cause with the largest effect that has a definite verdict.
@@ -104,7 +110,7 @@ for (const sc of scenarios) {
   const skip = await caseAtFirstReview(sc, skipping("billing"));
   cases.push({ id: `${sc.id}/skipped`, scenario: sc, variant: "skipped", messages: skip.messages, inv: skip.inv, issueSpecialists: [...new Set(stateAtReview(skip.inv).issues.map((i) => i.specialist))], planted: "billing reports without testing C3, C4, C5" });
 }
-console.log(`Built ${cases.length} case files (${cases.filter((c) => c.issueSpecialists.length).length} with planted problems).`);
+if (!rescore) console.log(`Built ${cases.length} case files (${cases.filter((c) => c.issueSpecialists.length).length} with planted problems).`);
 const show = process.argv.find((a) => a.startsWith("--show="))?.slice(7);
 if (show) {
   console.log(cases.find((c) => c.id === show)?.messages.map((m) => `[${m.role}]\n${m.content}`).join("\n\n"));
@@ -135,7 +141,20 @@ interface Outcome {
 }
 
 const outcomes: Outcome[] = [];
-for (let rep = 1; rep <= repeat; rep++) {
+// What the report needs to know about each case.
+const caseInfo = new Map<string, { planted: string; issueSpecialists: string[]; unexplained: string[] }>(cases.map((c) => [c.id, { planted: c.planted, issueSpecialists: c.issueSpecialists, unexplained: c.inv.unexplained }]));
+// Every decision saved so far, rescored.
+function loadSaved() {
+  outcomes.length = 0;
+  for (const f of readdirSync("eval/benchmark").sort()) {
+    const j = JSON.parse(readFileSync(`eval/benchmark/${f}`, "utf8")) as Outcome & { planted: string; unexplained: string[]; prompt: string };
+    const found = amounts(j.note);
+    outcomes.push({ ...j, noteAmounts: found.length, noteRight: found.filter((x) => near(x, amounts(j.prompt))).length });
+    caseInfo.set(j.id, { planted: j.planted, issueSpecialists: j.issueSpecialists, unexplained: j.unexplained });
+  }
+}
+if (rescore) loadSaved();
+for (const rep of rescore ? [] : onlyRep ? [onlyRep] : Array.from({ length: repeat }, (_, i) => i + 1)) {
   for (const [i, c] of cases.entries()) {
     for (const thinking of (i + rep) % 2 === 0 ? [false, true] : [true, false]) {
       const trace = new Trace();
@@ -156,7 +175,8 @@ for (let rep = 1; rep <= repeat; rep++) {
       const team = new Set(c.inv.findings.map((f) => f.specialist as string));
       const asked = parsed.ok ? [...new Set(parsed.value.requests.map((r) => r.specialist.toLowerCase().trim()).filter((s) => team.has(s)))] : [];
       const note = parsed.ok ? parsed.value.note : "";
-      const known = [c.inv.change, c.inv.a.total_gbp, c.inv.b.total_gbp, ...Object.values(c.inv.parts), ...c.inv.findings.map((f) => f.effect_gbp)];
+      // A figure is right if it's in the case file Ultra was given.
+      const known = amounts(String(c.messages[1]?.content ?? ""));
       const found = amounts(note);
       const supported = new Set(c.inv.findings.filter((f) => f.verdict === "supported").map((f) => f.cause));
       const material = (Object.keys(c.inv.parts) as PartId[]).filter((p) => Math.abs(c.inv.parts[p]) >= 1 && PART_CAUSES[p].some((x) => supported.has(x)));
@@ -190,6 +210,9 @@ for (let rep = 1; rep <= repeat; rep++) {
   }
 }
 
+if (onlyRep) loadSaved();
+const reps = new Set(outcomes.map((o) => o.rep)).size;
+
 // Scores per condition.
 const of = (t: boolean) => outcomes.filter((o) => o.thinking === t);
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}% (${a}/${b})` : "–");
@@ -200,7 +223,7 @@ const median = (xs: number[]) => {
 const score = (t: boolean) => {
   const o = of(t);
   const withProblems = o.filter((x) => x.issueSpecialists.length);
-  const clean = o.filter((x) => !x.issueSpecialists.length && !cases.find((c) => c.id === x.id)!.inv.unexplained.length);
+  const clean = o.filter((x) => !x.issueSpecialists.length && !caseInfo.get(x.id)!.unexplained.length);
   const problems = withProblems.reduce((n, x) => n + x.issueSpecialists.length, 0);
   const caught = withProblems.reduce((n, x) => n + x.issueSpecialists.filter((s) => x.asked.includes(s)).length, 0);
   return {
@@ -219,11 +242,24 @@ const score = (t: boolean) => {
 };
 const off = score(false);
 const on = score(true);
+
+// Paired: the same case and repetition reviewed both ways. Exact McNemar test
+// on the cases where only one condition sent every problem back.
+const pairs = new Map<string, { off?: boolean; on?: boolean }>();
+for (const o of outcomes.filter((x) => x.issueSpecialists.length)) {
+  const p = pairs.get(`${o.id}#${o.rep}`) ?? {};
+  p[o.thinking ? "on" : "off"] = o.recall === 1;
+  pairs.set(`${o.id}#${o.rep}`, p);
+}
+const onlyOn = [...pairs.values()].filter((p) => p.on && !p.off).length;
+const onlyOff = [...pairs.values()].filter((p) => p.off && !p.on).length;
+const choose = (n: number, k: number) => Array.from({ length: k }, (_, i) => (n - k + i + 1) / (i + 1)).reduce((a, b) => a * b, 1);
+const mcnemarP = Math.min(1, 2 * Array.from({ length: Math.min(onlyOn, onlyOff) + 1 }, (_, i) => choose(onlyOn + onlyOff, i) / 2 ** (onlyOn + onlyOff)).reduce((a, b) => a + b, 0));
 const row = (label: string, k: keyof ReturnType<typeof score>) => `| ${label} | ${off[k]} | ${on[k]} |`;
 const md = [
   "# The orchestrator's judgement: reasoning off against on",
   "",
-  `Run ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC. Nemotron 3 Ultra through Meterless Nightshift (scope \`none\`: no earlier answers injected, checked per call below). ${cases.length} case files built in code from the ${scenarios.length} answer-key scenarios, each in three versions (clean; one specialist contradicting its own measurement; one specialist skipping its tests), exactly as the orchestrator sees them at its first review. Each reviewed with reasoning off and on${repeat > 1 ? `, ${repeat} times` : ""}; the order alternated. Scored in code. Script: \`scripts/benchmark_orchestrator.ts\`; every decision in \`eval/benchmark/\`.`,
+  `Run 26 Oct 2026. Nemotron 3 Ultra through Meterless Nightshift, a fresh scope per call so no earlier answers were injected (checked per call below). ${caseInfo.size} case files built in code from the ${scenarios.length} answer-key scenarios, each in three versions (clean; one specialist contradicting its own measurement; one specialist skipping its tests), exactly as the orchestrator sees them at its first review. Each reviewed with reasoning off and on${reps > 1 ? `, ${reps} times` : ""}; the order alternated. Scored in code. Script: \`scripts/benchmark_orchestrator.ts\`; every decision in \`eval/benchmark/\`.`,
   "",
   "| Measure | Reasoning off | Reasoning on |",
   "| --- | --- | --- |",
@@ -232,24 +268,26 @@ const md = [
   row("Cases with problems it closed anyway", "closedOnProblems"),
   row("Clean cases closed without follow-ups", "cleanClosed"),
   row("Follow-ups to specialists with no problem", "extra"),
-  row("£ figures in its notes that match the split", "pounds"),
-  row("Closing notes: parts over £1 covered", "covered"),
+  row("£ figures in its notes that are in the case file", "pounds"),
+  row("Closing notes naming each part over £1 by its £ figure", "covered"),
   row("Replies in the required format", "valid"),
   row("Time per review (median)", "time"),
   row("Output per review (median tokens, reasoning included)", "tokens"),
   row("Nightshift memories injected into prompts", "memories"),
   "",
+  `Paired comparison of the ${pairs.size} reviews of cases with problems: only reasoning on sent every problem back in ${onlyOn}, only reasoning off in ${onlyOff} (exact McNemar test, p = ${mcnemarP < 0.001 ? mcnemarP.toExponential(1) : mcnemarP.toFixed(3)}).`,
+  "",
   "## Every case",
   "",
   "| Case | Planted problem | Reasoning off | Reasoning on |",
   "| --- | --- | --- | --- |",
-  ...cases.map((c) => {
+  ...[...caseInfo].sort(([a], [b]) => scenarios.findIndex((s) => a.startsWith(`${s.id}/`)) - scenarios.findIndex((s) => b.startsWith(`${s.id}/`))).map(([id, c]) => {
     const show = (t: boolean) =>
       of(t)
-        .filter((o) => o.id === c.id)
+        .filter((o) => o.id === id)
         .map((o) => (!o.valid ? "invalid reply" : o.done ? "closed" : `asked ${o.asked.join(", ")}`))
         .join("; ");
-    return `| ${c.id} | ${c.issueSpecialists.length ? `${c.planted} (${c.issueSpecialists.join(", ")})` : c.inv.unexplained.length ? "none; a part is open" : "none"} | ${show(false)} | ${show(true)} |`;
+    return `| ${id} | ${c.issueSpecialists.length ? `${c.planted} (${c.issueSpecialists.join(", ")})` : c.unexplained.length ? "none; a part is open" : "none"} | ${show(false)} | ${show(true)} |`;
   }),
   "",
 ];

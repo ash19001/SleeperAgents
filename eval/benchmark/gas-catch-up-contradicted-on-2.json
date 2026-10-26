@@ -1,0 +1,32 @@
+{
+  "id": "gas-catch-up/contradicted",
+  "variant": "contradicted",
+  "thinking": true,
+  "rep": 2,
+  "valid": true,
+  "done": false,
+  "asked": [
+    "billing",
+    "usage"
+  ],
+  "issueSpecialists": [
+    "billing"
+  ],
+  "recall": 1,
+  "extraAsks": 1,
+  "noteAmounts": 1,
+  "noteRight": 1,
+  "closingParts": 0,
+  "closingCovered": 0,
+  "ms": 13534,
+  "tokens": 809,
+  "reasoningChars": 2390,
+  "memories": 0,
+  "note": "Billing must correct C4 verdict to match its measurement. Use beyond weather (+£3.03) remains open with C7 inconclusive; need conclusive verdict from usage specialist.",
+  "reasoning": "The user wants me to review the case file and decide on next steps. Let me analyze the findings and issues.\n\nKey points:\n1. The split of the change shows:\n   - Days on bill: -£5.51 (C3) - supported\n   - Weather: +£0.00 (C6) - inconclusive (not trusted)\n   - Use beyond weather: +£3.03 (C7, C8, C9) - C7 inconclusive, C9 ruled_out\n   - Unit price: +£0.01 (C1) - ruled_out\n   - Standing charge: +£0.00 (C2) - ruled_out\n   - Estimated reading: +£21.75 (C4) - supported (though billing initially said ruled_out but measurement says supported)\n   - Credits: +£0.00 (C5) - ruled_out\n\n2. Issues found: billing said C4 was ruled_out but measurement says supported. This needs to be sent back to billing specialist.\n\n3. Parts over £1 still open: \"Use beyond the weather\" at +£3.03. C7 is inconclusive, C9 ruled_out. So we need to investigate C7 further.\n\n4. The weather part is 0 because weather fit not trusted, so any weather effect sits in use beyond weather.\n\n5. C7 (Use changed beyond weather) is inconclusive with effect +£3.03. The threshold is \"use beyond the weather moves daily use by ≥ 10%\". It was measured inconclusive.\n\n6. C9 (Switched fuel) ruled_out.\n\nNow, I need to:\n- Send the billing specialist back to correct C4 verdict (they said ruled_out but measurement says supported)\n- Ask usage specialist to follow up on C7 (Use beyond weather) since it's inconclusive and over £1\n\nBut wait: each specialist gets at most one follow-up. Billing already had round 1. Usage already had round 1. So both can get one follow-up.\n\nThe issue says: \"billing said C4 (Estimated reading corrected) was ruled out, but its measurement says supported\". So I need to send billing back to fix this.\n\nAlso, \"Use beyond the weather\" part is +£3.03 and still open (C7 inconclusive). I should ask usage specialist to investigate further.\n\nLet me check: \"Each specialist gets at most one follow-up; don't ask for work that's already done.\" Both billing and usage have had round 1, so they can each get one follow-up.\n\nI should create two requests: one for billing to correct C4, one for usage to investigate C7 further.\n\nBut wait: the note says \"REMAINING: no supported cause yet for Use beyond the weather\". And \"Parts over £1 still open: Use beyond the weather.\"\n\nSo I need to ask usage specialist to check C7 more thoroughly.\n\nAlso, the billing issue must be resolved.\n\nLet me structure the JSON response.",
+  "planted": "billing claims C4 the opposite of its measurement",
+  "unexplained": [
+    "usage_other"
+  ],
+  "prompt": "CASE FILE: gas bill\nEarlier bill: Nov 2025 (2025-11-01 to 2025-11-30, 30 days, £71.76, estimated reading)\nLater bill: Dec 2025 (2025-12-01 to 2025-12-28, 28 days, £91.04, actual reading)\nChange: +£19.28 [E1,E2]\nSplit of the change (exact, adds up to the change):\n- Days on the bill: −£5.51 (causes C3)\n- Weather: +£0.00 (causes C6)\n- Use beyond the weather: +£3.03 (causes C7, C8, C9)\n- Unit price: +£0.01 (causes C1)\n- Standing charge: +£0.00 (causes C2)\n- Estimated reading: +£21.75 (causes C4)\n- Credits and one-off charges: +£0.00 (causes C5)\nWeather fit: not trusted (too few bills, or the household's pattern changed), so the weather part is 0 and any weather effect sits in use beyond the weather.\n\nFindings (latest per cause; verdicts and £ are measured in code):\n- C1 Unit price changed: ruled_out, effect +£0.01, measured 0.01 against |change| ≥ 1% [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C2 Standing charge changed: ruled_out, effect +£0.00, measured 0.01 against |change| ≥ 0.5p a day [E1,E2,E3] (tariff, round 1) \"Measured with test_cause.\"\n- C3 Bill covered more or fewer days: supported, effect −£5.51, measured -2 against |change| ≥ 2 days [E1,E2] (billing, round 1) \"Measured with test_cause.\"\n- C4 Estimated reading corrected: supported, effect +£21.75, measured 17.59 against an estimate moved billed units by > 2% [E1,E2,E4] (billing, round 1, agent disagreed and was overruled) \"Measured with test_cause.\"\n- C5 Credit or one-off charge: ruled_out, effect +£0.00, measured 0 against one-offs differ [E1,E2] (billing, round 1) \"Measured with test_cause.\"\n- C6 Weather: inconclusive, effect +£0.00, measured n/a against weather ≥ 20% of the use change, R² ≥ 0.5 [E1,E2] (weather, round 1) \"Measured with test_cause.\"\n- C7 Use changed beyond the weather: inconclusive, effect +£3.03, measured n/a against use beyond the weather moves daily use by ≥ 10% [E1,E2,E4] (usage, round 1) \"Measured with test_cause.\"\n- C9 Switched fuel: ruled_out, effect +£0.00, measured 4.47 against gas falls and electricity rises beyond the weather, or a note says so [E1,E2,E5,E4] (usage, round 1) \"Measured with test_cause.\"\n\nIssues found in code (send each back to its specialist, unless it has had its follow-up):\n- billing said C4 (Estimated reading corrected) was ruled out, but its measurement says supported (17.59 against an estimate moved billed units by > 2%).\n\nParts over £1 still open (a cause untested or inconclusive): Use beyond the weather.\n\nCarried over from earlier steps:\nCOMPLETED: round 1 asked billing, tariff, weather, usage\nREMAINING: no supported cause yet for Use beyond the weather\nDECISIONS: C1 ruled_out, C2 ruled_out, C3 supported, C4 supported, C5 ruled_out, C6 inconclusive, C7 inconclusive, C9 ruled_out\nCONTEXT: no open questions\n\nReview the latest findings. Close the case, or ask follow-ups (2 follow-up rounds left).\nReply with only this JSON:\n{\"done\": false, \"requests\": [{\"specialist\": \"billing\", \"task\": \"...\"}], \"note\": \"...\"}"
+}

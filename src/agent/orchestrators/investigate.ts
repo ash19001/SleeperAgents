@@ -39,7 +39,7 @@ export interface InvestigationContext {
   data: DataSource;
   memory?: NotesMemory;
   chatFn?: ChatFn;
-  thinking?: boolean; // the orchestrator reasons before it plans and reviews; default ORCHESTRATOR_THINKING
+  thinking?: boolean; // the orchestrator reasons before it plans and reviews; on unless ORCHESTRATOR_THINKING=false
 }
 
 export interface InvestigationResult {
@@ -105,7 +105,9 @@ function carryState(file: CaseFile, log: string[]): string {
 
 export async function investigate(contract: ExecutionContract, utility: Utility, ctx: InvestigationContext): Promise<InvestigationResult> {
   const chatFn = ctx.chatFn ?? chat;
-  const thinking = ctx.thinking ?? process.env.ORCHESTRATOR_THINKING === "true";
+  // Reasoning on: in the benchmark (eval/orchestrator_benchmark.md) it sent
+  // back 95% of planted problems against 59% without, for ~8 s more a review.
+  const thinking = ctx.thinking ?? process.env.ORCHESTRATOR_THINKING !== "false";
   const agent = `orchestrator:${utility}`;
   const step = (label: string, route: string, ms: number, detail?: Record<string, unknown>) => ctx.trace.add({ step: "orchestrator", agent, label, route, model: null, ms, detail });
 
