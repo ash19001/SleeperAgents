@@ -153,7 +153,7 @@ export function AddBillForm({ utility, period, onSaved, onCancel }: {
           Units used: <strong>{Number.isFinite(units) ? `${Math.round(units * 100) / 100} ${draft?.unit ?? ""}` : "–"}</strong>
         </span>
         <span className="flex items-center gap-1.5">
-          {adds === true ? <Check aria-hidden className="size-4 rounded-full bg-hl p-0.5 text-hl-ink" strokeWidth={3} /> : adds === false ? <X aria-hidden className="size-4 text-rise" /> : null}
+          {adds === true ? <Check aria-hidden className="size-4" strokeWidth={2.5} /> : adds === false ? <X aria-hidden className="size-4 text-rise" /> : null}
           Charges add up to <strong>{money(sum)}</strong>
           {adds === true ? ", the same as the total." : adds === false ? `, not the total of ${money(num("total_gbp"))}.` : "."}
         </span>

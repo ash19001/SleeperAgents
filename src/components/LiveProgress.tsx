@@ -54,7 +54,7 @@ export function LiveProgress({ steps }: { steps: TraceStep[] }) {
             return (
               <li key={agent} className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-x-3 border-b border-rule py-2.5">
                 {finished ? (
-                  <Check aria-hidden className="mt-0.5 size-4 rounded-full bg-hl p-0.5 text-hl-ink" strokeWidth={3} />
+                  <Check aria-hidden className="mt-0.5 size-4" strokeWidth={2.5} />
                 ) : (
                   <LoaderCircle aria-hidden className="mt-0.5 size-4 animate-spin text-ink-2 motion-reduce:animate-none" />
                 )}

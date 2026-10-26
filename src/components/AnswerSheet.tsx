@@ -51,7 +51,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
             "How sure the answer is, and what to do next",
           ].map((t) => (
             <li key={t} className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-2 text-ink-2">
-              <Check aria-hidden className="mt-1 size-4 rounded-full bg-hl p-0.5 text-hl-ink" strokeWidth={3} />
+              <Check aria-hidden className="mt-1 size-4" strokeWidth={2.5} />
               {t}
             </li>
           ))}
@@ -364,7 +364,10 @@ function Block({ id, title, aside, children }: { id: string; title: string; asid
 }
 
 const SPLIT_ROW =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b border-rule py-2 [grid-template-areas:'label_value'_'track_track'] sm:grid-cols-[minmax(8rem,10rem)_minmax(0,1fr)_5rem] sm:[grid-template-areas:'label_track_value']";
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b border-rule py-2 [grid-template-areas:'label_value'_'track_track'] sm:grid-cols-[minmax(8rem,11.5rem)_minmax(0,1fr)_5rem] sm:[grid-template-areas:'label_track_value']";
+
+// Shorter names where the ledger's label column needs them; the agents keep PART_NAMES.
+const SPLIT_LABELS: Record<string, string> = { oneoff: "Credits and one-offs" };
 
 // One £ scale for both directions: the zero line sits where the biggest rise
 // and the biggest fall leave it, so the bars use the whole track.
@@ -388,7 +391,7 @@ function SplitBlock({ answer: a }: { answer: Answer }) {
           const width = `max(2px, ${(Math.abs(c.gbp) / span) * 100}%)`;
           return (
             <div key={c.id} className={`${SPLIT_ROW} ${zero ? "text-muted" : ""}`}>
-              <span className="min-w-0 [grid-area:label]">{PART_NAMES[c.id] ?? c.id}</span>
+              <span className="min-w-0 [grid-area:label]">{SPLIT_LABELS[c.id] ?? PART_NAMES[c.id] ?? c.id}</span>
               <span aria-hidden className="relative h-3 [grid-area:track]">
                 <span style={{ left: `${axis}%` }} className="absolute -inset-y-1.5 border-l border-axis" />
                 {!zero && (
