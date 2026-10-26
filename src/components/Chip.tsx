@@ -13,10 +13,10 @@ export function Chip({ refId, answer, onOpen }: { refId: string; answer: Answer;
       onClick={() => onOpen(refId)}
       aria-label={label}
       title={label}
-      className={`relative isolate mx-[1px] inline-block px-[3px] align-[0.42em] text-[0.7rem] leading-none font-bold before:absolute before:inset-x-0 before:-inset-y-[2px] before:-z-10 before:origin-left before:rounded-[2px] before:bg-hl before:transition-transform before:duration-300 before:ease-out hover:text-hl-ink focus-visible:text-hl-ink ${
+      className={`relative isolate inline-block px-[2px] align-[0.42em] text-[0.68rem] leading-none font-semibold before:absolute before:inset-x-0 before:-inset-y-[2px] before:-z-10 before:origin-left before:rounded-[2px] before:bg-hl before:transition-transform before:duration-300 before:ease-out hover:text-hl-ink focus-visible:text-hl-ink ${
         isNote
           ? "py-[2px] text-ink before:scale-x-100 before:bg-hl-wash hover:before:bg-hl"
-          : "text-link before:scale-x-0 hover:before:scale-x-100 focus-visible:before:scale-x-100"
+          : "text-muted before:scale-x-0 hover:before:scale-x-100 focus-visible:before:scale-x-100"
       }`}
     >
       {refId}
@@ -27,5 +27,5 @@ export function Chip({ refId, answer, onOpen }: { refId: string; answer: Answer;
 // A run of citations stays on one line.
 export function Chips({ refs, answer, onOpen }: { refs: string[]; answer: Answer; onOpen: (ref: string) => void }) {
   if (!refs.length) return null;
-  return <span className="whitespace-nowrap">{refs.map((ref) => <Chip key={ref} refId={ref} answer={answer} onOpen={onOpen} />)}</span>;
+  return <span className="ml-0.5 whitespace-nowrap">{refs.map((ref) => <Chip key={ref} refId={ref} answer={answer} onOpen={onOpen} />)}</span>;
 }

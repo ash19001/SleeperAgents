@@ -66,7 +66,7 @@ export function BillsChart({ bills, selected, previewIds, onPick }: {
                     <span
                       style={{ height: pct(bill.total_gbp) }}
                       className={`w-[min(22px,72%)] rounded-t-[2px] transition-colors ${
-                        on ? "border-t-[5px] border-hl bg-bar-sel" : "bg-bar group-hover:bg-bar-hover group-focus-visible:bg-bar-hover"
+                        on ? "border-t-[6px] border-hl bg-bar-sel" : "bg-bar group-hover:bg-bar-hover group-focus-visible:bg-bar-hover"
                       }`}
                     />
                   </button>

@@ -14,7 +14,7 @@ import { refreshFeeds } from "@/data/zetaris";
 import { householdMemory } from "@/memory/hmem";
 import { getMode } from "./mode";
 import * as preview from "./preview";
-import { loadReplay, recordedQuestions, saveReplay } from "./replay";
+import { loadReplay, saveReplay } from "./replay";
 import type { AskResult, Bill, Household, Note, TraceStep, Utility } from "./types";
 
 const live = () => getMode() === "live";
@@ -55,10 +55,9 @@ export async function ask(question: string, onStep?: (step: TraceStep) => void):
   if (mode === "replay") {
     const recording = loadReplay(question, notes);
     if (recording) return recording.result;
-    const recorded = recordedQuestions();
     return {
       kind: "general",
-      message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question.${recorded.length ? ` Recorded: ${recorded.map((q) => `“${q}”`).join(", ")}.` : ""}`,
+      message: `Replay mode only has answers recorded from earlier live runs${notes.length ? " with these household notes" : ""}, and there isn't one for that question. Tap a bar or try one of the example questions.`,
     };
   }
   // Every agent step goes to the server log too: who, what, which model, the Nightshift receipt.

@@ -114,24 +114,8 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   return (
     <>
       <TopBar mode={mode} household={household} />
-      {/* Phones: bills, answer, notes. Wide screens: bills over notes on the left, the answer sheet on the right. */}
+      {/* Answer first in reading order: on phones it leads, then the bills and notes; on wide screens it sits on the right. */}
       <main className="gutter mx-auto grid max-w-[1400px] items-start gap-4 pt-4 pb-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
-        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <BillsCard
-            household={household}
-            bills={billList}
-            utility={utility}
-            onUtility={setUtility}
-            selected={selected}
-            previewIds={previewIds}
-            question={question}
-            onQuestion={setQuestion}
-            onAsk={ask}
-            examples={examples}
-            busy={busy}
-            onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
-          />
-        </div>
         <section
           ref={answerRef}
           aria-labelledby="answer-title"
@@ -148,7 +132,6 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
             mode={mode}
             bills={billList}
             onAddBill={mode === "live" ? setAdding : undefined}
-            examples={examples}
             onAsk={ask}
             lastQuestion={lastQuestion}
             utility={utility}
@@ -157,6 +140,22 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           />
           )}
         </section>
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <BillsCard
+            household={household}
+            bills={billList}
+            utility={utility}
+            onUtility={setUtility}
+            selected={selected}
+            previewIds={previewIds}
+            question={question}
+            onQuestion={setQuestion}
+            onAsk={ask}
+            examples={examples}
+            busy={busy}
+            onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
+          />
+        </div>
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
           <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
         </div>

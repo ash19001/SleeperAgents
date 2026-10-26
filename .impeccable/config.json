@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-26T12:25:37.505Z",
+        "reason": "Claude: decision-round sketch, a gitignored fixture for choosing a direction, never shipped"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-26T12:25:37.522Z",
+        "reason": "Claude: decision-round sketch, a gitignored fixture for choosing a direction, never shipped"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-26T12:25:37.539Z",
+        "reason": "Claude: decision-round sketch, a gitignored fixture for choosing a direction, never shipped"
+      }
+    ]
+  }
+}

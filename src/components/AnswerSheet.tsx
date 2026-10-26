@@ -3,7 +3,6 @@
 import { ArrowDown, ArrowRight, ArrowUp, Check, CircleQuestionMark, Database, FileText, Info, NotebookPen, ShieldCheck, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { type CSSProperties, type KeyboardEvent, type ReactNode, useState } from "react";
 import { Chips } from "./Chip";
-import { Examples } from "./Examples";
 import { LiveProgress } from "./LiveProgress";
 import { Sheet } from "./Sheet";
 import { TraceList } from "./TraceList";
@@ -18,14 +17,13 @@ export type Result = AskResult | { kind: "error"; message: string } | null;
 
 type Open = (ref: string) => void;
 
-export function AnswerContent({ result, busy, progress, mode, bills, examples, lastQuestion, utility, onUtility, onAsk, onOpen, onAddBill }: {
+export function AnswerContent({ result, busy, progress, mode, bills, lastQuestion, utility, onUtility, onAsk, onOpen, onAddBill }: {
   result: Result;
   busy: boolean;
   onAddBill?: (missing: { utility: Utility; period: string | null }) => void;
   progress?: TraceStep[];
   mode: Mode;
   bills: Bill[];
-  examples: string[];
   lastQuestion: string;
   utility: Utility;
   onUtility: (utility: Utility) => void;
@@ -44,8 +42,8 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
   }
   if (!result) {
     return (
-      <Message title="Ask about a bill" text="Tap a bar or type a question to see why that bill changed." examples={examples} onAsk={onAsk}>
-        <ul className="grid gap-2 border-y border-rule py-4 sm:grid-cols-2">
+      <Message title="Ask about a bill" text="Tap a bar or type a question to see why that bill changed. Each answer gives you:">
+        <ul className="grid gap-2 sm:grid-cols-2">
           {[
             "The change split into exact £ parts that add up to the penny",
             "Each likely cause tested: supported, ruled out or not enough data",
@@ -90,8 +88,6 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
         <Message
           title={opts.some((o) => o.question) ? "There's no bill for that date" : "Which bill do you mean?"}
           text={result.message}
-          examples={opts.length ? undefined : examples}
-          onAsk={onAsk}
           trace={result.trace}
         >
           {opts.length > 0 && (
@@ -107,9 +103,9 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
       );
     }
     case "blocked":
-      return <Message title="I can't help with that question" text={result.reason} examples={examples} onAsk={onAsk} trace={result.trace} />;
+      return <Message title="I can't help with that question" text={`${result.reason} Ask why one of your bills changed instead.`} trace={result.trace} />;
     case "general":
-      return <Message title="Ask about a bill" text={result.message} examples={examples} onAsk={onAsk} trace={result.trace} />;
+      return <Message title="Ask about a bill" text={result.message} trace={result.trace} />;
     case "triage":
       return <TriageCard result={result} bills={bills} />;
     case "no_preview":
@@ -117,8 +113,6 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
         <Message
           title="No preview answer for this bill yet"
           text="In preview mode, answers exist only for the bills marked with a dot. Once the agents are connected, every bill gets one."
-          examples={examples}
-          onAsk={onAsk}
         />
       );
     case "error":
@@ -126,17 +120,11 @@ export function AnswerContent({ result, busy, progress, mode, bills, examples, l
   }
 }
 
-function Message({ title, text, examples, onAsk, trace, children }: { title: string; text: string; examples?: string[]; onAsk?: (q: string) => void; trace?: TraceStep[]; children?: ReactNode }) {
+function Message({ title, text, trace, children }: { title: string; text: string; trace?: TraceStep[]; children?: ReactNode }) {
   return (
     <Sheet title={title} heading>
       <p className="max-w-[62ch] text-[1.05rem] text-ink-2">{text}</p>
       {children}
-      {examples && onAsk && (
-        <div className="grid gap-1">
-          <p className="text-sm font-semibold">Try one of these</p>
-          <Examples examples={examples} onAsk={onAsk} />
-        </div>
-      )}
       {trace && <TraceList steps={trace} />}
     </Sheet>
   );
@@ -376,10 +364,15 @@ function Block({ id, title, aside, children }: { id: string; title: string; asid
 }
 
 const SPLIT_ROW =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b border-rule py-2 [grid-template-areas:'label_value'_'track_track'] sm:grid-cols-[minmax(9rem,13rem)_minmax(0,1fr)_5.5rem] sm:[grid-template-areas:'label_track_value']";
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b border-rule py-2 [grid-template-areas:'label_value'_'track_track'] sm:grid-cols-[minmax(8rem,10rem)_minmax(0,1fr)_5rem] sm:[grid-template-areas:'label_track_value']";
 
+// One £ scale for both directions: the zero line sits where the biggest rise
+// and the biggest fall leave it, so the bars use the whole track.
 function SplitBlock({ answer: a }: { answer: Answer }) {
-  const max = Math.max(...a.components.map((c) => Math.abs(c.gbp)), 0.01);
+  const rise = Math.max(0, ...a.components.map((c) => c.gbp));
+  const fall = Math.max(0, ...a.components.map((c) => -c.gbp));
+  const span = rise + fall || 1;
+  const axis = (fall / span) * 100;
   const off = a.components.reduce((t, c) => t + Math.round(c.gbp * 100), 0) - Math.round(a.change_gbp * 100);
   const legend = (
     <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-[0.82rem] text-ink-2">
@@ -392,14 +385,16 @@ function SplitBlock({ answer: a }: { answer: Answer }) {
       <div className="grid border-t border-ink">
         {a.components.map((c) => {
           const zero = Math.round(c.gbp * 100) === 0;
+          const width = `max(2px, ${(Math.abs(c.gbp) / span) * 100}%)`;
           return (
             <div key={c.id} className={`${SPLIT_ROW} ${zero ? "text-muted" : ""}`}>
               <span className="min-w-0 [grid-area:label]">{PART_NAMES[c.id] ?? c.id}</span>
-              <span aria-hidden className="relative h-3 [grid-area:track] before:absolute before:-inset-y-1.5 before:left-1/2 before:border-l before:border-axis">
+              <span aria-hidden className="relative h-3 [grid-area:track]">
+                <span style={{ left: `${axis}%` }} className="absolute -inset-y-1.5 border-l border-axis" />
                 {!zero && (
                   <span
-                    style={{ width: `calc(${(Math.abs(c.gbp) / max) * 50}% - 1px)` }}
-                    className={`absolute top-0 h-3 ${c.gbp > 0 ? "left-[calc(50%+1px)] bg-rise" : "right-1/2 bg-fall"}`}
+                    style={c.gbp > 0 ? { left: `${axis}%`, width } : { right: `${100 - axis}%`, width }}
+                    className={`absolute top-0 h-3 ${c.gbp > 0 ? "bg-rise" : "bg-fall"}`}
                   />
                 )}
               </span>

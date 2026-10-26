@@ -21,7 +21,7 @@ export function TraceList({ steps, open = false, note }: { steps: TraceStep[]; o
           How this answer was made
         </span>
         <span className="text-sm text-muted">
-          {steps.length} steps · {models} model calls{receipts ? `, ${receipts} with Nightshift receipts` : ""} · {elapsed !== null ? `answered in ${fmtMs(Math.round(elapsed))}` : fmtMs(Math.round(total))}
+          {steps.length} step{steps.length === 1 ? "" : "s"} · {models} model call{models === 1 ? "" : "s"}{receipts ? `, ${receipts} with Nightshift receipts` : ""} · {elapsed !== null ? `answered in ${fmtMs(Math.round(elapsed))}` : fmtMs(Math.round(total))}
         </span>
       </summary>
       <ol className="mt-3 grid border-t border-rule">
