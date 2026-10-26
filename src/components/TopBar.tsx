@@ -1,11 +1,6 @@
 import type { Household, Mode } from "@/lib/types";
 
 const MODE_LABEL: Record<Mode, string> = { preview: "Preview", replay: "Replay", live: "Live" };
-const SAMPLE_TEXT: Record<Mode, string> = {
-  preview: "A made-up household. The answers on this page are hand-written previews of what the agents will produce, not answers from them.",
-  replay: "A made-up household. Answers were recorded from earlier runs of the agents, so the page works with the agents switched off.",
-  live: "A made-up household. Each answer comes from the agents when you ask.",
-};
 
 // The product's mark: a bill with one line highlighted.
 export function Mark({ className }: { className?: string }) {
@@ -32,19 +27,12 @@ export function TopBar({ mode, household }: { mode: Mode; household: Household }
             {household.postcode_district} {household.town} · {household.price_region.name} price region ({household.price_region.code})
             {household.water_company ? ` · Water: ${household.water_company}` : ""}
           </p>
-          <span className="ml-auto flex flex-none items-center gap-2.5">
-            <span className="text-sm text-letterhead-2">
-              <span className="sr-only">Mode: </span>
-              {MODE_LABEL[mode]}
-            </span>
-            <span className="rounded-[4px] bg-hl px-2 py-0.5 text-[0.78rem] font-bold text-hl-ink">SAMPLE</span>
+          <span className="ml-auto flex-none text-sm text-letterhead-2">
+            <span className="sr-only">Mode: </span>
+            {MODE_LABEL[mode]}
           </span>
         </div>
       </header>
-      <div role="note" className="gutter mx-auto max-w-[1400px] pt-4 text-sm text-ink-2">
-        <strong className="font-semibold text-ink">Sample data. </strong>
-        {SAMPLE_TEXT[mode]}
-      </div>
     </>
   );
 }

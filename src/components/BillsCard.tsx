@@ -3,26 +3,21 @@
 import { Plus } from "lucide-react";
 import type { KeyboardEvent } from "react";
 import { BillsChart } from "./BillsChart";
-import { Examples } from "./Examples";
-import { BUTTON, BUTTON_QUIET_SMALL, FIELD, HEADING } from "./ui";
+import { BUTTON_QUIET_SMALL, HEADING } from "./ui";
 import { fmtDate } from "@/lib/format";
 import { UTILITIES } from "@/lib/labels";
 import type { Bill, Household, Utility } from "@/lib/types";
 
 const ORDER: Utility[] = ["electricity", "gas", "water"];
 
-export function BillsCard({ household, bills, utility, onUtility, selected, previewIds, question, onQuestion, onAsk, examples, busy, onAddBill }: {
+export function BillsCard({ household, bills, utility, onUtility, selected, previewIds, onAsk, onAddBill }: {
   household: Household;
   bills: Bill[];
   utility: Utility;
   onUtility: (utility: Utility) => void;
   selected: string | null;
   previewIds: string[];
-  question: string;
-  onQuestion: (question: string) => void;
   onAsk: (question: string) => void;
-  examples: string[];
-  busy: boolean;
   onAddBill?: () => void; // live mode: add the next bill for this utility
 }) {
   const shown = bills.filter((b) => b.utility === utility);
@@ -89,29 +84,6 @@ export function BillsCard({ household, bills, utility, onUtility, selected, prev
         />
       </div>
 
-      <form
-        autoComplete="off"
-        className="grid gap-2 border-t border-rule pt-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onAsk(question);
-        }}
-      >
-        <label htmlFor="question" className="font-semibold">Ask why a bill changed</label>
-        <div className="flex gap-2">
-          <input
-            id="question"
-            name="question"
-            type="text"
-            value={question}
-            onChange={(e) => onQuestion(e.target.value)}
-            placeholder="Why did my gas bill go up in January?"
-            className={`${FIELD} h-10 min-w-0 flex-1`}
-          />
-          <button type="submit" disabled={busy} className={BUTTON}>Ask</button>
-        </div>
-        <Examples examples={examples} onAsk={onAsk} />
-      </form>
     </section>
   );
 }

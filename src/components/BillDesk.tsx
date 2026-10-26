@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { AddBillForm } from "./AddBillForm";
 import { AnswerContent, type Result } from "./AnswerSheet";
+import { AskBar } from "./AskBar";
 import { BillsCard } from "./BillsCard";
 import { EvidenceDrawer, type DrawerTarget } from "./EvidenceDrawer";
 import { NotesCard } from "./NotesCard";
@@ -10,7 +11,14 @@ import { TopBar } from "./TopBar";
 import { postJson, postStream } from "@/lib/client";
 import type { AskResult, Bill, Household, Mode, Note, TraceStep, Utility } from "@/lib/types";
 
-// The whole page: bills and notes on the left, the answer sheet on the right.
+// The one line that says the household is made up (PLAN.md rule 8), and what the answers are in this mode.
+const FOOTNOTE: Record<Mode, string> = {
+  preview: "Made-up household for the demo; the answers are hand-written previews. Prices from Octopus Energy and weather from Open-Meteo are real.",
+  replay: "Made-up household for the demo; answers recorded from earlier runs of the agents. Prices from Octopus Energy and weather from Open-Meteo are real.",
+  live: "Made-up household for the demo. Prices from Octopus Energy and weather from Open-Meteo are real.",
+};
+
+// The whole page: the ask box and the answer sheet in the main column, bills and notes beside them.
 export function BillDesk({ mode, household, bills, initialNotes, initialResult, examples, suggestedNote, previewIds }: {
   mode: Mode;
   household: Household;
@@ -114,13 +122,15 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   return (
     <>
       <TopBar mode={mode} household={household} />
-      {/* Answer first in reading order: on phones it leads, then the bills and notes; on wide screens it sits on the right. */}
-      <main className="gutter mx-auto grid max-w-[1400px] items-start gap-4 pt-4 pb-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
+      {/* The ask box and the answer lead the reading order: first on phones, the main column on wide screens. Bills and notes follow, on the left on wide screens. */}
+      <main className="gutter mx-auto grid max-w-[1400px] items-start gap-4 pt-5 pb-10 lg:pt-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-6">
+        <div className="grid min-w-0 content-start gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:gap-6">
+        <AskBar question={question} onQuestion={setQuestion} onAsk={ask} examples={examples} busy={busy} />
         <section
           ref={answerRef}
           aria-labelledby="answer-title"
           aria-busy={busy}
-          className={`min-w-0 scroll-mt-4 overflow-hidden rounded-lg border border-line bg-surface transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"} lg:col-start-2 lg:row-span-2 lg:row-start-1`}
+          className={`min-w-0 scroll-mt-4 overflow-hidden rounded-lg border border-line bg-surface transition-opacity ${mode === "live" ? "" : "aria-busy:opacity-50"}`}
         >
           {adding ? (
             <AddBillForm key={`${adding.utility}|${adding.period}`} utility={adding.utility} period={adding.period} onSaved={(id) => billSaved(id, adding.period)} onCancel={() => setAdding(null)} />
@@ -140,6 +150,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           />
           )}
         </section>
+        </div>
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <BillsCard
             household={household}
@@ -148,11 +159,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
             onUtility={setUtility}
             selected={selected}
             previewIds={previewIds}
-            question={question}
-            onQuestion={setQuestion}
             onAsk={ask}
-            examples={examples}
-            busy={busy}
             onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
           />
         </div>
@@ -165,7 +172,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
           <p className="max-w-[72ch]">
             <span className="font-semibold text-letterhead-ink">Why My Bill</span> reads the household&apos;s data through Zetaris, reasons with NVIDIA Nemotron via Meterless Nightshift, and keeps household notes in Meterless H-MEM.
           </p>
-          <p>SAMPLE household data. Prices from Octopus Energy, weather from Open-Meteo.</p>
+          <p>{FOOTNOTE[mode]}</p>
         </div>
       </footer>
       <p role="status" className="sr-only">{announcement}</p>

@@ -3,6 +3,9 @@
 export const BUTTON =
   "inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 font-semibold whitespace-nowrap text-primary-ink transition-colors hover:bg-primary-hover active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60";
 
+export const BUTTON_LARGE =
+  "inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-6 text-[1.05rem] font-bold whitespace-nowrap text-primary-ink transition-colors hover:bg-primary-hover active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60";
+
 const QUIET =
   "inline-flex items-center gap-1.5 rounded-md border border-control bg-surface font-semibold text-ink transition-colors hover:border-ink-2 hover:bg-surface-2 active:translate-y-px aria-pressed:border-primary aria-pressed:bg-select";
 export const BUTTON_QUIET = `${QUIET} h-10 px-4`;

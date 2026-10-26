@@ -2,7 +2,7 @@
 
 /* The bill, highlighted: a navy statement letterhead, white paper sheets on a
    pale blue-grey desk, and a yellow highlighter on the figures that answer
-   the question. Light by default; a navy-ground version in dark mode. */
+   the question. Light in every colour scheme. */
 :root {
   --ground: #eef1f6;
   --surface: #ffffff;
@@ -39,84 +39,6 @@
   --backdrop: rgb(11 21 48 / 0.45);
   --float: 0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18);
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ground: #0a1430;
-    --surface: #101c3c;
-    --surface-2: #16244a;
-    --ink: #eef1f8;
-    --ink-2: #c6cde0;
-    --muted: #9ea9c3;
-    --line: #22325c;
-    --rule: #1b2a51;
-    --control: #6a7aa3;
-    --grid: #1e2d55;
-    --axis: #3f507f;
-    --letterhead: #060d24;
-    --letterhead-ink: #ffffff;
-    --letterhead-2: #aab4cf;
-    --primary: #ffde3b;
-    --primary-hover: #ffe873;
-    --primary-ink: #13224a;
-    --link: #9db8ff;
-    --hl: #ffde3b;
-    --hl-ink: #13224a;
-    --hl-wash: #3d3a1c;
-    --select: #1e2f5c;
-    --bar: #5a6fa8;
-    --bar-hover: #7a8fc8;
-    --bar-sel: #ffde3b;
-    --rise: #ff9486;
-    --fall: #94b3ff;
-    --rise-wash: #3a1f28;
-    --fall-wash: #182b55;
-    --code-bg: #0b1634;
-    --tip-bg: #eef1f8;
-    --tip-ink: #0b1530;
-    --backdrop: rgb(2 6 18 / 0.65);
-    --float: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.45);
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --ground: #0a1430;
-  --surface: #101c3c;
-  --surface-2: #16244a;
-  --ink: #eef1f8;
-  --ink-2: #c6cde0;
-  --muted: #9ea9c3;
-  --line: #22325c;
-  --rule: #1b2a51;
-  --control: #6a7aa3;
-  --grid: #1e2d55;
-  --axis: #3f507f;
-  --letterhead: #060d24;
-  --letterhead-ink: #ffffff;
-  --letterhead-2: #aab4cf;
-  --primary: #ffde3b;
-  --primary-hover: #ffe873;
-  --primary-ink: #13224a;
-  --link: #9db8ff;
-  --hl: #ffde3b;
-  --hl-ink: #13224a;
-  --hl-wash: #3d3a1c;
-  --select: #1e2f5c;
-  --bar: #5a6fa8;
-  --bar-hover: #7a8fc8;
-  --bar-sel: #ffde3b;
-  --rise: #ff9486;
-  --fall: #94b3ff;
-  --rise-wash: #3a1f28;
-  --fall-wash: #182b55;
-  --code-bg: #0b1634;
-  --tip-bg: #eef1f8;
-  --tip-ink: #0b1530;
-  --backdrop: rgb(2 6 18 / 0.65);
-  --float: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.45);
-  color-scheme: dark;
 }
 
 @theme inline {

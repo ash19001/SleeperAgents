@@ -32,7 +32,7 @@ Explains household bills (electricity, gas and water), drops as well as rises, w
 ## Capabilities and Constraints
 
 - Next.js 16 App Router, Tailwind 4, lucide-react, fonts via `next/font`. Runs on port 5175. No new dependencies unless they save real time.
-- All sample data is labelled SAMPLE in the UI. This label must stay visible.
+- The household is made up. One quiet line in the page footer says so, which meets PLAN.md rule 8; at the owner's request (26 Oct 2026) there is no other sample wording on the page.
 - Numbers on screen come from code, never a model; the page must not alter, round differently or recompute figures the API returns.
 - The page shows the sponsor technology truthfully: Zetaris (data and SQL), NVIDIA Nemotron (models), Meterless Nightshift (receipts), Scout (contracts), H-MEM (notes).
 - Deadline: feature freeze 17:00 Mon 26 Oct 2026; submission by 22:00 that day.
@@ -40,7 +40,7 @@ Explains household bills (electricity, gas and water), drops as well as rises, w
 ## Brand Commitments
 
 - Name: **Why My Bill**.
-- Colours: **navy and yellow**, pinned by the owner (26 Oct 2026). How they are applied was left to the designer.
+- Colours: **navy and yellow** on a **light page**, pinned by the owner (26 Oct 2026); no dark theme.
 - Voice: plain, direct British English; short sentences; no jargon or hype.
 
 ## Evidence on Hand
@@ -56,7 +56,7 @@ Explains household bills (electricity, gas and water), drops as well as rises, w
 2. Every number is checkable: evidence is one tap from the figure it supports.
 3. Honest about uncertainty: ruled-out causes and limits are shown, not hidden.
 4. Show the agents' work without making the household read it.
-5. Sample data is always labelled as sample.
+5. The page never presents the made-up household as real: the footer says so.
 
 ## Accessibility & Inclusion
 
