@@ -38,7 +38,8 @@
   --tip-ink: #ffffff;
   --backdrop: rgb(11 21 48 / 0.45);
   --float: 0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18);
-  color-scheme: light;
+  /* "only" stops browsers repainting the page dark on their own (Chrome's auto dark mode). */
+  color-scheme: only light;
 }
 
 @theme inline {
