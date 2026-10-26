@@ -28,7 +28,7 @@ import type { Trace } from "../trace.ts";
 
 export const MAX_FOLLOW_UPS = 2;
 
-const Decision = z.object({
+export const Decision = z.object({
   done: z.boolean(),
   requests: z.array(z.object({ specialist: z.string(), task: z.string().min(3).max(600) })).max(6).default([]),
   note: z.string().max(600).default(""),

@@ -8,12 +8,13 @@
 // drops tool calls from cached replies (found 25 Oct 2026). So each call is
 // made unique with a short request tag unless the caller opts into the cache.
 //
-// Nightshift also keeps its own memory of past answers. With
-// `meterless-scope: user` it injects up to three of them into every prompt
-// (found 26 Oct 2026: ~900 extra tokens a call, and agents copied earlier
-// answers word for word). Calls use `session` scope by default, so each
-// investigation reasons only from its own evidence; household memory is the
-// app's own H-MEM, used deliberately through recall_notes.
+// Nightshift also keeps its own memory of past answers and injects up to
+// three into each prompt (found 26 Oct 2026: ~900 extra tokens a call, and
+// agents copied earlier answers word for word, across different cases).
+// `user` and `session` scope both store and inject; `none` does neither
+// (tested: identical calls in a row, nothing injected). Calls use `none`, so
+// each investigation reasons only from its own evidence; household memory is
+// the app's own H-MEM, used deliberately through recall_notes.
 
 import { randomUUID } from "node:crypto";
 import type { Trace } from "./trace.ts";
@@ -115,7 +116,7 @@ function nightshift(): Route {
     headers: {
       Authorization: `Bearer ${required("NIGHTSHIFT_TOKEN")}`,
       "meterless-app": process.env.NIGHTSHIFT_APP_ID || "why-my-bill",
-      "meterless-scope": process.env.NIGHTSHIFT_SCOPE || "session",
+      "meterless-scope": process.env.NIGHTSHIFT_SCOPE || "none",
     },
   };
 }
