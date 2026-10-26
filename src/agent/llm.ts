@@ -11,10 +11,11 @@
 // Nightshift also keeps its own memory of past answers and injects up to
 // three into each prompt (found 26 Oct 2026: ~900 extra tokens a call, and
 // agents copied earlier answers word for word, across different cases).
-// `user` and `session` scope both store and inject; `none` does neither
-// (tested: identical calls in a row, nothing injected). Calls use `none`, so
-// each investigation reasons only from its own evidence; household memory is
-// the app's own H-MEM, used deliberately through recall_notes.
+// Every scope builds up its own store a little after each reply (`user`,
+// `session` and `none` all did), so each call gets a fresh scope: its store
+// is empty and nothing is injected. Each investigation reasons only from its
+// own evidence; household memory is the app's own H-MEM, used deliberately
+// through recall_notes. NIGHTSHIFT_SCOPE=user turns Nightshift's memory back on.
 
 import { randomUUID } from "node:crypto";
 import type { Trace } from "./trace.ts";
@@ -110,13 +111,14 @@ interface Route {
 }
 
 function nightshift(): Route {
+  const scope = process.env.NIGHTSHIFT_SCOPE || `call-${randomUUID().slice(0, 12)}`;
   return {
     name: "nightshift",
     url: `${required("NIGHTSHIFT_BASE_URL")}/chat/completions`,
     headers: {
       Authorization: `Bearer ${required("NIGHTSHIFT_TOKEN")}`,
       "meterless-app": process.env.NIGHTSHIFT_APP_ID || "why-my-bill",
-      "meterless-scope": process.env.NIGHTSHIFT_SCOPE || "none",
+      "meterless-scope": scope,
     },
   };
 }
