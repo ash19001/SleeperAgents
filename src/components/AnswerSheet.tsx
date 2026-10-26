@@ -581,7 +581,7 @@ function EvidenceList({ answer: a, mode, onOpen }: { answer: Answer; mode: Mode;
     if (!causes.length) return "";
     return ` · tests ${causes.length > 3 ? `${causes.slice(0, 3).join(", ")} and ${causes.length - 3} more` : causes.join(", ")}`;
   };
-  const source = (s?: string) => (mode === "preview" ? "Preview query" : s === "local-sample" ? "Read from a SAMPLE file" : "Zetaris, read-only SQL");
+  const source = (s?: string) => (mode === "preview" ? "Preview query" : s === "local-sample" ? "Read from a local file" : "Zetaris, read-only SQL");
   const rows = [
     ...a.evidence.map((e) => ({ id: e.id, title: e.title, meta: `${source(e.source)} · ${e.rows} row${e.rows === 1 ? "" : "s"}`, Icon: Database })),
     ...a.memory.map((m) => ({ id: m.id, title: m.text, meta: "Household note, from Meterless H-MEM", Icon: NotebookPen })),

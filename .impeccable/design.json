@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T12:45:17+00:00",
+  "generatedAt": "2026-10-26T18:00:00+00:00",
   "title": "Design System: Why My Bill",
   "extensions": {
     "colorMeta": {
@@ -10,7 +10,6 @@
         "canonical": "#13224a",
         "oklch": "oklch(26.4% 0.077 265.9)",
         "cssVar": "--primary",
-        "dark": "#13224a (letterhead #060d24; primary role #ffde3b)",
         "tonalRamp": [
           "#050a19",
           "#1a233a",
@@ -28,7 +27,6 @@
         "canonical": "#22356a",
         "oklch": "oklch(34.4% 0.096 266.6)",
         "cssVar": "--primary-hover",
-        "dark": "#ffe873",
         "tonalRamp": [
           "#050a1c",
           "#18233f",
@@ -46,7 +44,6 @@
         "canonical": "#c3cbe0",
         "oklch": "oklch(84.2% 0.031 269.1)",
         "cssVar": "--letterhead-2",
-        "dark": "#aab4cf",
         "tonalRamp": [
           "#090b11",
           "#20242d",
@@ -64,7 +61,6 @@
         "canonical": "#ffde3b",
         "oklch": "oklch(90.2% 0.171 97.0)",
         "cssVar": "--hl",
-        "dark": "#ffde3b",
         "tonalRamp": [
           "#140900",
           "#322200",
@@ -82,7 +78,6 @@
         "canonical": "#fff3b0",
         "oklch": "oklch(95.8% 0.086 99.2)",
         "cssVar": "--hl-wash",
-        "dark": "#3d3a1c",
         "tonalRamp": [
           "#0f0b00",
           "#2a2403",
@@ -100,7 +95,6 @@
         "canonical": "#eef1f6",
         "oklch": "oklch(95.7% 0.007 260.7)",
         "cssVar": "--ground",
-        "dark": "#0a1430",
         "tonalRamp": [
           "#0a0b0c",
           "#232426",
@@ -118,7 +112,6 @@
         "canonical": "#ffffff",
         "oklch": "oklch(100.0% 0.000 89.9)",
         "cssVar": "--surface",
-        "dark": "#101c3c",
         "tonalRamp": [
           "#0b0b0b",
           "#242424",
@@ -136,7 +129,6 @@
         "canonical": "#f5f7fa",
         "oklch": "oklch(97.5% 0.005 258.3)",
         "cssVar": "--surface-2",
-        "dark": "#16244a",
         "tonalRamp": [
           "#0b0b0c",
           "#232425",
@@ -154,7 +146,6 @@
         "canonical": "#0b1530",
         "oklch": "oklch(20.4% 0.056 266.3)",
         "cssVar": "--ink",
-        "dark": "#eef1f8",
         "tonalRamp": [
           "#070b15",
           "#1d2434",
@@ -172,7 +163,6 @@
         "canonical": "#3c4760",
         "oklch": "oklch(39.9% 0.045 266.0)",
         "cssVar": "--ink-2",
-        "dark": "#c6cde0",
         "tonalRamp": [
           "#080b13",
           "#1e2431",
@@ -190,7 +180,6 @@
         "canonical": "#59647a",
         "oklch": "oklch(50.2% 0.038 264.2)",
         "cssVar": "--muted",
-        "dark": "#9ea9c3",
         "tonalRamp": [
           "#080b12",
           "#1f242f",
@@ -208,7 +197,6 @@
         "canonical": "#dce1ea",
         "oklch": "oklch(90.9% 0.013 262.4)",
         "cssVar": "--line",
-        "dark": "#22325c",
         "tonalRamp": [
           "#0a0b0e",
           "#222428",
@@ -226,7 +214,6 @@
         "canonical": "#e8ecf2",
         "oklch": "oklch(94.2% 0.009 258.3)",
         "cssVar": "--rule",
-        "dark": "#1b2a51",
         "tonalRamp": [
           "#0a0b0d",
           "#222427",
@@ -244,7 +231,6 @@
         "canonical": "#8792a6",
         "oklch": "oklch(65.8% 0.032 262.5)",
         "cssVar": "--control",
-        "dark": "#6a7aa3",
         "tonalRamp": [
           "#080b11",
           "#1f242d",
@@ -262,7 +248,6 @@
         "canonical": "#e3e8f0",
         "oklch": "oklch(93.0% 0.012 259.8)",
         "cssVar": "--grid",
-        "dark": "#1e2d55",
         "tonalRamp": [
           "#0a0b0d",
           "#222427",
@@ -280,7 +265,6 @@
         "canonical": "#a3adc0",
         "oklch": "oklch(74.6% 0.030 263.4)",
         "cssVar": "--axis",
-        "dark": "#3f507f",
         "tonalRamp": [
           "#080b10",
           "#20242d",
@@ -298,7 +282,6 @@
         "canonical": "#e7ecf7",
         "oklch": "oklch(94.2% 0.016 266.3)",
         "cssVar": "--select",
-        "dark": "#1e2f5c",
         "tonalRamp": [
           "#0a0b0e",
           "#222429",
@@ -316,7 +299,6 @@
         "canonical": "#2b54b8",
         "oklch": "oklch(47.7% 0.165 264.2)",
         "cssVar": "--link",
-        "dark": "#9db8ff",
         "tonalRamp": [
           "#010728",
           "#0b1f51",
@@ -334,7 +316,6 @@
         "canonical": "#7d8db3",
         "oklch": "oklch(64.5% 0.060 266.9)",
         "cssVar": "--bar",
-        "dark": "#5a6fa8",
         "tonalRamp": [
           "#070b16",
           "#1c2435",
@@ -352,7 +333,6 @@
         "canonical": "#5d6e98",
         "oklch": "oklch(54.2% 0.069 267.1)",
         "cssVar": "--bar-hover",
-        "dark": "#7a8fc8",
         "tonalRamp": [
           "#060b17",
           "#1b2338",
@@ -370,7 +350,6 @@
         "canonical": "#b42318",
         "oklch": "oklch(50.0% 0.182 29.5)",
         "cssVar": "--rise",
-        "dark": "#ff9486",
         "tonalRamp": [
           "#230000",
           "#4b0100",
@@ -388,7 +367,6 @@
         "canonical": "#fdecea",
         "oklch": "oklch(95.6% 0.019 25.6)",
         "cssVar": "--rise-wash",
-        "dark": "#3a1f28",
         "tonalRamp": [
           "#0e0a09",
           "#292221",
@@ -406,7 +384,6 @@
         "canonical": "#2b54b8",
         "oklch": "oklch(47.7% 0.165 264.2)",
         "cssVar": "--fall",
-        "dark": "#94b3ff",
         "tonalRamp": [
           "#010728",
           "#0b1f51",
@@ -424,7 +401,6 @@
         "canonical": "#e7eefb",
         "oklch": "oklch(94.8% 0.019 263.0)",
         "cssVar": "--fall-wash",
-        "dark": "#182b55",
         "tonalRamp": [
           "#090b0f",
           "#21242a",
@@ -449,6 +425,10 @@
       "figure": {
         "displayName": "Figure",
         "purpose": "The change in the field strip, always marked."
+      },
+      "ask-label": {
+        "displayName": "Ask label",
+        "purpose": "\"Ask why a bill changed\", 800 1.15rem -0.01em; carried in prose, not a frontmatter role."
       },
       "title": {
         "displayName": "Title",
@@ -479,7 +459,6 @@
       {
         "name": "float",
         "value": "0 2px 6px rgb(11 21 48 / 0.08), 0 18px 40px rgb(11 21 48 / 0.18)",
-        "dark": "0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.45)",
         "purpose": "Tooltip and evidence drawer only; nothing on the desk casts a shadow."
       },
       {
@@ -519,7 +498,7 @@
       {
         "name": "sm",
         "value": "640px",
-        "note": "sheet padding 20px to 28px; split ledger goes to one row"
+        "note": "sheet and ask box side padding 20px to 28px; split ledger goes to one row"
       },
       {
         "name": "md",
@@ -529,7 +508,7 @@
       {
         "name": "lg",
         "value": "1024px",
-        "note": "two-column desk (360px + sheet); gutter 32px; Ask another question hidden"
+        "note": "two-column desk (360px bills and notes + main column with ask box above the answer sheet); gutter 32px"
       },
       {
         "name": "xl",
@@ -537,16 +516,22 @@
         "note": "Answer tab splits into two columns"
       }
     ],
-    "themes": {
-      "dark": "prefers-color-scheme: dark unless data-theme=light, or data-theme=dark; per-token dark values in colorMeta.*.dark"
-    }
+    "colorScheme": "light only; no dark token set"
   },
   "components": [
+    {
+      "name": "Ask Box",
+      "kind": "input",
+      "refersTo": "ask-box",
+      "description": "The page's main control, top of the main column and first on phones: label, 48px field with the large Ask button, and a Try: row of example questions.",
+      "html": "<section class=\"ds-ask\"><form class=\"ds-ask-form\" onsubmit=\"return false\"><label class=\"ds-ask-label\" for=\"ds-q\">Ask why a bill changed</label><div class=\"ds-ask-row\"><input id=\"ds-q\" class=\"ds-ask-field\" placeholder=\"Why did my gas bill go up in January?\"><button class=\"ds-btn-large\">Ask</button></div><div class=\"ds-try\"><span>Try:</span><ul><li><button type=\"button\">Why did my gas bill go up in January?</button></li><li><button type=\"button\">Why was my electricity bill lower in June?</button></li></ul></div></form></section>",
+      "css": ".ds-ask { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); border: 1px solid var(--line, #dce1ea); border-radius: 8px; background: var(--surface, #fff); color: var(--ink, #0b1530); padding: 20px 28px; } .ds-ask-form { display: grid; gap: 12px; } .ds-ask-label { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; } .ds-ask-row { display: flex; gap: 8px; } .ds-ask-field { flex: 1; min-width: 0; height: 48px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font: inherit; font-size: 1.05rem; caret-color: var(--link, #2b54b8); } .ds-ask-field::placeholder { color: var(--muted, #59647a); } .ds-ask-field:focus { border-color: var(--primary, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; } .ds-btn-large { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border: 0; border-radius: 6px; background: var(--primary, #13224a); color: var(--primary-ink, #fff); font: inherit; font-size: 1.05rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-large:hover { background: var(--primary-hover, #22356a); } .ds-btn-large:active { transform: translateY(1px); } .ds-btn-large:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-try { display: flex; align-items: baseline; gap: 12px; } .ds-try span { flex: none; font-size: 14px; color: var(--muted, #59647a); } .ds-try ul { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; } .ds-try button { border: 0; background: none; padding: 2px 0; font: inherit; font-size: .92rem; text-align: left; color: var(--link, #2b54b8); text-decoration: underline transparent; text-underline-offset: .2em; cursor: pointer; } .ds-try button:hover { color: var(--ink, #0b1530); text-decoration-color: currentColor; } .ds-try button:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); }"
+    },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one solid action per area (Ask, Save note, Add bill). Navy in light, yellow in dark.",
+      "description": "The one solid action per area (Save note, Add bill); navy with a white label.",
       "html": "<button class=\"ds-btn-primary\">Ask</button>",
       "css": ".ds-btn-primary { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 6px; background: var(--primary, #13224a); color: var(--primary-ink, #fff); font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .15s; } .ds-btn-primary:hover { background: var(--primary-hover, #22356a); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-primary:disabled { opacity: .6; cursor: not-allowed; }"
     },
@@ -559,19 +544,19 @@
       "css": ".ds-btn-quiet { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, border-color .15s; } .ds-btn-quiet:hover { border-color: var(--ink-2, #3c4760); background: var(--surface-2, #f5f7fa); } .ds-btn-quiet:active { transform: translateY(1px); } .ds-btn-quiet[aria-pressed=true] { border-color: var(--primary, #13224a); background: var(--select, #e7ecf7); } .ds-btn-quiet:focus-visible { outline: 3px solid var(--hl, #ffde3b); outline-offset: 2px; box-shadow: 0 0 0 5px var(--letterhead, #13224a); } .ds-btn-quiet--sm { height: 32px; padding: 0 10px; font-size: 14px; }"
     },
     {
-      "name": "Question Field",
+      "name": "Field",
       "kind": "input",
       "refersTo": "field",
-      "description": "Paper field with a control border; primary border and flush yellow outline on focus.",
-      "html": "<input class=\"ds-field\" placeholder=\"Why did my gas bill go up?\">",
+      "description": "Paper field with a control border; primary border and flush yellow outline on focus. 40px in forms.",
+      "html": "<input class=\"ds-field\" placeholder=\"Bill total\">",
       "css": ".ds-field { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--control, #8792a6); border-radius: 6px; background: var(--surface, #fff); color: var(--ink, #0b1530); font-size: 15px; caret-color: var(--link, #2b54b8); } .ds-field::placeholder { color: var(--muted, #59647a); } .ds-field:focus { border-color: var(--primary, #13224a); outline: 3px solid var(--hl, #ffde3b); outline-offset: 0; }"
     },
     {
       "name": "Letterhead",
       "kind": "nav",
-      "description": "64px navy bar: Mark, wordmark, household line, mode, SAMPLE tag.",
-      "html": "<header class=\"ds-letterhead\"><svg viewBox=\"0 0 32 32\" width=\"40\" height=\"40\" aria-hidden=\"true\"><rect x=\"8\" y=\"5\" width=\"16\" height=\"22\" rx=\"2\" fill=\"#fff\"/><rect x=\"11\" y=\"9\" width=\"10\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"9.5\" y=\"14\" width=\"13\" height=\"5\" rx=\"1\" fill=\"#ffde3b\"/><rect x=\"11\" y=\"15.5\" width=\"8\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"11\" y=\"22\" width=\"6\" height=\"2\" rx=\"1\" fill=\"#13224a\"/></svg><span class=\"ds-wordmark\">Why My Bill</span><span class=\"ds-household\">M1 Manchester · North West England price region (G)</span><span class=\"ds-mode\">Replay</span><span class=\"ds-sample\">SAMPLE</span></header>",
-      "css": ".ds-letterhead { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 32px; background: var(--letterhead, #13224a); color: var(--letterhead-ink, #fff); } .ds-wordmark { font-size: 1.3rem; line-height: 1; font-weight: 800; letter-spacing: -0.015em; white-space: nowrap; } .ds-household { margin-left: 12px; padding-left: 16px; border-left: 1px solid rgb(255 255 255 / .2); font-size: 14px; color: var(--letterhead-2, #c3cbe0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-mode { margin-left: auto; font-size: 14px; color: var(--letterhead-2, #c3cbe0); } .ds-sample { border-radius: 4px; background: var(--hl, #ffde3b); color: var(--hl-ink, #13224a); padding: 2px 8px; font-size: .78rem; font-weight: 700; }"
+      "description": "64px navy bar: Mark, wordmark, household line, mode.",
+      "html": "<header class=\"ds-letterhead\"><svg viewBox=\"0 0 32 32\" width=\"40\" height=\"40\" aria-hidden=\"true\"><rect x=\"8\" y=\"5\" width=\"16\" height=\"22\" rx=\"2\" fill=\"#fff\"/><rect x=\"11\" y=\"9\" width=\"10\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"9.5\" y=\"14\" width=\"13\" height=\"5\" rx=\"1\" fill=\"#ffde3b\"/><rect x=\"11\" y=\"15.5\" width=\"8\" height=\"2\" rx=\"1\" fill=\"#13224a\"/><rect x=\"11\" y=\"22\" width=\"6\" height=\"2\" rx=\"1\" fill=\"#13224a\"/></svg><span class=\"ds-wordmark\">Why My Bill</span><span class=\"ds-household\">M1 Manchester · North West England price region (G)</span><span class=\"ds-mode\">Replay</span></header>",
+      "css": ".ds-letterhead { font-family: var(--font-sans, 'Libre Franklin', system-ui, sans-serif); display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 32px; background: var(--letterhead, #13224a); color: var(--letterhead-ink, #fff); } .ds-wordmark { font-size: 1.3rem; line-height: 1; font-weight: 800; letter-spacing: -0.015em; white-space: nowrap; } .ds-household { margin-left: 12px; padding-left: 16px; border-left: 1px solid rgb(255 255 255 / .2); font-size: 14px; color: var(--letterhead-2, #c3cbe0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-mode { margin-left: auto; font-size: 14px; color: var(--letterhead-2, #c3cbe0); }"
     },
     {
       "name": "Answer Sheet",
@@ -607,7 +592,7 @@
   ],
   "narrative": {
     "northStar": "The Bill, Highlighted",
-    "overview": "**Creative North Star: \"The Bill, Highlighted\"**\n\nThe screen is a supplier's \"your bill explained\" statement that the household has gone over with a highlighter. A navy letterhead runs across the top and heads each statement sheet; white paper sheets sit on a pale blue-grey desk; navy ink carries the text; and a flat yellow marker band sits behind the few figures that answer the question. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.\n\nDensity is that of a statement, not a dashboard: ruled ledger rows, a field strip of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). Dark mode is the same statement on a navy ground, with the letterhead going darker than the ground and yellow taking the primary-action role.\n\nThe world refuses the category default of an assistant chat beside KPI tiles on grey cards.",
+    "overview": "**Creative North Star: \"The Bill, Highlighted\"**\n\nThe screen is a supplier's \"your bill explained\" statement that the household has gone over with a highlighter. A navy letterhead runs across the top and heads each statement sheet; white paper sheets sit on a pale blue-grey desk; navy ink carries the text; and a flat yellow marker band sits behind the few figures that answer the question. Each highlighted figure opens the query behind it, so the highlight is both emphasis and proof.\n\nDensity is that of a statement, not a dashboard: ruled ledger rows, a field strip of From / To / Days / Change, labelled bars drawn at true length to one right edge, and plain sentences. Libre Franklin carries everything with tabular figures, so money lines up. Surfaces are flat at rest; depth appears only for things that float over the page (tooltip, evidence drawer). The page is light in every colour scheme (`color-scheme: light`); there is no dark theme.\n\nThe world refuses the category default of an assistant chat beside KPI tiles on grey cards.",
     "keyCharacteristics": [
       "Navy letterhead bar and sheet strips; white sheets on a blue-grey desk.",
       "One yellow, used as a highlighter on evidence, never as decoration.",
@@ -619,12 +604,12 @@
     "rules": [
       {
         "name": "The Yellow Rule",
-        "body": "Yellow (`highlighter-yellow`) is reserved for the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, the SAMPLE tag, focus rings and text selection. Ticks and status icons are ink, never yellow. The one sanctioned exception is dark mode, where `primary` and the selected bar resolve to yellow because navy would vanish on the navy ground; that is the dark theme's primary-action colour, not extra highlighting.",
+        "body": "Yellow (`highlighter-yellow`) is reserved for the highlighter on the figures that answer the question (the change and the two largest supported causes), the selected chart bar's cap, focus rings and text selection. Ticks and status icons are ink, never yellow, and no button, tag or label is yellow.",
         "section": "colors"
       },
       {
         "name": "The Bars Hold Rule",
-        "body": "Chart bars hold 3:1 against their panel in both themes (bar slate 3.3:1 on paper; 3.4:1 dark).",
+        "body": "Chart bars hold 3:1 against their panel (bar slate 3.3:1 on paper).",
         "section": "colors"
       },
       {
@@ -639,12 +624,12 @@
       },
       {
         "name": "The Weight Not Face Rule",
-        "body": "Emphasis inside prose is bold Libre Franklin; there is no italic, no second family, and no uppercase except the SAMPLE tag.",
+        "body": "Emphasis inside prose is bold Libre Franklin; there is no italic, no second family, and no uppercase labels.",
         "section": "typography"
       },
       {
-        "name": "The Answer First Rule",
-        "body": "The answer sheet leads the reading order on every width; below `lg` its strip carries an \"Ask another question\" control that returns focus to the question field.",
+        "name": "The Ask and Answer First Rule",
+        "body": "The ask box, then the answer sheet, lead the reading order on every width: the top of the main column on wide screens, the first two blocks on phones. The question field lives only in the ask box: no second question form in the side column, and no ask control in the sheet strip. Chart bars and note actions ask through it.",
         "section": "layout"
       },
       {
@@ -654,14 +639,15 @@
       }
     ],
     "dos": [
-      "Do keep yellow to the Yellow Rule list: evidenced figures (the change and the two largest supported causes), the selected bar's cap, SAMPLE, focus and selection.",
+      "Do keep yellow to the Yellow Rule list: evidenced figures (the change and the two largest supported causes), the selected bar's cap, focus and selection.",
       "Do make every marked figure a button that opens its evidence.",
       "Do head every sheet and drawer with the navy letterhead strip.",
       "Do draw money at true length to one scale, with signed amounts right-aligned to one edge.",
       "Do separate ledger rows with light rules under a 1px ink top rule.",
       "Do set citations as small raised reference groups in muted ink that take the highlighter swipe on hover or focus.",
-      "Do keep chart bars at 3:1 or better against their panel in both themes.",
-      "Do keep the SAMPLE tag visible in the letterhead on every width."
+      "Do keep chart bars at 3:1 or better against their panel.",
+      "Do put the ask box first: the top of the main column on wide screens and the first block on phones.",
+      "Do say the household is made up in the one footer line for the mode, and nowhere else."
     ],
     "donts": [
       "Don't colour ticks or status icons yellow; they are ink.",
@@ -669,7 +655,9 @@
       "Don't give a split chart separate scales for rises and falls, or fix the zero line at the centre.",
       "Don't put a shadow on anything that sits on the desk.",
       "Don't let rise and fall colour carry meaning without a sign.",
-      "Don't add a second typeface or uppercase labels beyond SAMPLE.",
+      "Don't add a second typeface or uppercase labels.",
+      "Don't add a dark theme or tokens keyed to `prefers-color-scheme: dark`; the page is light only.",
+      "Don't add a SAMPLE tag, badge or banner; the footer line carries it.",
       "Don't build an assistant chat beside KPI tiles on grey cards."
     ]
   }

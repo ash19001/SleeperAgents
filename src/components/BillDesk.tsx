@@ -82,7 +82,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     showAnswer();
   }
 
-  // On one-column layouts the answer sits below the bills, so bring it into view.
+  // On one-column layouts a long answer can push the sheet's top out of view, so bring it back.
   function showAnswer() {
     if (!window.matchMedia("(max-width: 1023px)").matches) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
