@@ -51,7 +51,7 @@ Why My Bill explains why a UK household's electricity, gas or water bill changed
 
 **Markovian.** The orchestrator's rounds are Markovian steps. Each step, Ultra reads the case file and the state carried from earlier steps (completed rounds, open parts, verdicts, open questions), then plans, asks follow-ups or closes the case. The state is passed with Markovian's checkpoint marker and its completion marker ends the run.
 
-**H-MEM.** Household notes ("We installed a heat pump on 15 March 2026") are H-MEM records; the usage and leak specialists recall them through H-MEM's hybrid retrieval and can cite only notes they actually recalled. After each checked answer, its supported causes are stored as findings with their evidence ids. Thumbs up or down become H-MEM feedback on the notes and findings behind the answer, and H-MEM's trust ledger records every create, read and feedback.
+**H-MEM.** Household notes ("We installed a heat pump on 15 March 2026") are H-MEM records; the usage and leak specialists recall them through H-MEM's hybrid scoring and can cite only notes they actually recalled. After each checked answer, its supported causes are stored as findings with their evidence ids, once per bill pair. Thumbs on an answer are H-MEM feedback, and they count: "Yes" raises the confidence of the notes and findings behind it; "No" lowers the findings' and flags the notes it cited for review (H-MEM's "wrong" feedback, −0.2 and a review tag), and a flagged note isn't recalled until the household keeps it. H-MEM's trust ledger records every create, read, feedback and update, and the page shows it in plain words as the memory audit under Household notes.
 
 ## NVIDIA
 

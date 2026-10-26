@@ -6,7 +6,7 @@
 // the models or Zetaris fell back along the way, the result says so.
 
 import type { DataSource } from "../data/types.ts";
-import { questionNotices, withQuestion } from "../lib/session.ts";
+import { extraBill, questionNotices, withQuestion } from "../lib/session.ts";
 import type { AskResult, Utility } from "../lib/types.ts";
 import type { HouseholdMemory } from "../memory/hmem.ts";
 import { composeAnswer } from "./answer.ts";
@@ -36,9 +36,11 @@ export function answerQuestion(question: string, opts: PipelineOptions): Promise
 
 async function answer(question: string, opts: PipelineOptions): Promise<AskResult> {
   const found = new Map<string, InvestigationResult>();
+  let bills = 0;
   const result = await triage(question, {
     ...opts,
     orchestrate: async (contract, ctx) => {
+      if (bills++) extraBill();
       const r = await runOrchestrator(contract, { ...ctx, data: opts.data, memory: opts.memory, chatFn: opts.chatFn });
       if (r.investigation) {
         found.set(contract.contractId, r.investigation);

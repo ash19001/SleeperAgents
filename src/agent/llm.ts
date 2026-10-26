@@ -140,14 +140,16 @@ function nightshift(): Route {
   };
 }
 
-// NVIDIA answers 429 when calls come too fast for the account's allowance
-// (Nightshift passes it on as a 502 naming nvidia_429). So calls
-// wait for a slot, at most LLM_RPM starts a minute and LLM_CONCURRENCY at
-// once. A 429 cools every call in the process down, not just the one that
-// got it: all calls wait out the back-off (Retry-After, at most a minute),
-// and the rate is halved for the next two minutes, so parallel agents don't
-// keep hitting the limit. A call that never reached Nightshift gives its
-// slot back.
+// NVIDIA allows this account 40 calls a minute but rejects bursts with 429:
+// on 26 Oct 2026 Nightshift's log showed 2,121 calls accepted and 4,598
+// rejected, the rejections often starting after 7 to 11 calls in ten
+// seconds. Nightshift retries each rejection four times itself before
+// passing it on as a 502 naming nvidia_429, so a burst feeds itself. So
+// calls start evenly spaced, one every 60/LLM_RPM seconds (default 30 a
+// minute: one every 2 s), at most LLM_CONCURRENCY at once. A 429 cools
+// every call in the process down: all wait out the back-off (Retry-After,
+// at most a minute), then resume one gap apart, at half the rate for the
+// next two minutes. A call that never reached Nightshift gives its slot back.
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const RECENT_429_MS = 120_000;
 let coolUntil = 0;
@@ -157,7 +159,7 @@ const rpm = () => {
   return Date.now() - last429 < RECENT_429_MS ? Math.max(4, Math.floor(base / 2)) : base;
 };
 const concurrency = () => Number(process.env.LLM_CONCURRENCY) || 4;
-const starts: number[] = [];
+const starts: number[] = []; // when recent calls started, oldest first
 let active = 0;
 
 interface CallStats {
@@ -175,7 +177,8 @@ async function slot(stats: CallStats): Promise<(refund: boolean) => void> {
       await sleep(Math.min(1000, coolUntil - now));
       continue;
     }
-    if (active < concurrency() && starts.length < rpm()) {
+    const next = (starts.at(-1) ?? -Infinity) + 60_000 / rpm(); // the earliest the next call may start
+    if (active < concurrency() && now >= next) {
       active++;
       starts.push(now);
       stats.waitedMs += now - began;
@@ -185,7 +188,7 @@ async function slot(stats: CallStats): Promise<(refund: boolean) => void> {
         if (refund && i >= 0) starts.splice(i, 1);
       };
     }
-    await sleep(starts.length >= rpm() ? Math.min(1000, 60_050 - (now - starts[0])) : 100);
+    await sleep(now < next ? Math.min(1000, next - now) : 100);
   }
 }
 

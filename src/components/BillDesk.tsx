@@ -9,7 +9,7 @@ import { EvidenceDrawer, type DrawerTarget } from "./EvidenceDrawer";
 import { NotesCard } from "./NotesCard";
 import { TopBar } from "./TopBar";
 import { postJson, postStream } from "@/lib/client";
-import type { AskResult, Bill, Household, Mode, Note, TraceStep, Utility } from "@/lib/types";
+import type { AskResult, AuditEntry, Bill, Household, Mode, Note, TraceStep, Utility } from "@/lib/types";
 
 // The one line that says the household is made up (PLAN.md rule 8), and what the answers are in this mode.
 const FOOTNOTE: Record<Mode, string> = {
@@ -19,11 +19,12 @@ const FOOTNOTE: Record<Mode, string> = {
 };
 
 // The whole page: the ask box and the answer sheet in the main column, bills and notes beside them.
-export function BillDesk({ mode, household, bills, initialNotes, initialResult, examples, suggestedNote, previewIds }: {
+export function BillDesk({ mode, household, bills, initialNotes, initialAudit, initialResult, examples, suggestedNote, previewIds }: {
   mode: Mode;
   household: Household;
   bills: Bill[];
   initialNotes: Note[];
+  initialAudit: { entries: AuditEntry[]; total: number };
   initialResult: AskResult | null;
   examples: string[];
   suggestedNote: string;
@@ -39,6 +40,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
   const [question, setQuestion] = useState(first?.question ?? "");
   const [lastQuestion, setLastQuestion] = useState(first?.question ?? "");
   const [notes, setNotes] = useState(initialNotes);
+  const [audit, setAudit] = useState(initialAudit);
   const [drawer, setDrawer] = useState<DrawerTarget>(null);
   const [announcement, setAnnouncement] = useState("");
   const answerRef = useRef<HTMLElement>(null);
@@ -62,6 +64,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     try {
       const res = mode === "live" ? await askLive(q) : await postJson<AskResult>("/api/ask", { question: q });
       setResult(res);
+      if (mode === "live") void refreshMemory(); // the answer recalled notes and saved findings
       if (res.kind === "answer") setUtility(res.answer.utility);
       if (res.kind === "answers") setUtility(res.answers[0].utility);
       if (res.kind === "no_preview") setUtility(res.utility);
@@ -113,10 +116,25 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
     await ask(period && lastQuestion ? lastQuestion : bill ? `Why did my ${bill.utility} bill change in ${bill.label}?` : lastQuestion);
   }
 
+  // Notes and the memory audit, after anything that changes them.
+  async function refreshMemory() {
+    const res = await fetch("/api/notes").catch(() => null);
+    if (!res?.ok) return;
+    const fresh = (await res.json()) as { notes: Note[]; audit: { entries: AuditEntry[]; total: number } };
+    setNotes(fresh.notes);
+    setAudit(fresh.audit);
+  }
+
   async function addNote(text: string) {
     const { note } = await postJson<{ note: Note }>("/api/note", { text });
     setNotes((all) => [...all, note]);
+    if (mode === "live") void refreshMemory();
     return note;
+  }
+
+  async function keepNote(id: string) {
+    await postJson<{ note: Note }>("/api/note/keep", { id });
+    await refreshMemory();
   }
 
   return (
@@ -149,6 +167,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
                 utility={utility}
                 onUtility={setUtility}
                 onOpen={(ref, answer) => setDrawer({ ref, answer })}
+                onMemoryChanged={mode === "live" ? refreshMemory : undefined}
               />
               )}
             </section>
@@ -166,7 +185,7 @@ export function BillDesk({ mode, household, bills, initialNotes, initialResult, 
               onAsk={ask}
               onAddBill={mode === "live" ? () => setAdding({ utility, period: null }) : undefined}
             />
-            <NotesCard notes={notes} onAdd={addNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
+            <NotesCard notes={notes} audit={audit} onAdd={addNote} onKeep={keepNote} suggestedNote={suggestedNote} lastQuestion={lastQuestion} onAsk={ask} />
           </div>
         </aside>
       </main>

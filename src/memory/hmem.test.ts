@@ -101,8 +101,44 @@ describe("the heat pump note", () => {
 
     mem.saveFindings(after);
     expect(mem.findings({ bill_a: "A-E-202603", bill_b: "A-E-202604" }).map((r) => r.tags.find((t) => /^C\d$/.test(t)))).toEqual(after.causes.filter((c) => c.verdict === "supported").map((c) => c.id));
-    expect(mem.feedback(after, true)).toBe(1 + mem.findings().length);
+    expect(mem.feedback(after, true)).toEqual({ updated: 1 + mem.findings().length, flagged: [] });
     expect(mem.audit().filter((e) => e.action === "feedback")).toHaveLength(1 + mem.findings().length);
+
+    // Asked again: the same findings aren't saved twice.
+    const count = mem.findings().length;
+    mem.saveFindings(after);
+    expect(mem.findings()).toHaveLength(count);
+  });
+
+  it("flags the notes a 'No' answer used; they aren't recalled until the household keeps them", async () => {
+    const mem = new HouseholdMemory();
+    const note = mem.addNote(PUMP);
+    const window = { utility: "electricity" as const, from: "2026-03-01", to: "2026-04-30" };
+    expect((await mem.recall("heat pump", window)).map((n) => n.id)).toEqual(["M1"]);
+
+    expect(mem.feedback({ bill_a: "A-E-202603", bill_b: "A-E-202604", memory: [note] }, false)).toEqual({ updated: 1, flagged: ["M1"] });
+    expect(mem.notes()[0]).toMatchObject({ id: "M1", flagged: true });
+    expect(await mem.recall("heat pump", window)).toEqual([]);
+
+    expect(mem.keepNote("M1").flagged).toBeUndefined();
+    expect((await mem.recall("heat pump", window)).map((n) => n.id)).toEqual(["M1"]);
+    expect(() => mem.keepNote("M9")).toThrow("There's no note M9.");
+
+    const said = mem.auditTrail().entries.map((e) => e.text);
+    expect(said.slice(0, 3)).toEqual(["M1 recalled for a question", "M1 kept after review", "M1 flagged for review: an answer that used it was marked not useful"]);
+    expect(said.at(-1)).toBe("M1 added by the household");
+  });
+
+  it("recalls notes even when saved findings outnumber them", async () => {
+    const mem = new HouseholdMemory();
+    for (let i = 1; i <= 6; i++) {
+      mem.saveFindings({ utility: "water", bill_a: `WC-${i}`, bill_b: `WC-${i + 1}`, causes: [{ id: "C8", verdict: "supported", effect_gbp: 9, evidence: ["E1"], memory: [], detail: "Possible leak: water use up beyond the weather." }] } as never);
+    }
+    mem.addNote("We fixed a leak under the kitchen sink in May 2026");
+    const notes = await mem.recall("leak water use", { utility: "water", from: "2026-04-01", to: "2026-07-31" });
+    expect(notes.map((n) => n.id)).toEqual(["M1"]);
+    expect(mem.audit().filter((e) => e.action === "read").map((e) => e.memoryId)).toEqual(["mem-7"]); // only the note is read
+    expect(mem.auditTrail().entries.map((e) => e.text)).toContain("Finding saved: Possible leak, water WC-1 → WC-2");
   });
 
   it("refuses a note id the agent didn't recall", async () => {

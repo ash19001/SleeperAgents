@@ -17,7 +17,7 @@ export type Result = AskResult | { kind: "error"; message: string } | null;
 
 type Open = (ref: string) => void;
 
-export function AnswerContent({ result, busy, progress, mode, bills, lastQuestion, utility, onUtility, onAsk, onOpen, onAddBill }: {
+export function AnswerContent({ result, busy, progress, mode, bills, lastQuestion, utility, onUtility, onAsk, onOpen, onAddBill, onMemoryChanged }: {
   result: Result;
   busy: boolean;
   onAddBill?: (missing: { utility: Utility; period: string | null }) => void;
@@ -29,6 +29,7 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
   onUtility: (utility: Utility) => void;
   onAsk: (question: string) => void;
   onOpen: (ref: string, answer: Answer) => void;
+  onMemoryChanged?: () => void; // feedback changed the household memory (live mode)
 }) {
   // Live answers take a while, so show the agents at work rather than fade the last answer.
   if (busy && mode === "live" && progress) return <LiveProgress steps={progress} />;
@@ -63,10 +64,10 @@ export function AnswerContent({ result, busy, progress, mode, bills, lastQuestio
     case "answer": {
       const a = result.answer;
       // A new key per answer resets the tabs and the feedback buttons.
-      return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} notices={result.notices} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} />;
+      return <AnswerView key={`${a.bill_b}|${a.question}|${a.memory.length}`} answer={a} notices={result.notices} mode={mode} bills={bills} onOpen={(ref) => onOpen(ref, a)} onMemoryChanged={onMemoryChanged} />;
     }
     case "answers":
-      return <AnswersView key={`${result.question}|${result.answers.map((a) => a.bill_b).join()}`} result={result} mode={mode} bills={bills} utility={utility} onUtility={onUtility} onOpen={onOpen} />;
+      return <AnswersView key={`${result.question}|${result.answers.map((a) => a.bill_b).join()}`} result={result} mode={mode} bills={bills} utility={utility} onUtility={onUtility} onOpen={onOpen} onMemoryChanged={onMemoryChanged} />;
     case "clarify": {
       const opts = result.options ?? [];
       const missing = result.missing;
@@ -151,13 +152,14 @@ type AnswersResult = Extract<AskResult, { kind: "answers" }>;
 
 // Two or more utilities: the combiner's summary, then one utility at a time,
 // chosen here or with the bills tabs. The trace covers the whole question.
-function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
+function AnswersView({ result, mode, bills, utility, onUtility, onOpen, onMemoryChanged }: {
   result: AnswersResult;
   mode: Mode;
   bills: Bill[];
   utility: Utility;
   onUtility: (u: Utility) => void;
   onOpen: (ref: string, answer: Answer) => void;
+  onMemoryChanged?: () => void;
 }) {
   // The summary's {F#} come from its own facts; it has no citations.
   const summary = { ...result.answers[0], facts: result.summary_facts, evidence: [], memory: [] };
@@ -189,18 +191,18 @@ function AnswersView({ result, mode, bills, utility, onUtility, onOpen }: {
           );
         })}
       </div>
-      <AnswerBody key={current.utility} answer={current} mode={mode} bills={bills} trace={result.trace} onOpen={(ref) => onOpen(ref, current)} />
+      <AnswerBody key={current.utility} answer={current} mode={mode} bills={bills} trace={result.trace} onOpen={(ref) => onOpen(ref, current)} onMemoryChanged={onMemoryChanged} />
     </Sheet>
   );
 }
 
-function AnswerView({ answer: a, notices, mode, bills, onOpen }: { answer: Answer; notices?: string[]; mode: Mode; bills: Bill[]; onOpen: Open }) {
+function AnswerView({ answer: a, notices, mode, bills, onOpen, onMemoryChanged }: { answer: Answer; notices?: string[]; mode: Mode; bills: Bill[]; onOpen: Open; onMemoryChanged?: () => void }) {
   const A = bills.find((b) => b.bill_id === a.bill_a);
   const B = bills.find((b) => b.bill_id === a.bill_b);
   return (
     <Sheet title={a.question} meta={[`Your ${UTILITIES[a.utility].name.toLowerCase()} bill, ${A?.label ?? a.bill_a} → ${B?.label ?? a.bill_b}`, checkedShort(a)].filter(Boolean).join(" · ")}>
       <Notices notices={notices} />
-      <AnswerBody answer={a} mode={mode} bills={bills} trace={a.trace} onOpen={onOpen} />
+      <AnswerBody answer={a} mode={mode} bills={bills} trace={a.trace} onOpen={onOpen} onMemoryChanged={onMemoryChanged} />
     </Sheet>
   );
 }
@@ -213,7 +215,7 @@ const TABS = [
 type Tab = (typeof TABS)[number][0];
 
 // One utility's answer: the bill pair, the short answer, then the detail in tabs.
-function AnswerBody({ answer: a, mode, bills, trace, onOpen }: { answer: Answer; mode: Mode; bills: Bill[]; trace: TraceStep[]; onOpen: Open }) {
+function AnswerBody({ answer: a, mode, bills, trace, onOpen, onMemoryChanged }: { answer: Answer; mode: Mode; bills: Bill[]; trace: TraceStep[]; onOpen: Open; onMemoryChanged?: () => void }) {
   const [tab, setTab] = useState<Tab>("answer");
   const marked = markedFacts(a);
   const id = (t: Tab) => `${a.utility}-${t}`;
@@ -268,7 +270,7 @@ function AnswerBody({ answer: a, mode, bills, trace, onOpen }: { answer: Answer;
                 <div className="xl:col-start-1 xl:row-start-3"><SureBlock answer={a} /></div>
               </div>
               <Checked answer={a} />
-              <Feedback answer={a} />
+              <Feedback answer={a} onMemoryChanged={onMemoryChanged} />
             </>
           )}
           {tab === "agents" && (
@@ -632,15 +634,27 @@ function EvidenceList({ answer: a, mode, onOpen }: { answer: Answer; mode: Mode;
   );
 }
 
-function Feedback({ answer }: { answer: Answer }) {
+// Thumbs on the answer, kept in the household memory (live mode). "No"
+// flags the notes the answer used, so they aren't used again until kept.
+function Feedback({ answer, onMemoryChanged }: { answer: Answer; onMemoryChanged?: () => void }) {
   const [rating, setRating] = useState<"helpful" | "not_helpful" | null>(null);
   const [status, setStatus] = useState("");
 
   async function send(value: "helpful" | "not_helpful") {
     setRating(value);
     try {
-      const res = await postJson<{ stored: boolean }>("/api/feedback", { question: answer.question, bill_a: answer.bill_a, bill_b: answer.bill_b, rating: value, memory: answer.memory.map((n) => n.id) });
-      setStatus(res.stored ? "Thanks. Your feedback is saved in the household memory." : "Thanks. Feedback is only saved in live mode.");
+      const res = await postJson<{ stored: boolean; flagged?: string[] }>("/api/feedback", { question: answer.question, bill_a: answer.bill_a, bill_b: answer.bill_b, rating: value, memory: answer.memory.map((n) => n.id) });
+      const flagged = res.flagged ?? [];
+      setStatus(
+        !res.stored
+          ? "Thanks. Feedback is only saved in live mode."
+          : flagged.length
+            ? `Thanks. ${flagged.join(" and ")} ${flagged.length === 1 ? "is" : "are"} flagged for review: answers won't use ${flagged.length === 1 ? "it" : "them"} until you keep ${flagged.length === 1 ? "it" : "them"} under Household notes.`
+            : value === "helpful"
+              ? "Thanks. The household memory now trusts what this answer found a little more."
+              : "Thanks. The household memory now trusts what this answer found a little less.",
+      );
+      if (res.stored) onMemoryChanged?.();
     } catch (err) {
       setStatus(`Couldn't save feedback: ${(err as Error).message}`);
     }

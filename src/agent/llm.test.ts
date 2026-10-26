@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { currentQuestion, questionNotices, withQuestion } from "../lib/session.ts";
+import { currentQuestion, extraBill, questionNotices, withQuestion } from "../lib/session.ts";
 import { chat } from "./llm.ts";
 import { Trace } from "./trace.ts";
 
@@ -40,7 +40,7 @@ describe("chat, within one question", () => {
       await new Promise((r) => setTimeout(r, 5));
       await expect(chat(ask())).rejects.toThrow(/time limit/);
       expect(currentQuestion()?.models?.reason).toBe("time");
-      expect(questionNotices(true)[0]).toMatch(/took longer than the 4-minute limit/);
+      expect(questionNotices(true)[0]).toMatch(/^The AI models couldn't finish this answer \(they took longer than the/);
     }, 1);
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -54,8 +54,35 @@ describe("chat, within one question", () => {
     expect(Date.now() - started).toBeLessThan(2000);
   });
 
+  it("spaces calls evenly, even when they're asked for at once", async () => {
+    vi.stubEnv("LLM_RPM", "600"); // one every 100 ms
+    const at: number[] = [];
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      at.push(Date.now());
+      return Response.json({ choices: [{ message: { role: "assistant", content: "{}" } }] });
+    }));
+    await Promise.all([chat(ask()), chat(ask()), chat(ask())]);
+    expect(at).toHaveLength(3);
+    expect(at[1] - at[0]).toBeGreaterThanOrEqual(95);
+    expect(at[2] - at[1]).toBeGreaterThanOrEqual(95);
+  });
+
+  it("gives a question about more bills more time, and says how long", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    await withQuestion(async () => {
+      const q = currentQuestion()!;
+      expect(q.deadline - q.started).toBe(240_000);
+      extraBill();
+      expect(q.deadline - q.started).toBe(360_000);
+      q.models = { reason: "time", why: "out of time" };
+      expect(questionNotices(true)[0]).toMatch(/took longer than the 6-minute limit/);
+      await expect(chat(ask())).rejects.toThrow("Not sent: the question's time limit was reached.");
+    }, 240_000);
+  });
+
   // Last: the 429 cools every later call in this file down.
   it("doesn't wait for a retry that would pass the time limit", async () => {
+    vi.stubEnv("LLM_RPM", "600");
     const fetch = vi.fn(async () => new Response("Too Many Requests", { status: 429, headers: { "retry-after": "120" } }));
     vi.stubGlobal("fetch", fetch);
     const started = Date.now();

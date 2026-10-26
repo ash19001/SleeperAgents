@@ -82,6 +82,13 @@ export interface Note {
   id: string;
   text: string;
   created: string;
+  flagged?: boolean; // flagged for review after an answer that used it was marked not useful; not used until kept
+}
+
+// One line of the household memory's audit (H-MEM's trust ledger), in plain words.
+export interface AuditEntry {
+  at: string;
+  text: string;
 }
 
 // One step in how the agents worked a case out, for the page.

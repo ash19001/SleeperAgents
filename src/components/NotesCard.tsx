@@ -1,20 +1,35 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { BUTTON, BUTTON_QUIET, BUTTON_QUIET_SMALL, FIELD, HEADING } from "./ui";
-import { fmtDate } from "@/lib/format";
-import type { Note } from "@/lib/types";
+import { fmtDate, fmtDateTime } from "@/lib/format";
+import type { AuditEntry, Note } from "@/lib/types";
 
-// Household notes explain what bills can't show. Answers recall them from H-MEM and cite them as M#.
-export function NotesCard({ notes, onAdd, suggestedNote, lastQuestion, onAsk }: {
+// Household notes explain what bills can't show. Answers recall them from
+// H-MEM and cite them as M#. A note flagged for review (an answer that used
+// it was marked not useful) isn't used until the household keeps it. Under
+// the notes, H-MEM's trust ledger as the memory audit (live mode).
+export function NotesCard({ notes, audit, onAdd, onKeep, suggestedNote, lastQuestion, onAsk }: {
   notes: Note[];
+  audit: { entries: AuditEntry[]; total: number };
   onAdd: (text: string) => Promise<Note>;
+  onKeep: (id: string) => Promise<void>;
   suggestedNote: string;
   lastQuestion: string;
   onAsk: (question: string) => void;
 }) {
   const [text, setText] = useState("");
   const [status, setStatus] = useState<{ message: string; askAgain: boolean } | null>(null);
+
+  async function keep(id: string) {
+    try {
+      await onKeep(id);
+      setStatus({ message: `Kept ${id}: answers use it again.`, askAgain: Boolean(lastQuestion) });
+    } catch (err) {
+      setStatus({ message: `Couldn't keep ${id}: ${(err as Error).message}`, askAgain: false });
+    }
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -45,8 +60,15 @@ export function NotesCard({ notes, onAdd, suggestedNote, lastQuestion, onAsk }: 
           notes.map((n) => (
             <li key={n.id} className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-2.5 gap-y-0.5 border-t border-rule py-2.5">
               <span className="rounded-[3px] bg-hl-wash px-1 text-[0.78rem] font-bold text-ink">{n.id}</span>
-              <span>{n.text}</span>
+              <span className={n.flagged ? "text-ink-2" : undefined}>{n.text}</span>
               <span className="col-start-2 text-sm text-muted">Added {fmtDate(n.created)}</span>
+              {n.flagged && (
+                <span className="col-start-2 mt-1 flex flex-wrap items-center gap-2 text-sm">
+                  <span className="rounded-[4px] bg-rise-wash px-1.5 py-px font-semibold text-rise">Flagged for review</span>
+                  <span className="text-ink-2">Answers don&apos;t use it until you keep it.</span>
+                  <button type="button" className={BUTTON_QUIET_SMALL} onClick={() => keep(n.id)}>Keep {n.id}</button>
+                </span>
+              )}
             </li>
           ))
         ) : (
@@ -87,6 +109,27 @@ export function NotesCard({ notes, onAdd, suggestedNote, lastQuestion, onAsk }: 
           )}
         </div>
       </form>
+
+      {audit.total > 0 && (
+        <details className="group border-t border-rule pt-3">
+          <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-3 [&::-webkit-details-marker]:hidden">
+            <span className="inline-flex items-center gap-1.5 font-semibold">
+              <ChevronRight aria-hidden className="size-4 transition-transform group-open:rotate-90" strokeWidth={2.5} />
+              Memory audit
+            </span>
+            <span className="text-sm text-muted">{audit.total} entr{audit.total === 1 ? "y" : "ies"} in H-MEM&apos;s ledger</span>
+          </summary>
+          <ol className="mt-2 grid">
+            {audit.entries.map((e, i) => (
+              <li key={`${e.at}|${i}`} className="grid gap-0.5 border-t border-rule py-2 text-sm">
+                <span className="text-ink">{e.text}</span>
+                <span className="text-muted">{fmtDateTime(e.at)}</span>
+              </li>
+            ))}
+          </ol>
+          {audit.total > audit.entries.length && <p className="pt-2 text-sm text-muted">Showing the latest {audit.entries.length}.</p>}
+        </details>
+      )}
     </section>
   );
 }

@@ -71,15 +71,15 @@ Needs Docker with the hackathon's Zetaris images running locally (UI on port 300
 1. `npm ci`, then copy `.env.example` to `.env.local` and fill in the Zetaris org ID and API key, the Nightshift token, and `SCOUT_SECRET` (`openssl rand -hex 32`). Set `WHYBILL_MODE=live`.
 2. `npm run dev` (port 5175; Zetaris fetches the SAMPLE supplier feeds from it).
 3. `npm run zetaris:setup` shows what it will create; `npm run zetaris:setup -- --apply` registers the sources and views in Zetaris; `npm run zetaris:check` confirms Zetaris matches the files.
-4. Open http://localhost:5175 and ask. A question takes 20 to 60 s normally, longer if NVIDIA rate-limits the key; the page shows each agent at work meanwhile, and the server log prints every step with its model and receipt.
+4. Open http://localhost:5175 and ask. A question takes 20 to 60 s normally, longer if NVIDIA rate-limits the key; the page shows each agent at work meanwhile, and the server log prints every step with its model, receipt and any rate-limit waits. Thumbs on an answer go to H-MEM: "No" flags the household notes it used, and answers leave them out until you keep them; the memory audit under Household notes shows every change.
 
-If Zetaris isn't set up or stops answering, the agents read the same files locally (Zetaris is tried again a minute later) and every evidence record says so. If Nightshift is down, the intake falls back to keywords, code settles every cause, and the answer uses a checked template; once Nightshift fails, the rest of that question sends no more model calls. Each question has a time limit (`QUESTION_TIME_LIMIT_S`, 4 minutes by default): past it, code finishes the answer. Whenever any of this happens, a note at the top of the answer says what fell back and why, and that answer isn't saved for replay.
+If Zetaris isn't set up or stops answering, the agents read the same files locally (Zetaris is tried again a minute later) and every evidence record says so. If Nightshift is down, the intake falls back to keywords, code settles every cause, and the answer uses a checked template; once Nightshift fails, the rest of that question sends no more model calls. Each question has a time limit (`QUESTION_TIME_LIMIT_S`, 4 minutes for one bill, 2 more for each further bill): past it, code finishes the answer. Whenever any of this happens, a note at the top of the answer says what fell back and why, and that answer isn't saved for replay. Model calls are spaced evenly (`LLM_RPM`, 30 a minute) because NVIDIA rejects bursts even under the account's 40 a minute.
 
 ## Checks
 
 | Command | What it shows |
 | --- | --- |
-| `npm test` | 170 tests: bill model (every pair to the penny), Scout, model calls (time limit, Nightshift down), data source fallback, the agent loop, specialists, orchestrator and critique loop, case file, H-MEM, facts, checker, confidence, adding bills, pipeline |
+| `npm test` | 174 tests: bill model (every pair to the penny), Scout, model calls (time limit, Nightshift down), data source fallback, the agent loop, specialists, orchestrator and critique loop, case file, H-MEM, facts, checker, confidence, adding bills, pipeline |
 | `npm run eval:answers` | The whole pipeline against the answer key: 58 of 58 checks in both full runs ([eval/results.md](eval/results.md)) |
 | `npm run eval:triage` | 25 triage questions: 25 of 25 (25 Oct) |
 | `npm run eval:orchestrator` | The orchestrator's judgement on 33 case files, reasoning off against on: 61% against 93% of planted problems sent back (p = 0.0005); [eval/orchestrator_benchmark.md](eval/orchestrator_benchmark.md) |
@@ -93,7 +93,7 @@ Sample inputs: `eval/scenarios.json` (11 bill pairs with their answer key), `eva
 | Criterion | Where to look |
 | --- | --- |
 | Impact | A real question every household has; answers end in a concrete next step; [data/README.md](data/README.md) for the scenarios |
-| Technical | Code-measured causes and an exact £ split (`src/billmodel/`); 170 tests; 58 of 58 on the answer key; fallbacks for Zetaris, Nightshift and model failures |
+| Technical | Code-measured causes and an exact £ split (`src/billmodel/`); 174 tests; 58 of 58 on the answer key; fallbacks for Zetaris, Nightshift and model failures |
 | Innovation | Models never write a number (placeholders plus a code checker); signed per-utility contracts scope what each agent may read; code critiques the specialists and sends work back; the orchestrator's reasoning measured, not assumed (93% against 61% of planted problems caught) |
 | Demo | Replay mode (no keys); the live panel shows the agents at work; [docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md) |
 | Product and UX | Phone-first page; every number has an evidence chip; confidence and limitations in plain English; add a missing bill |
