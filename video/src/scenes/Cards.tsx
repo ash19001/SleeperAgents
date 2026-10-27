@@ -199,24 +199,25 @@ const SOURCES: { icon: React.ElementType; name: string; kind: string }[] = [
 ];
 export const ZETARIS_FRAMES = 450;
 
-// Camera over the Zetaris diagram (its own 1664 x 680 space, placed at 128, 50
-// in an 1920 x 880 viewport): the sources, then Zetaris, then the evidence and
-// the rule, then the whole picture.
+// Camera over the Zetaris diagram (its own 1664 x 680 space, placed at 128, 80
+// in a viewport that fills the page below the headline): the sources, then
+// Zetaris, then the evidence and the rule, then the whole picture.
+const ZVIEW = { top: 170, height: 1080 - 116 - 170 }; // below the letterhead and headline
 const ZSHOTS: { at: number; r: Rect }[] = [
   { at: 0, r: [-20, 40, 560, 690] },
   { at: 112, r: [470, 90, 1100, 600] },
   { at: 192, r: [1120, 20, 1690, 690] },
-  { at: 380, r: [-88, 0, 1752, 780] },
+  { at: 380, r: [-88, -40, 1752, 734] },
 ];
 const zcam = (frame: number) => {
-  // The diagram point at a shot's centre lands mid-viewport (960, 440).
-  const fit = ([x0, y0, x1, y1]: Rect) => ({ z: Math.min(1840 / (x1 - x0), 860 / (y1 - y0), 1.45), cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 });
+  // The diagram point at a shot's centre lands mid-viewport.
+  const fit = ([x0, y0, x1, y1]: Rect) => ({ z: Math.min(1840 / (x1 - x0), (ZVIEW.height - 20) / (y1 - y0), 1.45), cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 });
   let k = 0;
   ZSHOTS.forEach((sh, i) => frame >= sh.at && (k = i));
   const a = fit(ZSHOTS[Math.max(0, k - 1)].r), b = fit(ZSHOTS[k].r);
   const p = k ? interpolate(frame, [ZSHOTS[k].at, ZSHOTS[k].at + 24], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: INOUT }) : 1;
   const z = a.z + (b.z - a.z) * p, cx = a.cx + (b.cx - a.cx) * p, cy = a.cy + (b.cy - a.cy) * p;
-  return `translate(${960 - 128 - cx * z}px, ${440 - 50 - cy * z}px) scale(${z})`;
+  return `translate(${960 - 128 - cx * z}px, ${ZVIEW.height / 2 - 80 - cy * z}px) scale(${z})`;
 };
 
 export const Zetaris: React.FC = () => {
@@ -233,8 +234,8 @@ export const Zetaris: React.FC = () => {
           <H1 size={76}>Zetaris is the only way the agents see data.</H1>
         </Rise>
       </div>
-      <div style={{ position: "absolute", left: 0, top: 200, width: 1920, height: 880, overflow: "hidden" }}>
-      <div style={{ position: "absolute", left: 128, top: 50, width: 1664, height: 680, transformOrigin: "0 0", transform: zcam(frame) }}>
+      <div style={{ position: "absolute", left: 0, top: ZVIEW.top, width: 1920, height: ZVIEW.height, overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 128, top: 80, width: 1664, height: 680, transformOrigin: "0 0", transform: zcam(frame) }}>
         <svg width={1664} height={680} style={{ position: "absolute", inset: 0 }}>
           {SOURCES.map((_, i) => {
             const p = ramp(frame, 104 + i * 4, 134 + i * 4, Easing.inOut(Easing.quad));
