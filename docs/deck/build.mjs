@@ -52,6 +52,24 @@ const muted = (t) => `<span style="color:#59647a">${t}</span>`;
 
 const IMG = { answer: "img/answer.png", evidence: "img/evidence-phone.png" };
 
+// The agent diagram (slide 4): nodes by what runs them, and arrows drawn as small SVGs.
+const NODE = {
+  input: ["#ffffff", "2px solid #8792a6", "#13224a", "#59647a"],
+  code: ["#f5f7fa", "2px dashed #8792a6", "#13224a", "#59647a"],
+  lightning: ["#ffffff", "2px solid #13224a", "#13224a", "#59647a"],
+  ultra: ["#13224a", "2px solid #13224a", "#ffffff", "#c3cbe0"],
+  answer: ["#fff3b0", "2px solid #ffde3b", "#13224a", "#59647a"],
+};
+const node = (kind, title, sub) => {
+  const [bg, border, ink, soft] = NODE[kind];
+  return `<div style="flex:1;display:flex;flex-direction:column;gap:2px;background:${bg};border:${border};border-radius:6px;padding:10px 14px"><p style="font-size:24px;font-weight:800;line-height:1.25;color:${ink}">${title}</p><p style="font-size:24px;line-height:1.25;color:${soft}">${sub}</p></div>`;
+};
+const specialist = (name, causes, tools) =>
+  `<div style="display:flex;flex-direction:column;gap:4px;background:#ffffff;border:2px solid #13224a;border-radius:6px;padding:10px 14px"><p style="font-size:24px;line-height:1.25"><b>${name}</b> <span style="color:#59647a">${causes}</span></p><p style="font-family:${MONO};font-size:24px;line-height:1.25;color:#13224a">${tools}</p></div>`;
+const ARROW_R = `<svg aria-label="then" width="32" height="24" viewBox="0 0 32 24"><path d="M2 12h24" stroke="#8792a6" stroke-width="3"/><path d="M20 5l8 7-8 7" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
+const ARROW_D = `<svg aria-label="then" width="24" height="28" viewBox="0 0 24 28"><path d="M12 2v20" stroke="#8792a6" stroke-width="3"/><path d="M5 16l7 8 7-8" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
+const ARROW_LR = `<svg aria-label="sends tasks, gets reports" width="40" height="40" viewBox="0 0 40 40"><path d="M4 13h28" stroke="#8792a6" stroke-width="3"/><path d="M26 7l7 6-7 6" fill="none" stroke="#8792a6" stroke-width="3"/><path d="M36 27H8" stroke="#8792a6" stroke-width="3"/><path d="M14 21l-7 6 7 6" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
+
 const slides = [
   {
     id: "cover",
@@ -159,38 +177,40 @@ const slides = [
     gap: 24,
     left: [
       h2("Agents investigate. Code decides every number."),
-      marked("93%", "of planted problems the orchestrator sent back with reasoning on, against 61% with it off."),
-      `<div style="display:flex;flex-direction:column;border-top:2px solid #0b1530">`,
-      ...[
-        ["1", "Scout guard", "code", "Blocks injection, redacts personal details"],
-        ["2", "Intake agent", "Lightning", "One request per bill and month"],
-        ["3", "Scout contract", "code", "Signed per bill: the data it may read"],
-        ["4", "Orchestrator", "Ultra, reasoning", "Plans, reviews the case, sends work back"],
-        ["5", "Five specialists", "Lightning", "Read-only Zetaris queries; H-MEM notes"],
-        ["6", "Measurement", "code", "Every verdict and £, against a threshold"],
-        ["7", "Writer", "Ultra", "Placeholders and citations only"],
-        ["8", "Checker", "code", "Sums, figures, citations; one rewrite"],
-        ["9", "Combiner", "Ultra", "Links two or more bills"],
-      ].map(
-        ([n, who, runs, what]) =>
-          `<div style="display:grid;grid-template-columns:48px 440px 1fr;gap:24px;align-items:baseline;padding:6px 0px;border-bottom:1px solid #e8ecf2"><p style="font-size:26px;font-weight:700;color:#59647a">${n}</p><p style="font-size:26px"><b>${who}</b> ${muted(runs)}</p><p style="font-size:26px;color:#3c4760">${what}</p></div>`,
-      ),
+      `<div style="display:flex;flex-direction:column;gap:8px">`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("input", "Question", "in plain words")}${ARROW_R}${node("code", "Scout guard", "code")}${ARROW_R}${node("lightning", "Intake", "Lightning")}${ARROW_R}${node("code", "Contract", "code, signed")}</div>`,
+      `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
+      `<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">`,
+      `<div style="width:250px;display:flex;flex-direction:column;gap:6px;background:#13224a;border:2px solid #13224a;border-radius:6px;padding:12px 14px"><p style="font-size:24px;font-weight:800;line-height:1.25;color:#ffffff">Orchestrator</p><p style="font-size:24px;line-height:1.25;color:#c3cbe0">Ultra, reasoning</p><p style="font-size:24px;line-height:1.3;color:#ffffff;padding:6px 0px 0px">Plans tasks, reviews findings, sends work back</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Case file: World Model</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Rounds: Markovian</p></div>`,
+      `<div style="display:flex;flex-direction:column;justify-content:center">${ARROW_LR}</div>`,
+      `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px">`,
+      specialist("Billing", "C3 C4 C5", "get_bills<br>get_meter_readings"),
+      specialist("Tariff", "C1 C2", "get_tariff, get_bills"),
+      specialist("Weather", "C6", "get_weather, get_split"),
+      specialist("Usage", "C7 C9", "get_split, recall_notes<br>get_meter_readings"),
+      specialist("Leak", "C8, water", "get_split, recall_notes<br>get_meter_readings"),
+      `<div style="display:flex;flex-direction:column;justify-content:center;padding:4px 8px"><p style="font-size:24px;line-height:1.35;color:#3c4760">Five specialists on <b>Lightning</b>. All also call <b>test_cause</b>, so code measures each cause.</p></div>`,
       `</div>`,
-      prose("Steps 4 to 6 loop: code sends back any verdict its measurement contradicts, even if the orchestrator would close, for up to two more rounds. Markovian runs the rounds; World Model holds the case file.", 26),
+      `</div>`,
+      `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("code", "Measure", "code")}${ARROW_R}${node("ultra", "Writer", "Ultra")}${ARROW_R}${node("code", "Checker", "code")}${ARROW_R}${node("ultra", "Combiner", "Ultra")}${ARROW_R}${node("answer", "Answer", "checked")}</div>`,
+      `</div>`,
     ],
     tape: tape(
-      tapeHead("Why the orchestrator reasons"),
-      `<p style="font-family:${SANS};font-size:24px;line-height:1.45;color:#3c4760;padding:0px 0px 8px">Nemotron Ultra reviewed 33 case files with planted problems, reasoning off, then on.</p>`,
-      line("Problems sent back", "61% to 93%"),
-      line("Closed anyway", "39% to 7%"),
-      line("Clean cases closed", "94% to 94%"),
-      line("Time per review", "4.6 to 13.5 s"),
+      tapeHead("What each tool reads"),
+      line("get_bills", "bills"),
+      line("get_meter_readings", "reads"),
+      line("get_tariff", "tariffs"),
+      line("get_weather", "weather_daily"),
+      line("get_split", "bills + weather"),
+      line("test_cause", "code measures"),
+      line("recall_notes", "H-MEM notes"),
       rule,
-      total("Paired test", "p = 0.0005"),
-      footnote("Reasoning stays off for the intake, specialists and writer: short structured tasks that make most of the calls."),
+      total("Writes", "none"),
+      footnote("bills, reads, tariffs and weather_daily are read-only Zetaris views. Every call is checked against the bill’s signed contract before it runs. The orchestrator, writer and combiner use no data tools: they read the case file and the facts code builds."),
     ),
     notes:
-      "Nine steps, five of them Nemotron agents. Scout’s guard checks the raw text, the intake agent reads the question, and Scout signs a contract per bill. The orchestrator on Nemotron Ultra plans; five Lightning specialists investigate through read-only Zetaris queries; code measures every cause, so no model ever decides a number. The orchestrator reviews and sends work back, and code sends back anything a measurement contradicts. We measured whether the orchestrator should reason: with reasoning on it sent back 93% of planted problems against 61%, for about nine seconds more per review.",
+      "Here is the whole team for one bill. Scout’s guard checks the question, the intake agent on Nemotron Lightning reads it, and Scout signs a contract naming the data this investigation may read. The orchestrator on Nemotron Ultra, with reasoning on, plans a task for each of five Lightning specialists and reviews what they find in a World Model case file, over Markovian rounds. Each specialist has its own read-only tools: billing reads bills and meter readings, tariff reads tariffs, weather reads the weather, and usage and leak also recall household notes from H-MEM. Every one calls test_cause, so code measures each cause; no model decides a number. Then the writer, the checker in code, and for several bills the combiner. The receipt lists what each tool reads: Zetaris views, H-MEM, or code. Nothing writes.",
   },
   {
     id: "stack",
@@ -219,10 +239,14 @@ const slides = [
       rule,
       total("Calls per bill", "18 to 27"),
       total("Route", "Nightshift"),
-      footnote("Both models call tools through Nightshift; the NVIDIA key lives there, not in the app. Cursor was not used."),
+      tapeHead("Orchestrator reasoning, measured"),
+      line("Problems sent back", "61% to 93%"),
+      line("Closed anyway", "39% to 7%"),
+      line("Time per review", "4.6 to 13.5 s"),
+      footnote("33 case files with planted problems, reviewed off and on; paired test p = 0.0005. Cursor was not used."),
     ),
     notes:
-      "A Next.js app with our own TypeScript agent loop and no agent framework, so every step, retry and fallback is ours and visible on the page. Models are NVIDIA Nemotron, Lightning for the many short parallel steps and Ultra for judgement and wording, always through Meterless Nightshift. Data is Zetaris in Docker. The three Meterless engines are vendored unchanged, and Scout Intent is our implementation of Meterless’s specification. We didn’t use Cursor.",
+      "A Next.js app with our own TypeScript agent loop and no agent framework, so every step, retry and fallback is ours and visible on the page. Models are NVIDIA Nemotron, Lightning for the many short parallel steps and Ultra for judgement and wording, always through Meterless Nightshift. Data is Zetaris in Docker. The three Meterless engines are vendored unchanged, and Scout Intent is our implementation of Meterless’s specification. We measured whether the orchestrator should reason before it decides: on 33 case files with planted problems, reasoning sent back 93% of them against 61%, for about nine seconds more per review, so it is on for the orchestrator only. We didn’t use Cursor.",
   },
   {
     id: "zetaris",
