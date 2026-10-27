@@ -58,7 +58,7 @@ const IMG = { answer: "img/answer.png", evidence: "img/evidence-phone.png" };
 // Icons are lucide's (lucide-react, ISC), the app's own set.
 const LUCIDE = join(here, "..", "..", "node_modules", "lucide-react", "dist", "esm", "icons");
 const ICONS = {};
-for (const name of ["message-circle-question-mark", "shield-check", "bot", "signature", "network", "receipt-pound-sterling", "tag", "cloud-sun", "gauge", "droplets", "ruler", "pen-line", "list-checks", "merge", "file-check", "database", "notebook-pen"]) {
+for (const name of ["message-circle-question-mark", "shield-check", "bot", "signature", "network", "receipt-pound-sterling", "tag", "cloud-sun", "gauge", "droplets", "ruler", "pen-line", "list-checks", "merge", "file-check", "database", "notebook-pen", "repeat", "folder-open"]) {
   ICONS[name] = (await import(pathToFileURL(join(LUCIDE, `${name}.mjs`)).href)).__iconData.node;
 }
 const icon = (name, colour, size = 28) => {
@@ -86,17 +86,39 @@ const label = (text, size = 24, weight = 800, colour = "#13224a") => `<p style="
 const agent = ({ cx, cy, size, iconSize, kind, iconName, name, sub = [], nameSize = 24, width = 120, after = "" }) =>
   `<div style="position:absolute;left:${cx - width / 2}px;top:${cy - size / 2}px;width:${width}px;display:flex;flex-direction:column;align-items:center;gap:6px">${badge(kind, iconName, size, iconSize)}${label(name, nameSize)}${sub.map((t) => label(t, 24, 400, "#59647a")).join("")}${after}</div>`;
 const STROKE = "#59647a";
-const segment = (x1, y1, x2, y2) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${STROKE}" stroke-width="3" fill="none"/>`;
+// The pen the arrow helpers draw with: the loop in navy and heavier, the pipeline around it lighter.
+let INK = STROKE, WIDTH = 3;
+const segment = (x1, y1, x2, y2) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${INK}" stroke-width="${WIDTH}" fill="none"/>`;
 const arrow = (x1, y1, x2, y2) => {
   const t = Math.atan2(y2 - y1, x2 - x1);
   const [len, half] = [16, 8];
   const bx = x2 - len * Math.cos(t), by = y2 - len * Math.sin(t);
   const f = (n) => n.toFixed(1);
-  return `${segment(x1, y1, f(bx), f(by))}<path d="M${x2} ${y2}L${f(bx + half * Math.sin(t))} ${f(by - half * Math.cos(t))}L${f(bx - half * Math.sin(t))} ${f(by + half * Math.cos(t))}Z" fill="${STROKE}"/>`;
+  return `${segment(x1, y1, f(bx), f(by))}<path d="M${x2} ${y2}L${f(bx + half * Math.sin(t))} ${f(by - half * Math.cos(t))}L${f(bx - half * Math.sin(t))} ${f(by + half * Math.cos(t))}Z" fill="${INK}"/>`;
 };
 
+// A routed path through points, with its head on the last segment.
+const route = (...pts) => {
+  const [x2, y2] = pts.at(-1);
+  const [x1, y1] = pts.at(-2);
+  const head = arrow(x1, y1, x2, y2);
+  const body = pts.slice(0, -1).map(([x, y], i) => `${i ? "L" : "M"}${x} ${y}`).join("");
+  return `<path d="${body}" stroke="${INK}" stroke-width="${WIDTH}" fill="none" stroke-linejoin="round"/>${head}`;
+};
+// A curved arrow from (x1, y1) to (x2, y2) bending through (cx, cy).
+const curve = (x1, y1, cx, cy, x2, y2) => {
+  const t = Math.atan2(y2 - cy, x2 - cx);
+  const [len, half] = [16, 8];
+  const bx = x2 - len * Math.cos(t), by = y2 - len * Math.sin(t);
+  const f = (n) => n.toFixed(1);
+  return `<path d="M${x1} ${y1}Q${cx} ${cy} ${f(bx)} ${f(by)}" stroke="${INK}" stroke-width="${WIDTH}" fill="none"/><path d="M${x2} ${y2}L${f(bx + half * Math.sin(t))} ${f(by - half * Math.cos(t))}L${f(bx - half * Math.sin(t))} ${f(by + half * Math.cos(t))}Z" fill="${INK}"/>`;
+};
+const quiet = (left, top, width, html) => `<div style="position:absolute;left:${left}px;top:${top}px;width:${width}px;display:flex;flex-direction:row;align-items:center;gap:8px">${html}</div>`;
+
 const DIAGRAM = (() => {
-  const W = 1160, H = 650, ROW = 70, SMALL = 76, HUB = 134, SPEC = 102, MEASURE = 64, GAP = 4;
+  // The agentic loop: orchestrator -> specialists -> code measures -> case file -> orchestrator,
+  // with the inputs flowing in from the left and the answer out to the right.
+  const W = 1160, H = 650, ROW = 80, SMALL = 76, HUB = 134, SPEC = 92, MEASURE = 76, GAP = 4;
   const inputs = [
     [60, "input", "message-circle-question-mark", "Question", "household"],
     [180, "code", "shield-check", "Guard", "code"],
@@ -109,44 +131,64 @@ const DIAGRAM = (() => {
     [980, "ultra", "merge", "Combiner", "Ultra"],
     [1100, "answer", "file-check", "Answer", "checked"],
   ];
+  const SPEC_Y = 330;
   const specialists = [
-    [200, 400, "receipt-pound-sterling", "Billing", false],
-    [390, 380, "tag", "Tariff", false],
-    [580, 370, "cloud-sun", "Weather", false],
-    [770, 380, "gauge", "Usage", true],
-    [960, 400, "droplets", "Leak", true],
+    [340, "receipt-pound-sterling", "Billing", false],
+    [460, "tag", "Tariff", false],
+    [580, "cloud-sun", "Weather", false],
+    [700, "gauge", "Usage", true],
+    [820, "droplets", "Leak", true],
   ];
   const hub = { cx: 580, cy: ROW };
-  const fanFrom = { x: 580, y: 258 }; // under the orchestrator's labels
-  const bus = 540;
-  const measure = { cx: 580, cy: 600 };
+  const fanFrom = 236; // under the orchestrator's labels
+  const bus = 466;
+  const measure = { cx: 580, cy: 550 };
+  const caseFile = { cx: 150, cy: 550 };
+  const quietIcon = (name) => icon(name, "#59647a", 26);
 
   const nodes = [
     ...inputs.map(([cx, kind, ic, name, sub]) => agent({ cx, cy: ROW, size: SMALL, iconSize: 40, kind, iconName: ic, name, sub: [sub] })),
-    agent({ cx: hub.cx, cy: hub.cy, size: HUB, iconSize: 68, kind: "ultra", iconName: "network", name: "Orchestrator", nameSize: 28, width: 330, sub: ["Ultra, reasoning on", "World Model · Markovian"] }),
+    agent({ cx: hub.cx, cy: hub.cy, size: HUB, iconSize: 68, kind: "ultra", iconName: "network", name: "Orchestrator", nameSize: 28, width: 260, sub: ["Ultra, reasoning on"] }),
     ...outputs.map(([cx, kind, ic, name, sub]) => agent({ cx, cy: ROW, size: SMALL, iconSize: 40, kind, iconName: ic, name, sub: [sub] })),
-    ...specialists.map(([cx, cy, ic, name, notes]) =>
-      agent({ cx, cy, size: SPEC, iconSize: 54, kind: "lightning", iconName: ic, name, width: 170, after: `<div style="display:flex;flex-direction:row;gap:10px">${icon("database", "#59647a", 30)}${notes ? icon("notebook-pen", "#59647a", 30) : ""}</div>` }),
+    ...specialists.map(([cx, ic, name, notes]) =>
+      agent({ cx, cy: SPEC_Y, size: SPEC, iconSize: 50, kind: "lightning", iconName: ic, name, width: 120, after: `<div style="display:flex;flex-direction:row;gap:6px">${quietIcon("database")}${notes ? quietIcon("notebook-pen") : ""}${quietIcon("repeat")}</div>` }),
     ),
-    `<div style="position:absolute;left:${measure.cx - MEASURE / 2}px;top:${measure.cy - MEASURE / 2}px;width:460px;display:flex;flex-direction:row;align-items:center;gap:16px">${badge("code", "ruler", MEASURE, 34)}<div style="display:flex;flex-direction:column"><p style="font-size:24px;font-weight:800;line-height:1.25;color:#13224a">Measure</p><p style="font-size:24px;line-height:1.25;color:#59647a">code tests every cause</p></div></div>`,
+    `<div style="position:absolute;left:${measure.cx - MEASURE / 2}px;top:${measure.cy - MEASURE / 2}px;width:400px;display:flex;flex-direction:row;align-items:center;gap:14px">${badge("code", "ruler", MEASURE, 40)}<div style="display:flex;flex-direction:column"><p style="font-size:24px;font-weight:800;line-height:1.25;color:#13224a">Measure</p><p style="font-size:24px;line-height:1.25;color:#59647a">code tests every cause</p></div></div>`,
+    `<div style="position:absolute;left:${caseFile.cx - MEASURE / 2}px;top:${caseFile.cy - MEASURE / 2}px;width:${MEASURE}px;display:flex;flex-direction:column;align-items:center">${badge("lightning", "folder-open", MEASURE, 40)}</div>`,
+    `<div style="position:absolute;left:${caseFile.cx - 80}px;top:${caseFile.cy - MEASURE / 2 - 70}px;width:160px;display:flex;flex-direction:column;align-items:center">${label("Case file")}${label("World Model", 24, 400, "#59647a")}</div>`,
+    quiet(56, 252, 236, `${icon("repeat", "#13224a", 30)}<p style="font-size:24px;line-height:1.25;color:#13224a"><b>Markovian</b>:<br>up to 2 more rounds</p>`),
+    quiet(250, 558, 260, `<p style="font-size:24px;line-height:1.25;color:#59647a">findings</p>`),
+    quiet(990, 360, 160, `<p style="font-size:24px;line-height:1.25;color:#59647a">sent back when code disagrees</p>`),
   ];
 
   const r = SMALL / 2 + GAP;
   const paths = [];
+  // In and out along the top row: the pipeline, drawn light.
+  INK = "#8792a6";
+  WIDTH = 3;
   const row = [...inputs.map((n) => n[0]), hub.cx, ...outputs.map((n) => n[0])];
   for (let i = 0; i < row.length - 1; i++) {
     const [x1, x2] = [row[i], row[i + 1]];
-    const right = x1 === hub.cx ? HUB / 2 + GAP : r;
-    const left = x2 === hub.cx ? HUB / 2 + GAP : r;
-    paths.push(arrow(x1 + right, ROW, x2 - left, ROW));
+    paths.push(arrow(x1 + (x1 === hub.cx ? HUB / 2 + GAP : r), ROW, x2 - (x2 === hub.cx ? HUB / 2 + GAP : r), ROW));
   }
-  for (const [cx, cy] of specialists) paths.push(arrow(fanFrom.x, fanFrom.y, cx, cy - SPEC / 2 - GAP));
-  const bottomOf = (cy) => cy - SPEC / 2 + SPEC + 6 + 30 + 6 + 30 + GAP; // badge, name, data icons
-  for (const [cx, cy] of specialists) paths.push(segment(cx, bottomOf(cy), cx, bus));
+  // The checker sends a failed draft back to the writer once.
+  paths.push(curve(860, ROW - r, 800, 2, 740 + 10, ROW - r - 2));
+  // The loop: tasks out, measured, recorded, reviewed. Drawn in navy, heavier.
+  INK = "#13224a";
+  WIDTH = 4;
+  for (const [cx] of specialists) paths.push(arrow(hub.cx, fanFrom, cx, SPEC_Y - SPEC / 2 - GAP));
+  const specBottom = SPEC_Y - SPEC / 2 + SPEC + 6 + 30 + 6 + 26 + GAP;
+  for (const [cx] of specialists) paths.push(segment(cx, specBottom, cx, bus));
   paths.push(segment(specialists[0][0], bus, specialists[4][0], bus));
   paths.push(arrow(measure.cx, bus, measure.cx, measure.cy - MEASURE / 2 - GAP));
+  paths.push(arrow(measure.cx - MEASURE / 2 - GAP, measure.cy, caseFile.cx + MEASURE / 2 + GAP, caseFile.cy));
+  paths.push(route([caseFile.cx - MEASURE / 2 - GAP, caseFile.cy], [36, caseFile.cy], [36, 242], [hub.cx - 44, 242]));
+  // Code sends a contradicted verdict back to its specialist.
+  paths.push(route([measure.cx, measure.cy + MEASURE / 2 + GAP], [measure.cx, 628], [970, 628], [970, SPEC_Y], [specialists[4][0] + SPEC / 2 + GAP, SPEC_Y]));
 
-  const svg = `<svg aria-label="Arrows: the question passes the guard, intake and contract to the orchestrator; the orchestrator sends tasks to five specialists, whose causes code measures; the orchestrator's case goes to the writer, checker, combiner and the answer" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0px;top:0px">${paths.join("")}</svg>`;
+  INK = STROKE;
+  WIDTH = 3;
+  const svg = `<svg aria-label="The agentic loop: the orchestrator sends tasks to five specialists, code measures every cause, findings go into the case file, and the orchestrator reviews them for up to two more rounds before the writer, checker and combiner produce the answer" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0px;top:0px">${paths.join("")}</svg>`;
   return `<div style="position:relative;width:${W}px;height:${H}px">${svg}\n${nodes.join("\n")}</div>`;
 })();
 
@@ -257,10 +299,10 @@ const slides = [
     gap: 24,
     left: [h2("Agents investigate. Code decides every number."), DIAGRAM],
     tape: tape(
-      tapeHead("Who reads what"),
+      tapeHead("Reading the loop"),
+      `<div style="display:flex;flex-direction:row;align-items:start;gap:12px">${icon("repeat", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px;line-height:1.35">Each specialist’s tool loop: call, read, decide, up to 6 steps</p></div>`,
       `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("database", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">Zetaris views, read-only</p></div>`,
       `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("notebook-pen", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">H-MEM household notes</p></div>`,
-      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("ruler", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">Code measures: test_cause</p></div>`,
       rule,
       line("Billing", "bills, reads"),
       line("Tariff", "tariffs, bills"),
@@ -269,10 +311,10 @@ const slides = [
       line("Leak", "reads, £ split, notes"),
       rule,
       total("Writes", "none"),
-      footnote("Navy: Nemotron Ultra. Outlined: Lightning. Dashed: code. Every tool call is checked against the bill’s signed contract; leak runs for water bills only."),
+      footnote("Navy: Ultra. Outlined: Lightning. Dashed: code. The arc over the writer is its one rewrite when the checker fails a draft; leak runs for water only."),
     ),
     notes:
-      "This is the whole team for one bill. The question passes Scout’s guard, the intake agent on Nemotron Lightning reads it, and Scout signs a contract naming the data this investigation may read. That goes to the orchestrator on Nemotron Ultra, with reasoning on, which keeps the case file in World Model and runs its review rounds with Markovian. It sends a task to each of five Lightning specialists: billing, tariff, weather, usage and leak. Each reads read-only Zetaris views, and usage and leak also recall household notes from H-MEM. All of them hand every cause to code to measure, so no model decides a number. When the case closes, the writer drafts the answer, the checker in code verifies it, the combiner links bills when there are several, and the answer goes back checked. Nothing in the team writes data.",
+      "This is the loop that answers one bill. The question passes Scout’s guard, the intake agent on Nemotron Lightning reads it, and Scout signs a contract naming the data the investigation may read. The orchestrator on Nemotron Ultra, reasoning on, sends a task to each of five Lightning specialists. Each runs its own tool loop: call a read-only tool, read the result, decide the next step, up to six times. Every cause they look at is measured in code, so no model decides a number, and the findings go into the case file in World Model. The orchestrator reviews the case file and either closes it or sends follow-ups, for up to two more rounds that Markovian runs. Code also sends a specialist back when its verdict contradicts the measurement. When the case closes, the writer drafts the answer, the checker in code verifies it and allows one rewrite, and the combiner links bills when there are several. Nothing in the team writes data.",
   },
   {
     id: "stack",
