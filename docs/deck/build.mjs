@@ -9,7 +9,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -60,12 +60,26 @@ const NODE = {
   ultra: ["#13224a", "2px solid #13224a", "#ffffff", "#c3cbe0"],
   answer: ["#fff3b0", "2px solid #ffde3b", "#13224a", "#59647a"],
 };
-const node = (kind, title, sub) => {
-  const [bg, border, ink, soft] = NODE[kind];
-  return `<div style="flex:1;display:flex;flex-direction:column;gap:2px;background:${bg};border:${border};border-radius:6px;padding:10px 14px"><p style="font-size:24px;font-weight:800;line-height:1.25;color:${ink}">${title}</p><p style="font-size:24px;line-height:1.25;color:${soft}">${sub}</p></div>`;
+// Icons from lucide, the app's own icon set (lucide-react, ISC), drawn as inline SVG at 28px.
+const LUCIDE = join(here, "..", "..", "node_modules", "lucide-react", "dist", "esm", "icons");
+const ICONS = {};
+for (const name of ["message-circle-question-mark", "shield-check", "bot", "signature", "network", "receipt-pound-sterling", "tag", "cloud-sun", "gauge", "droplets", "ruler", "pen-line", "list-checks", "merge", "file-check"]) {
+  ICONS[name] = (await import(pathToFileURL(join(LUCIDE, `${name}.mjs`)).href)).__iconData.node;
+}
+const icon = (name, colour, size = 28) => {
+  const shapes = ICONS[name]
+    .map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).filter(([k]) => k !== "key").map(([k, v]) => `${k}="${v}"`).join(" ")}/>`)
+    .join("");
+  return `<svg aria-label="" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g transform="scale(${(size / 24).toFixed(4)})" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${shapes}</g></svg>`;
 };
-const specialist = (name, causes, tools) =>
-  `<div style="display:flex;flex-direction:column;gap:4px;background:#ffffff;border:2px solid #13224a;border-radius:6px;padding:10px 14px"><p style="font-size:24px;line-height:1.25"><b>${name}</b> <span style="color:#59647a">${causes}</span></p><p style="font-family:${MONO};font-size:24px;line-height:1.25;color:#13224a">${tools}</p></div>`;
+const titled = (iconName, colour, titleHtml) =>
+  `<div style="display:flex;flex-direction:row;align-items:center;gap:10px">${icon(iconName, colour)}${titleHtml}</div>`;
+const node = (kind, title, sub, iconName) => {
+  const [bg, border, ink, soft] = NODE[kind];
+  return `<div style="flex:1;display:flex;flex-direction:column;gap:2px;background:${bg};border:${border};border-radius:6px;padding:10px 14px">${titled(iconName, ink, `<p style="font-size:24px;font-weight:800;line-height:1.25;color:${ink}">${title}</p>`)}<p style="font-size:24px;line-height:1.25;color:${soft}">${sub}</p></div>`;
+};
+const specialist = (name, causes, tools, iconName) =>
+  `<div style="display:flex;flex-direction:column;gap:4px;background:#ffffff;border:2px solid #13224a;border-radius:6px;padding:10px 14px">${titled(iconName, "#13224a", `<p style="font-size:24px;line-height:1.25"><b>${name}</b> <span style="color:#59647a">${causes}</span></p>`)}<p style="font-family:${MONO};font-size:24px;line-height:1.25;color:#13224a">${tools}</p></div>`;
 const ARROW_R = `<svg aria-label="then" width="32" height="24" viewBox="0 0 32 24"><path d="M2 12h24" stroke="#8792a6" stroke-width="3"/><path d="M20 5l8 7-8 7" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
 const ARROW_D = `<svg aria-label="then" width="24" height="28" viewBox="0 0 24 28"><path d="M12 2v20" stroke="#8792a6" stroke-width="3"/><path d="M5 16l7 8 7-8" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
 const ARROW_LR = `<svg aria-label="sends tasks, gets reports" width="40" height="40" viewBox="0 0 40 40"><path d="M4 13h28" stroke="#8792a6" stroke-width="3"/><path d="M26 7l7 6-7 6" fill="none" stroke="#8792a6" stroke-width="3"/><path d="M36 27H8" stroke="#8792a6" stroke-width="3"/><path d="M14 21l-7 6 7 6" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
@@ -178,22 +192,22 @@ const slides = [
     left: [
       h2("Agents investigate. Code decides every number."),
       `<div style="display:flex;flex-direction:column;gap:8px">`,
-      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("input", "Question", "in plain words")}${ARROW_R}${node("code", "Scout guard", "code")}${ARROW_R}${node("lightning", "Intake", "Lightning")}${ARROW_R}${node("code", "Contract", "code, signed")}</div>`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("input", "Question", "in plain words", "message-circle-question-mark")}${ARROW_R}${node("code", "Scout guard", "code", "shield-check")}${ARROW_R}${node("lightning", "Intake", "Lightning", "bot")}${ARROW_R}${node("code", "Contract", "code, signed", "signature")}</div>`,
       `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
       `<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">`,
-      `<div style="width:250px;display:flex;flex-direction:column;gap:6px;background:#13224a;border:2px solid #13224a;border-radius:6px;padding:12px 14px"><p style="font-size:24px;font-weight:800;line-height:1.25;color:#ffffff">Orchestrator</p><p style="font-size:24px;line-height:1.25;color:#c3cbe0">Ultra, reasoning</p><p style="font-size:24px;line-height:1.3;color:#ffffff;padding:6px 0px 0px">Plans tasks, reviews findings, sends work back</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Case file: World Model</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Rounds: Markovian</p></div>`,
+      `<div style="width:250px;display:flex;flex-direction:column;gap:6px;background:#13224a;border:2px solid #13224a;border-radius:6px;padding:12px 14px">${titled("network", "#ffffff", `<p style="font-size:24px;font-weight:800;line-height:1.25;color:#ffffff">Orchestrator</p>`)}<p style="font-size:24px;line-height:1.25;color:#c3cbe0">Ultra, reasoning</p><p style="font-size:24px;line-height:1.3;color:#ffffff;padding:6px 0px 0px">Plans tasks, reviews findings, sends work back</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Case file: World Model</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Rounds: Markovian</p></div>`,
       `<div style="display:flex;flex-direction:column;justify-content:center">${ARROW_LR}</div>`,
       `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px">`,
-      specialist("Billing", "C3 C4 C5", "get_bills<br>get_meter_readings"),
-      specialist("Tariff", "C1 C2", "get_tariff, get_bills"),
-      specialist("Weather", "C6", "get_weather, get_split"),
-      specialist("Usage", "C7 C9", "get_split, recall_notes<br>get_meter_readings"),
-      specialist("Leak", "C8, water", "get_split, recall_notes<br>get_meter_readings"),
+      specialist("Billing", "C3 C4 C5", "get_bills<br>get_meter_readings", "receipt-pound-sterling"),
+      specialist("Tariff", "C1 C2", "get_tariff, get_bills", "tag"),
+      specialist("Weather", "C6", "get_weather, get_split", "cloud-sun"),
+      specialist("Usage", "C7 C9", "get_split, recall_notes<br>get_meter_readings", "gauge"),
+      specialist("Leak", "C8, water", "get_split, recall_notes<br>get_meter_readings", "droplets"),
       `<div style="display:flex;flex-direction:column;justify-content:center;padding:4px 8px"><p style="font-size:24px;line-height:1.35;color:#3c4760">Five specialists on <b>Lightning</b>. All also call <b>test_cause</b>, so code measures each cause.</p></div>`,
       `</div>`,
       `</div>`,
       `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
-      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("code", "Measure", "code")}${ARROW_R}${node("ultra", "Writer", "Ultra")}${ARROW_R}${node("code", "Checker", "code")}${ARROW_R}${node("ultra", "Combiner", "Ultra")}${ARROW_R}${node("answer", "Answer", "checked")}</div>`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("code", "Measure", "code", "ruler")}${ARROW_R}${node("ultra", "Writer", "Ultra", "pen-line")}${ARROW_R}${node("code", "Checker", "code", "list-checks")}${ARROW_R}${node("ultra", "Combiner", "Ultra", "merge")}${ARROW_R}${node("answer", "Answer", "checked", "file-check")}</div>`,
       `</div>`,
     ],
     tape: tape(
