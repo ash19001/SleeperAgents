@@ -41,6 +41,7 @@
     "node_modules",
     "vendor",
     "scripts",
-    "web"
+    "web",
+    "video"
   ]
 }

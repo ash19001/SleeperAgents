@@ -21,6 +21,8 @@ const eslintConfig = defineConfig([
     "vendor/**",
     // Side servers' build output (NEXT_DIST_DIR=tmp/…).
     "tmp/**",
+    // The demo video's Remotion project, with its own config.
+    "video/**",
   ]),
 ]);
 

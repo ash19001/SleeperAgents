@@ -17,3 +17,7 @@ next-env.d.ts
 .impeccable/mocks/
 .impeccable/questions/
 .impeccable/hook.cache.json
+
+# Demo video: captured footage and renders
+video/public/footage/
+video/out/

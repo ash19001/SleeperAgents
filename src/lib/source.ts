@@ -76,8 +76,10 @@ export async function ask(question: string, onStep?: (step: TraceStep) => void):
     async () => answerQuestion(question, { bills: await getBills(), data: await dataSource(), memory: householdMemory(), onStep: log }),
     questionTimeLimitMs(),
   );
-  // An answer that fell back (no models, no Zetaris) isn't kept for replay.
-  if (!result.notices?.length) saveReplay(question, notes, result);
+  // An answer that fell back (no models, no Zetaris, or code wrote it because
+  // the writer failed) isn't kept for replay: it would replace a better one.
+  const answers = result.kind === "answer" ? [result.answer] : result.kind === "answers" ? result.answers : [];
+  if (!result.notices?.length && !answers.some((a) => a.checked?.writer_failed)) saveReplay(question, notes, result);
   return result;
 }
 

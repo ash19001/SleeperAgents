@@ -1,34 +1,37 @@
-# Demo script (about 2½ minutes)
+# Demo video and voiceover script (2:39)
 
 For the video (rule 6.1: 1 to 4 minutes; show the main workflow, how the agent solves the challenge, key features, and how Zetaris and Meterless are integrated).
 
-## Before recording
-
-- Record most of it in **replay mode** (`SAMPLE_MODE=true npm run dev`): recorded answers appear instantly. Live answers take 20 to 60 s, or several minutes when NVIDIA rate-limits the key.
-- Record the two **live** clips separately (`WHYBILL_MODE=live`) and cut the waiting: say on screen that it's sped up.
-- Have open in other tabs: the Zetaris SQL Editor, the Nightshift app's receipts, and `eval/results.md` on GitHub.
-- Phone-width browser window (about 400 px) looks best; the page is built phone first.
-
-## Script
+The video is built in `video/` (Remotion) from real browser recordings: one live run through Zetaris, Nightshift and NVIDIA Nemotron (sped up, and labelled so), and recorded live answers in replay mode. It has no sound. Record the voiceover against it; each line below fits its scene at an easy pace (about 140 words a minute).
 
 | Time | On screen | Say |
 | --- | --- | --- |
-| 0:00 | The page, bills chart | "Your gas bill jumped thirty pounds. Your supplier tells you what you owe, never why. Why My Bill is a team of Nemotron agents that works out why, and shows its evidence." |
-| 0:12 | **Live clip:** tap the January gas bar. The live panel fills: Scout, intake, orchestrator, five specialists, writer, checker (sped up) | "Scout checks the question and signs a contract for the gas investigation. Nemotron Ultra plans the work, and five Lightning specialists each test their causes by querying Zetaris." |
-| 0:30 | The answer: headline, "Where the £ went", "Why it changed" | "Every pound is accounted for, to the penny: seven extra days, the coldest month, an estimated reading catching up, and a lower unit rate. Code measures each cause, so the model can't invent a number." |
-| 0:45 | Tap an `E1` chip: the SQL and the SHA-256 | "Every figure links to the exact query Zetaris ran, here over six sources: three supplier feeds in different formats, plus the live Octopus price and Open-Meteo weather APIs." |
-| 0:58 | Scroll to "How sure we are" and "How the agents worked it out" | "It says how sure it is and what it can't tell you. And you can see how the agents worked it out: the plan, each round, and any specialist whose verdict contradicted its own measurement being sent back to fix it." |
-| 1:15 | Ask "Why did my electricity bill change in April?" (replay) | "April electricity went down overall, but use went up." |
-| 1:22 | Use the heat pump example note, save it, ask again | "Add one thing the bills can't show: we installed a heat pump in March. It's stored in Meterless H-MEM." |
-| 1:30 | The new answer, citing `M1` | "Now the usage specialist recalls the note, links it to the fuel switch, and the answer cites it." |
-| 1:38 | Ask "Why did my energy bills change in April?" | "Ask about both and they're investigated in parallel; the summary links them: gas down, electricity up, the same heat pump." |
-| 1:50 | Ask "Why did my water bill go up in June and July?" | "Water: a hot July explains some of it, but use beyond the weather is up and staying up with no note to explain it: a possible leak, and how to check." |
-| 2:02 | **Live clip:** ask "Why did my gas bill change in October 2026?"; "That bill isn't here yet"; Add the bill, Fill in example figures, Save; the answer (sped up) | "If a bill is missing, it asks you for it. The figures are checked, saved into the supplier feed and refreshed in Zetaris, then the agents explain it." |
-| 2:20 | Quick cuts: Zetaris SQL Editor on `whybill.bills`; Nightshift receipts naming Nemotron; "How this answer was made" with receipts | "Under the hood: Zetaris is the only way the agents read data; every model call goes through Meterless Nightshift with a receipt; World Model holds the case file and Markovian runs the review rounds." |
-| 2:32 | `eval/results.md` | "Against a planted answer key it found 19 of 19 causes and wrongly supported none, with every answer checked in code. Why My Bill: explanations you can check." |
+| 0:00 | Title | "Why My Bill: Nemotron agents that explain why a household bill changed, with the evidence." |
+| 0:06 | The problem: the January gas bill, "Why it changed: not stated" | "A bill tells you what you owe, never why it changed. Colder weather, more days, a price rise, a leak? Each needs a different fix." |
+| 0:16 | **Live run, sped up:** tap the January gas bar; the agents work | "Tap the January gas bill. This is a live run, sped up. Scout signs a contract for this bill, and Nemotron Ultra plans the investigation. Lightning specialists test each cause against Zetaris, in parallel. The checker found a problem in the first draft; the writer fixed it." |
+| 0:36 | The agent loop, drawn step by step | "Under the hood it's a loop. The orchestrator sends out tasks, each specialist runs its own tool loop, code measures every cause, and findings go into the World Model case file. Markovian review sends work round again when it needs to. Agents investigate; code decides every number." |
+| 0:55 | The answer; tap £27.05; the query and its SHA-256; the split | "Every pound is accounted for, to the penny. The writer only uses placeholders; code fills in each figure. Tap one to see the exact read-only query Zetaris ran, with a fingerprint of its rows. Every cause is tested: supported, ruled out, or not enough data." |
+| 1:13 | How the agents worked it out; how this answer was made | "You can see how the agents worked it out: the plan, each round, each review. And every Nemotron call goes through Meterless Nightshift, with a receipt." |
+| 1:26 | April electricity; add the heat pump note; ask again; note M1 | "Some causes never show on a bill. In April, electricity went down overall, but use went up. Add a note that you installed a heat pump; it's stored in Meterless H-MEM. Ask again, and the answer links the switch to electric heating to your note." |
+| 1:46 | Water, June and July: a possible leak | "Water went up sixty-one pounds. Warmer weather explains some of it; the rest is use that's up and staying up. A possible leak, and how to check." |
+| 1:56 | Zetaris: six sources, four views, read-only evidence | "Zetaris is the only way the agents see data: six sources, including live Octopus prices and Open-Meteo weather, behind four views. Every tool is one read-only query." |
+| 2:09 | Meterless: five parts, each with its proof | "Meterless runs through every step: Nightshift for every model call, Scout for the signed contract, World Model for the case file, Markovian for the review rounds, and H-MEM for household memory." |
+| 2:22 | Results | "Against a planted answer key, it found all nineteen causes, wrongly supported none, and passed fifty-eight of fifty-eight checks in both full runs." |
+| 2:31 | Close | "Why My Bill. Every number traced, every cause tested, every fallback said out loud. Try it from the repo; no keys needed." |
 
-## If something goes wrong while recording
+## Adding the voiceover
 
-- An answer is slow: use replay mode for that question.
-- NVIDIA rate limits: wait a few minutes between live clips; the live panel keeps working meanwhile.
-- Zetaris is down: the agents use the same files locally and say so on each evidence chip; record the Zetaris shots another time.
+- Record each line on its own, then line it up with its scene. The scene times above are where each line starts.
+- If a line runs long, the scenes with screen recordings can be slowed in `video/src/scenes/Footage.tsx` (each cut's `speed`), and the designed scenes lengthened in `video/src/Video.tsx`. Then render again (below).
+- To mix the voiceover into the video instead of in an editor, put it at `video/public/voiceover.mp3` and add `<Audio src={staticFile("voiceover.mp3")} />` (from `@remotion/media`) to `WhyMyBill` in `video/src/Video.tsx`.
+
+## Rendering
+
+```bash
+cd video
+npm ci
+npm run dev                                   # Remotion Studio, to preview
+npx remotion render WhyMyBill out/why-my-bill.mp4 --codec h264 --crf 18
+```
+
+The footage (`video/public/footage/`, about 10,000 JPEG frames) isn't committed. It was recorded with a Playwright script driving the app at 1280 × 720 CSS pixels and a scale of 1.5 (1920 × 1080 frames), with a drawn cursor; each clip's `frames.json` gives every frame's time. `node scripts/footage.mjs` rebuilds `src/footage.ts` from those files.
