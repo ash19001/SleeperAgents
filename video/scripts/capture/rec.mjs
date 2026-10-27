@@ -4,7 +4,9 @@ import { chromium } from "playwright-core";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 
 const exe = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
-export const OUT = new URL("../../public/footage", import.meta.url).pathname;
+// FOOTAGE_OUT keeps frames out of the project while recording, so the
+// dev server's file watcher doesn't see thousands of new files.
+export const OUT = process.env.FOOTAGE_OUT ?? new URL("../../public/footage", import.meta.url).pathname;
 
 const CURSOR = `
 (() => {
