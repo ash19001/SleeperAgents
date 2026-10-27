@@ -102,23 +102,21 @@ export const TapeLine: React.FC<{ at: number; l: React.ReactNode; v: React.React
   );
 };
 
-// ---- Footage: recorded browser clips, played back in a window with camera moves.
+// ---- Footage: recorded browser clips, played back in a window. Each beat
+// shows one thing: the camera moves to it and the rest is dimmed.
 
-export type Segment = { from: number; to: number; speed: number }; // clip seconds
-export type Shot = { t: number; x: number; y: number; z: number }; // output seconds; focus in clip px
-export type Line = { from: number; to: number; text: React.ReactNode }; // output seconds
-
-export const segmentsSeconds = (segments: Segment[]) => segments.reduce((s, g) => s + (g.to - g.from) / g.speed, 0);
-
-const clipTime = (segments: Segment[], t: number) => {
-  let start = 0;
-  for (const g of segments) {
-    const len = (g.to - g.from) / g.speed;
-    if (t < start + len) return g.from + (t - start) * g.speed;
-    start += len;
-  }
-  return segments[segments.length - 1].to;
+export type Rect = [number, number, number, number]; // x0, y0, x1, y1 in clip pixels (1920 x 1080)
+export type Beat = {
+  from: number; // clip seconds
+  to: number;
+  speed?: number;
+  focus?: Rect; // none: the whole window
+  text?: React.ReactNode | null; // a new caption; undefined keeps the last one, null clears it
+  badge?: string;
+  spot?: boolean; // dim around the focus (default true)
 };
+
+export const beatsSeconds = (beats: Beat[]) => beats.reduce((s, b) => s + (b.to - b.from) / (b.speed ?? 1), 0);
 
 const frameAt = (times: number[], t: number) => {
   let lo = 0, hi = times.length - 1;
@@ -130,53 +128,97 @@ const frameAt = (times: number[], t: number) => {
   return lo;
 };
 
-const camera = (shots: Shot[], t: number) => {
-  if (!shots.length) return { x: 960, y: 540, z: 1 };
-  if (t <= shots[0].t) return shots[0];
-  for (let i = 0; i < shots.length - 1; i++) {
-    const a = shots[i], b = shots[i + 1];
-    if (t <= b.t) {
-      const p = interpolate(t, [a.t, b.t], [0, 1], { easing: INOUT });
-      return { x: a.x + (b.x - a.x) * p, y: a.y + (b.y - a.y) * p, z: a.z + (b.z - a.z) * p };
-    }
-  }
-  return shots[shots.length - 1];
+const ZMAX = 2.3;
+const target = (r?: Rect) => {
+  if (!r) return { x: 960, y: 540, z: 1 };
+  const w = (r[2] - r[0]) * 1.12, h = (r[3] - r[1]) * 1.12;
+  const z = Math.max(1, Math.min(ZMAX, 1920 / w, 1080 / h));
+  const x = Math.min(Math.max((r[0] + r[2]) / 2, 960 / z), 1920 - 960 / z);
+  const y = Math.min(Math.max((r[1] + r[3]) / 2, 540 / z), 1080 - 540 / z);
+  return { x, y, z };
 };
 
+const CAM = 0.8; // seconds for the camera to move to the next focus
 const WIN = { left: 160, top: 34, width: 1600, height: 900 };
 
-export const FootageScene: React.FC<{ clip: string; segments: Segment[]; shots?: Shot[]; lines: Line[]; badge?: { from: number; to: number; text: string } }> = ({ clip, segments, shots = [], lines, badge }) => {
+export const FootageScene: React.FC<{ clip: string; beats: Beat[] }> = ({ clip, beats }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const t = frame / fps;
   const c = FOOTAGE[clip];
-  const i = frameAt(c.times, clipTime(segments, t));
-  const cam = camera(shots, t);
-  const z = cam.z;
-  const x = Math.min(Math.max(cam.x, 960 / z), 1920 - 960 / z);
-  const y = Math.min(Math.max(cam.y, 540 / z), 1080 - 540 / z);
-  const line = lines.find((l) => t >= l.from && t < l.to);
-  const lineIn = line ? ramp(frame, line.from * fps, line.from * fps + 12) : 0;
-  const lineOut = line ? 1 - ramp(frame, line.to * fps - 8, line.to * fps, Easing.linear) : 0;
-  const badgeOn = badge && t >= badge.from && t < badge.to ? ramp(frame, badge.from * fps, badge.from * fps + 10) * (1 - ramp(frame, badge.to * fps - 8, badge.to * fps, Easing.linear)) : 0;
 
+  // Where each beat starts in the scene, and its caption and badge spans.
+  const starts: number[] = [];
+  let acc = 0;
+  for (const b of beats) {
+    starts.push(acc);
+    acc += (b.to - b.from) / (b.speed ?? 1);
+  }
+  const ends = beats.map((b, i) => starts[i] + (b.to - b.from) / (b.speed ?? 1));
+  let i = beats.findIndex((_, k) => t < ends[k]);
+  if (i < 0) i = beats.length - 1;
+  const b = beats[i];
+  const clipT = Math.min(b.to, b.from + (t - starts[i]) * (b.speed ?? 1));
+  const img = frameAt(c.times, clipT);
+
+  // Camera: ease from the last beat's focus to this one's.
+  const prev = target(i ? beats[i - 1].focus : undefined), next = target(b.focus);
+  const p = interpolate(t, [starts[i], starts[i] + CAM], [i ? 0 : 1, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: INOUT });
+  const cam = { x: prev.x + (next.x - prev.x) * p, y: prev.y + (next.y - prev.y) * p, z: prev.z + (next.z - prev.z) * p };
+
+  // Spotlight on the focus once the camera has arrived.
+  const same = (a?: Rect, z?: Rect) => !!a && !!z && a.every((v, k) => v === z[k]);
+  const keepsAfter = same(beats[i + 1]?.focus, b.focus) && beats[i + 1]?.spot !== false;
+  const keptBefore = i > 0 && same(beats[i - 1].focus, b.focus) && beats[i - 1].spot !== false;
+  const spotOn = b.focus && b.spot !== false
+    ? (keptBefore ? 1 : interpolate(t, [starts[i] + CAM * 0.6, starts[i] + CAM + 0.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })) *
+      (keepsAfter ? 1 : interpolate(t, [ends[i] - 0.25, ends[i]], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }))
+    : 0;
+
+  // Caption: the latest beat at or before this one that set one.
+  let g = i;
+  while (g > 0 && beats[g].text === undefined) g--;
+  const text = beats[g].text ?? null;
+  let gEnd = i;
+  while (gEnd + 1 < beats.length && beats[gEnd + 1].text === undefined) gEnd++;
+  const lineIn = ramp(frame, starts[g] * fps, starts[g] * fps + 12);
+  const lineOut = 1 - ramp(frame, ends[gEnd] * fps - 8, ends[gEnd] * fps, Easing.linear);
+
+  let a0 = i, a1 = i;
+  while (a0 > 0 && beats[a0 - 1].badge === b.badge) a0--;
+  while (a1 + 1 < beats.length && beats[a1 + 1].badge === b.badge) a1++;
+  const badgeOn = b.badge ? ramp(frame, starts[a0] * fps, starts[a0] * fps + 10) * (1 - ramp(frame, ends[a1] * fps - 8, ends[a1] * fps, Easing.linear)) : 0;
+
+  const r = b.focus;
+  const pad = 14;
   return (
     <AbsoluteFill style={{ background: C.navy, fontFamily: FRANKLIN }}>
       <div style={{ position: "absolute", ...WIN, borderRadius: 16, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.45), 0 0 0 2px rgba(255,255,255,0.14)", background: "#fff" }}>
         <div style={{ width: 1920, height: 1080, scale: String(WIN.width / 1920), transformOrigin: "0 0" }}>
-          <div style={{ width: 1920, height: 1080, transformOrigin: "0 0", transform: `translate(${960 - x * z}px, ${540 - y * z}px) scale(${z})` }}>
-            <Img src={staticFile(`footage/${clip}/${String(i).padStart(5, "0")}.jpg`)} style={{ width: 1920, height: 1080, display: "block" }} />
+          <div style={{ width: 1920, height: 1080, transformOrigin: "0 0", transform: `translate(${960 - cam.x * cam.z}px, ${540 - cam.y * cam.z}px) scale(${cam.z})` }}>
+            <Img src={staticFile(`footage/${clip}/${String(img).padStart(5, "0")}.jpg`)} style={{ width: 1920, height: 1080, display: "block" }} />
+            {r && spotOn > 0 ? (
+              <div
+                style={{
+                  position: "absolute",
+                  left: r[0] - pad,
+                  top: r[1] - pad,
+                  width: r[2] - r[0] + pad * 2,
+                  height: r[3] - r[1] + pad * 2,
+                  borderRadius: 14,
+                  boxShadow: `0 0 0 4000px rgba(11, 21, 48, ${0.5 * spotOn}), 0 0 0 4px rgba(255, 222, 59, ${spotOn})`,
+                }}
+              />
+            ) : null}
           </div>
         </div>
-        {badge ? (
-          <div style={{ position: "absolute", right: 24, top: 24, opacity: badgeOn, background: C.yellow, color: C.navy, fontSize: 28, fontWeight: 800, padding: "8px 18px", borderRadius: 999, boxShadow: "0 6px 20px rgba(11,21,48,0.25)" }}>
-            {badge.text}
-          </div>
-        ) : null}
       </div>
-      <div style={{ position: "absolute", left: 160, right: 160, top: WIN.top + WIN.height, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {line ? (
-          <p style={{ margin: 0, fontSize: 44, fontWeight: 600, color: "#fff", textAlign: "center", lineHeight: 1.2, opacity: lineIn * lineOut, translate: `0px ${(1 - lineIn) * 16}px` }}>{line.text}</p>
+      <div style={{ position: "absolute", left: 140, right: 140, top: WIN.top + WIN.height, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {b.badge ? (
+          <div style={{ position: "absolute", top: 12, opacity: badgeOn, background: C.yellow, color: C.navy, fontSize: 26, fontWeight: 800, padding: "3px 16px", borderRadius: 999 }}>{b.badge}</div>
+        ) : null}
+        {text ? (
+          <p style={{ margin: b.badge ? "34px 0 0" : 0, fontSize: 44, fontWeight: 600, color: "#fff", textAlign: "center", lineHeight: 1.2, opacity: lineIn * lineOut, translate: `0px ${(1 - lineIn) * 16}px` }}>{text}</p>
         ) : null}
       </div>
     </AbsoluteFill>
