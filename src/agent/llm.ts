@@ -141,7 +141,7 @@ function nightshift(): Route {
 }
 
 // NVIDIA allows this account 40 calls a minute but rejects bursts with 429:
-// on 26 Oct 2026 Nightshift's log showed 2,121 calls accepted and 4,598
+// over the build (24 to 26 Oct 2026) Nightshift's log showed 2,121 calls accepted and 4,598
 // rejected, the rejections often starting after 7 to 11 calls in ten
 // seconds. Nightshift retries each rejection four times itself before
 // passing it on as a 502 naming nvidia_429, so a burst feeds itself. So
