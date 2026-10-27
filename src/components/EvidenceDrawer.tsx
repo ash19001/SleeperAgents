@@ -137,7 +137,7 @@ function EvidenceBody({ refId, answer, mode }: { refId: string; answer: Answer; 
           <button type="button" onClick={copy} className={BUTTON_QUIET_SMALL}>{ev.source === "local-sample" ? "Copy" : "Copy SQL"}</button>
         </span>
       </div>
-      <pre className="overflow-x-auto rounded-md border border-line bg-code px-4 py-3 font-mono text-[0.8rem] leading-relaxed whitespace-pre">
+      <pre className="overflow-x-auto rounded-md border border-line bg-code px-4 py-3 font-mono text-[0.8rem] leading-relaxed break-words whitespace-pre-wrap">
         <code ref={code}>{ev.sql}</code>
       </pre>
       <dl className={DL}>

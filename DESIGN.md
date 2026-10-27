@@ -324,6 +324,13 @@ Rhythm runs on 4px: 8px and 12px inside rows, 16px between controls, 24px betwee
 
 **The Two Planes Rule.** Sections are grouped by the two planes, space and rules, never by a card. The ask box, the answer, "Your bills" and "Household notes" have no border, box or fill of their own.
 
+### Slide canvas (1920 x 1080)
+Decks keep this world and rescale it for a fixed 1920 x 1080 page read alone, in formats that take inline px styles only (first used by `docs/deck/`).
+- **Letterhead:** a 110px navy band with a 6px yellow foot rule (the 4px rule scaled to the canvas), 128px side margins; the Mark and the wordmark (36px, 800) on the left, the page line in letterhead mist on the right.
+- **Type in px, never below 24px:** cover title 120px and slide headline 72px (800, navy, tightened -3px and -1.5px); figures 30-56px at 800; body 26-30px in ink soft; meta 24px in ink muted. Libre Franklin falls back to Arial where system-ui cannot load.
+- **Receipt tape:** a third plane beside the paper: paper tint with a 1px line on its left edge, unboxed, flat and square. A bold Libre Franklin heading, then mono lines (24px, totals 26px semibold), label left and value right, a 2px navy rule above a total, closed top and bottom by a 3px dashed axis-colour perforation. On the tape the mono's receipt role covers SQL, IDs, hashes and timings.
+- **Marker:** where the format cannot mark inside a sentence, the figure stands as its own block: yellow, navy 800, 2px corners, 0 8-12px padding, no wrap. The Yellow Rule is unchanged.
+
 ## Elevation & Depth
 
 Flat at rest. The rail and the main plane are separated by tone (blue-grey beside white) and a 1px line, not shadow; sections inside them by space and rules. Shadow appears only on layers that float above the page.

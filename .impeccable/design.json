@@ -574,7 +574,33 @@
         "value": "border-bottom: 3px solid var(--selected); margin-bottom: -1px",
         "purpose": "Active tab and chosen utility."
       }
-    ]
+    ],
+    "slideCanvas": {
+      "canvas": "1920x1080, inline px styles only",
+      "letterhead": {
+        "height": "110px",
+        "footRule": "border-bottom: 6px solid var(--hl) (4px scaled to the canvas)",
+        "sidePadding": "128px",
+        "wordmark": "36px / 800"
+      },
+      "typeScalePx": {
+        "floor": "24px",
+        "coverTitle": "120px / 800 / -3px",
+        "headline": "72px / 800 / -1.5px",
+        "figure": "30-56px / 800",
+        "body": "26-30px ink-soft",
+        "meta": "24px ink-muted",
+        "fallback": "Libre Franklin, Arial, sans-serif"
+      },
+      "receiptTape": {
+        "background": "paper-tint",
+        "edge": "border-left: 1px solid var(--line)",
+        "perforation": "3px dashed axis, top and bottom",
+        "lines": "mono 24px, label left value right; totals 26px semibold under a 2px navy rule",
+        "purpose": "Third plane carrying the proof (SQL, IDs, hashes, timings) beside the claim; flat, unboxed, square."
+      },
+      "marker": "standalone block where inline marking is unavailable: highlighter-yellow, navy 800, 2px radius, padding 0 8-12px, nowrap"
+    }
   },
   "components": [
     {

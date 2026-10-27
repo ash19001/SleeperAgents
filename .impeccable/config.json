@@ -65,6 +65,60 @@
         ],
         "createdAt": "2026-10-26T12:55:45.249Z",
         "reason": "Claude: decision-round sketch of an alternative direction, a gitignored fixture whose fonts are deliberately its own; never shipped"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/claim-proof.html"
+        ],
+        "createdAt": "2026-10-27T10:51:31.962Z",
+        "reason": "DESIGN.md Float shadow: offset navy-ink elevation defined for the evidence drawer, which this sketch draws"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/deck/index.html"
+        ],
+        "createdAt": "2026-10-27T11:02:44.667Z",
+        "reason": "Full-bleed slide frame and a vertically centred letterhead: the inset is the centring, not padding; checked in the slide renders"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "*",
+        "files": [
+          "docs/deck/index.html"
+        ],
+        "createdAt": "2026-10-27T11:02:44.686Z",
+        "reason": "1920x1080 slide canvas: DESIGN.md's ramp is for the web page in rem; the Slides format needs its own px scale, 24px minimum"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "6px",
+        "files": [
+          "docs/deck/index.html"
+        ],
+        "createdAt": "2026-10-27T11:02:44.702Z",
+        "reason": "6px is DESIGN.md's md radius (rounded.md), used on the screenshot frames and the ask-field depiction"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "2px",
+        "files": [
+          "docs/deck/index.html"
+        ],
+        "createdAt": "2026-10-27T11:02:53.401Z",
+        "reason": "2px is DESIGN.md's marker radius (rounded.mark) on the highlighted figures"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/claim-proof.html"
+        ],
+        "createdAt": "2026-10-27T11:03:59.277Z",
+        "reason": "Unchosen decision sketch from the structure round (owner chose Statement and receipt); spent, gitignored, never shipped"
       }
     ]
   }
