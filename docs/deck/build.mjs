@@ -52,18 +52,13 @@ const muted = (t) => `<span style="color:#59647a">${t}</span>`;
 
 const IMG = { answer: "img/answer.png", evidence: "img/evidence-phone.png" };
 
-// The agent diagram (slide 4): nodes by what runs them, and arrows drawn as small SVGs.
-const NODE = {
-  input: ["#ffffff", "2px solid #8792a6", "#13224a", "#59647a"],
-  code: ["#f5f7fa", "2px dashed #8792a6", "#13224a", "#59647a"],
-  lightning: ["#ffffff", "2px solid #13224a", "#13224a", "#59647a"],
-  ultra: ["#13224a", "2px solid #13224a", "#ffffff", "#c3cbe0"],
-  answer: ["#fff3b0", "2px solid #ffde3b", "#13224a", "#59647a"],
-};
-// Icons from lucide, the app's own icon set (lucide-react, ISC), drawn as inline SVG at 28px.
+// The agent diagram (slide 4): the orchestrator at the top, its specialists
+// around it, icons first and labels second. Nodes are pinned in a 1160 x 650
+// host; one SVG draws every arrow under them, from the same coordinates.
+// Icons are lucide's (lucide-react, ISC), the app's own set.
 const LUCIDE = join(here, "..", "..", "node_modules", "lucide-react", "dist", "esm", "icons");
 const ICONS = {};
-for (const name of ["message-circle-question-mark", "shield-check", "bot", "signature", "network", "receipt-pound-sterling", "tag", "cloud-sun", "gauge", "droplets", "ruler", "pen-line", "list-checks", "merge", "file-check"]) {
+for (const name of ["message-circle-question-mark", "shield-check", "bot", "signature", "network", "receipt-pound-sterling", "tag", "cloud-sun", "gauge", "droplets", "ruler", "pen-line", "list-checks", "merge", "file-check", "database", "notebook-pen"]) {
   ICONS[name] = (await import(pathToFileURL(join(LUCIDE, `${name}.mjs`)).href)).__iconData.node;
 }
 const icon = (name, colour, size = 28) => {
@@ -72,17 +67,88 @@ const icon = (name, colour, size = 28) => {
     .join("");
   return `<svg aria-label="" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g transform="scale(${(size / 24).toFixed(4)})" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${shapes}</g></svg>`;
 };
-const titled = (iconName, colour, titleHtml) =>
-  `<div style="display:flex;flex-direction:row;align-items:center;gap:10px">${icon(iconName, colour)}${titleHtml}</div>`;
-const node = (kind, title, sub, iconName) => {
-  const [bg, border, ink, soft] = NODE[kind];
-  return `<div style="flex:1;display:flex;flex-direction:column;gap:2px;background:${bg};border:${border};border-radius:6px;padding:10px 14px">${titled(iconName, ink, `<p style="font-size:24px;font-weight:800;line-height:1.25;color:${ink}">${title}</p>`)}<p style="font-size:24px;line-height:1.25;color:${soft}">${sub}</p></div>`;
+const KIND = {
+  input: ["#ffffff", "3px solid #8792a6", "#13224a"],
+  code: ["#f5f7fa", "3px dashed #8792a6", "#13224a"],
+  lightning: ["#ffffff", "3px solid #13224a", "#13224a"],
+  ultra: ["#13224a", "3px solid #13224a", "#ffffff"],
+  answer: ["#fff3b0", "3px solid #ffde3b", "#13224a"],
 };
-const specialist = (name, causes, tools, iconName) =>
-  `<div style="display:flex;flex-direction:column;gap:4px;background:#ffffff;border:2px solid #13224a;border-radius:6px;padding:10px 14px">${titled(iconName, "#13224a", `<p style="font-size:24px;line-height:1.25"><b>${name}</b> <span style="color:#59647a">${causes}</span></p>`)}<p style="font-family:${MONO};font-size:24px;line-height:1.25;color:#13224a">${tools}</p></div>`;
-const ARROW_R = `<svg aria-label="then" width="32" height="24" viewBox="0 0 32 24"><path d="M2 12h24" stroke="#8792a6" stroke-width="3"/><path d="M20 5l8 7-8 7" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
-const ARROW_D = `<svg aria-label="then" width="24" height="28" viewBox="0 0 24 28"><path d="M12 2v20" stroke="#8792a6" stroke-width="3"/><path d="M5 16l7 8 7-8" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
-const ARROW_LR = `<svg aria-label="sends tasks, gets reports" width="40" height="40" viewBox="0 0 40 40"><path d="M4 13h28" stroke="#8792a6" stroke-width="3"/><path d="M26 7l7 6-7 6" fill="none" stroke="#8792a6" stroke-width="3"/><path d="M36 27H8" stroke="#8792a6" stroke-width="3"/><path d="M14 21l-7 6 7 6" fill="none" stroke="#8792a6" stroke-width="3"/></svg>`;
+const BORDER = 3;
+// A round icon badge; `size` is its outer diameter, border included.
+const badge = (kind, iconName, size, iconSize) => {
+  const [bg, border, ink] = KIND[kind];
+  const inner = size - 2 * BORDER;
+  return `<div style="width:${inner}px;height:${inner}px;display:flex;flex-direction:row;align-items:center;justify-content:center;background:${bg};border:${border};border-radius:50%">${icon(iconName, ink, iconSize)}</div>`;
+};
+const label = (text, size = 24, weight = 800, colour = "#13224a") => `<p style="font-size:${size}px;font-weight:${weight};line-height:1.25;color:${colour};text-align:center;white-space:nowrap">${text}</p>`;
+// One node: badge, then name, then a quiet line under it.
+const agent = ({ cx, cy, size, iconSize, kind, iconName, name, sub = [], nameSize = 24, width = 120, after = "" }) =>
+  `<div style="position:absolute;left:${cx - width / 2}px;top:${cy - size / 2}px;width:${width}px;display:flex;flex-direction:column;align-items:center;gap:6px">${badge(kind, iconName, size, iconSize)}${label(name, nameSize)}${sub.map((t) => label(t, 24, 400, "#59647a")).join("")}${after}</div>`;
+const STROKE = "#59647a";
+const segment = (x1, y1, x2, y2) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${STROKE}" stroke-width="3" fill="none"/>`;
+const arrow = (x1, y1, x2, y2) => {
+  const t = Math.atan2(y2 - y1, x2 - x1);
+  const [len, half] = [16, 8];
+  const bx = x2 - len * Math.cos(t), by = y2 - len * Math.sin(t);
+  const f = (n) => n.toFixed(1);
+  return `${segment(x1, y1, f(bx), f(by))}<path d="M${x2} ${y2}L${f(bx + half * Math.sin(t))} ${f(by - half * Math.cos(t))}L${f(bx - half * Math.sin(t))} ${f(by + half * Math.cos(t))}Z" fill="${STROKE}"/>`;
+};
+
+const DIAGRAM = (() => {
+  const W = 1160, H = 650, ROW = 70, SMALL = 76, HUB = 134, SPEC = 102, MEASURE = 64, GAP = 4;
+  const inputs = [
+    [60, "input", "message-circle-question-mark", "Question", "household"],
+    [180, "code", "shield-check", "Guard", "code"],
+    [300, "lightning", "bot", "Intake", "Lightning"],
+    [420, "code", "signature", "Contract", "code"],
+  ];
+  const outputs = [
+    [740, "ultra", "pen-line", "Writer", "Ultra"],
+    [860, "code", "list-checks", "Checker", "code"],
+    [980, "ultra", "merge", "Combiner", "Ultra"],
+    [1100, "answer", "file-check", "Answer", "checked"],
+  ];
+  const specialists = [
+    [200, 400, "receipt-pound-sterling", "Billing", false],
+    [390, 380, "tag", "Tariff", false],
+    [580, 370, "cloud-sun", "Weather", false],
+    [770, 380, "gauge", "Usage", true],
+    [960, 400, "droplets", "Leak", true],
+  ];
+  const hub = { cx: 580, cy: ROW };
+  const fanFrom = { x: 580, y: 258 }; // under the orchestrator's labels
+  const bus = 540;
+  const measure = { cx: 580, cy: 600 };
+
+  const nodes = [
+    ...inputs.map(([cx, kind, ic, name, sub]) => agent({ cx, cy: ROW, size: SMALL, iconSize: 40, kind, iconName: ic, name, sub: [sub] })),
+    agent({ cx: hub.cx, cy: hub.cy, size: HUB, iconSize: 68, kind: "ultra", iconName: "network", name: "Orchestrator", nameSize: 28, width: 330, sub: ["Ultra, reasoning on", "World Model · Markovian"] }),
+    ...outputs.map(([cx, kind, ic, name, sub]) => agent({ cx, cy: ROW, size: SMALL, iconSize: 40, kind, iconName: ic, name, sub: [sub] })),
+    ...specialists.map(([cx, cy, ic, name, notes]) =>
+      agent({ cx, cy, size: SPEC, iconSize: 54, kind: "lightning", iconName: ic, name, width: 170, after: `<div style="display:flex;flex-direction:row;gap:10px">${icon("database", "#59647a", 30)}${notes ? icon("notebook-pen", "#59647a", 30) : ""}</div>` }),
+    ),
+    `<div style="position:absolute;left:${measure.cx - MEASURE / 2}px;top:${measure.cy - MEASURE / 2}px;width:460px;display:flex;flex-direction:row;align-items:center;gap:16px">${badge("code", "ruler", MEASURE, 34)}<div style="display:flex;flex-direction:column"><p style="font-size:24px;font-weight:800;line-height:1.25;color:#13224a">Measure</p><p style="font-size:24px;line-height:1.25;color:#59647a">code tests every cause</p></div></div>`,
+  ];
+
+  const r = SMALL / 2 + GAP;
+  const paths = [];
+  const row = [...inputs.map((n) => n[0]), hub.cx, ...outputs.map((n) => n[0])];
+  for (let i = 0; i < row.length - 1; i++) {
+    const [x1, x2] = [row[i], row[i + 1]];
+    const right = x1 === hub.cx ? HUB / 2 + GAP : r;
+    const left = x2 === hub.cx ? HUB / 2 + GAP : r;
+    paths.push(arrow(x1 + right, ROW, x2 - left, ROW));
+  }
+  for (const [cx, cy] of specialists) paths.push(arrow(fanFrom.x, fanFrom.y, cx, cy - SPEC / 2 - GAP));
+  const bottomOf = (cy) => cy - SPEC / 2 + SPEC + 6 + 30 + 6 + 30 + GAP; // badge, name, data icons
+  for (const [cx, cy] of specialists) paths.push(segment(cx, bottomOf(cy), cx, bus));
+  paths.push(segment(specialists[0][0], bus, specialists[4][0], bus));
+  paths.push(arrow(measure.cx, bus, measure.cx, measure.cy - MEASURE / 2 - GAP));
+
+  const svg = `<svg aria-label="Arrows: the question passes the guard, intake and contract to the orchestrator; the orchestrator sends tasks to five specialists, whose causes code measures; the orchestrator's case goes to the writer, checker, combiner and the answer" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="position:absolute;left:0px;top:0px">${paths.join("")}</svg>`;
+  return `<div style="position:relative;width:${W}px;height:${H}px">${svg}\n${nodes.join("\n")}</div>`;
+})();
 
 const slides = [
   {
@@ -189,42 +255,24 @@ const slides = [
     id: "workflow",
     label: "Agent workflow · Page 4 of 10",
     gap: 24,
-    left: [
-      h2("Agents investigate. Code decides every number."),
-      `<div style="display:flex;flex-direction:column;gap:8px">`,
-      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("input", "Question", "in plain words", "message-circle-question-mark")}${ARROW_R}${node("code", "Scout guard", "code", "shield-check")}${ARROW_R}${node("lightning", "Intake", "Lightning", "bot")}${ARROW_R}${node("code", "Contract", "code, signed", "signature")}</div>`,
-      `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
-      `<div style="display:flex;flex-direction:row;align-items:stretch;gap:12px">`,
-      `<div style="width:250px;display:flex;flex-direction:column;gap:6px;background:#13224a;border:2px solid #13224a;border-radius:6px;padding:12px 14px">${titled("network", "#ffffff", `<p style="font-size:24px;font-weight:800;line-height:1.25;color:#ffffff">Orchestrator</p>`)}<p style="font-size:24px;line-height:1.25;color:#c3cbe0">Ultra, reasoning</p><p style="font-size:24px;line-height:1.3;color:#ffffff;padding:6px 0px 0px">Plans tasks, reviews findings, sends work back</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Case file: World Model</p><p style="font-size:24px;line-height:1.3;color:#c3cbe0">Rounds: Markovian</p></div>`,
-      `<div style="display:flex;flex-direction:column;justify-content:center">${ARROW_LR}</div>`,
-      `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px">`,
-      specialist("Billing", "C3 C4 C5", "get_bills<br>get_meter_readings", "receipt-pound-sterling"),
-      specialist("Tariff", "C1 C2", "get_tariff, get_bills", "tag"),
-      specialist("Weather", "C6", "get_weather, get_split", "cloud-sun"),
-      specialist("Usage", "C7 C9", "get_split, recall_notes<br>get_meter_readings", "gauge"),
-      specialist("Leak", "C8, water", "get_split, recall_notes<br>get_meter_readings", "droplets"),
-      `<div style="display:flex;flex-direction:column;justify-content:center;padding:4px 8px"><p style="font-size:24px;line-height:1.35;color:#3c4760">Five specialists on <b>Lightning</b>. All also call <b>test_cause</b>, so code measures each cause.</p></div>`,
-      `</div>`,
-      `</div>`,
-      `<div style="display:flex;flex-direction:row;justify-content:center">${ARROW_D}</div>`,
-      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${node("code", "Measure", "code", "ruler")}${ARROW_R}${node("ultra", "Writer", "Ultra", "pen-line")}${ARROW_R}${node("code", "Checker", "code", "list-checks")}${ARROW_R}${node("ultra", "Combiner", "Ultra", "merge")}${ARROW_R}${node("answer", "Answer", "checked", "file-check")}</div>`,
-      `</div>`,
-    ],
+    left: [h2("Agents investigate. Code decides every number."), DIAGRAM],
     tape: tape(
-      tapeHead("What each tool reads"),
-      line("get_bills", "bills"),
-      line("get_meter_readings", "reads"),
-      line("get_tariff", "tariffs"),
-      line("get_weather", "weather_daily"),
-      line("get_split", "bills + weather"),
-      line("test_cause", "code measures"),
-      line("recall_notes", "H-MEM notes"),
+      tapeHead("Who reads what"),
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("database", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">Zetaris views, read-only</p></div>`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("notebook-pen", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">H-MEM household notes</p></div>`,
+      `<div style="display:flex;flex-direction:row;align-items:center;gap:12px">${icon("ruler", "#13224a", 30)}<p style="font-family:${SANS};font-size:24px">Code measures: test_cause</p></div>`,
+      rule,
+      line("Billing", "bills, reads"),
+      line("Tariff", "tariffs, bills"),
+      line("Weather", "weather, £ split"),
+      line("Usage", "reads, £ split, notes"),
+      line("Leak", "reads, £ split, notes"),
       rule,
       total("Writes", "none"),
-      footnote("bills, reads, tariffs and weather_daily are read-only Zetaris views. Every call is checked against the bill’s signed contract before it runs. The orchestrator, writer and combiner use no data tools: they read the case file and the facts code builds."),
+      footnote("Navy: Nemotron Ultra. Outlined: Lightning. Dashed: code. Every tool call is checked against the bill’s signed contract; leak runs for water bills only."),
     ),
     notes:
-      "Here is the whole team for one bill. Scout’s guard checks the question, the intake agent on Nemotron Lightning reads it, and Scout signs a contract naming the data this investigation may read. The orchestrator on Nemotron Ultra, with reasoning on, plans a task for each of five Lightning specialists and reviews what they find in a World Model case file, over Markovian rounds. Each specialist has its own read-only tools: billing reads bills and meter readings, tariff reads tariffs, weather reads the weather, and usage and leak also recall household notes from H-MEM. Every one calls test_cause, so code measures each cause; no model decides a number. Then the writer, the checker in code, and for several bills the combiner. The receipt lists what each tool reads: Zetaris views, H-MEM, or code. Nothing writes.",
+      "This is the whole team for one bill. The question passes Scout’s guard, the intake agent on Nemotron Lightning reads it, and Scout signs a contract naming the data this investigation may read. That goes to the orchestrator on Nemotron Ultra, with reasoning on, which keeps the case file in World Model and runs its review rounds with Markovian. It sends a task to each of five Lightning specialists: billing, tariff, weather, usage and leak. Each reads read-only Zetaris views, and usage and leak also recall household notes from H-MEM. All of them hand every cause to code to measure, so no model decides a number. When the case closes, the writer drafts the answer, the checker in code verifies it, the combiner links bills when there are several, and the answer goes back checked. Nothing in the team writes data.",
   },
   {
     id: "stack",
